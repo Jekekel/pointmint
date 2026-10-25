@@ -10,6 +10,7 @@ import { oidcRoute } from './oidc.js';
 import { buildGraph, neighborhood, graphMarkdown } from './graph.js';
 import { handleConnectApi, findConnectionPaths, pathMarkdown, reservedDetail, reservedMarkdown, PATH_TOOL } from './connect.js';
 import { handleSplitApi, maybeMarkdown, sendMessage, visibleMessages, pubMessage, demoHeartbeat, agentLevel, LEVELS, showFounder } from './split.js';
+import { handlePointsApi } from './points.js';
 
 const enc = new TextEncoder();
 const SESSION_COOKIE = '__Host-pm_session';
@@ -259,6 +260,9 @@ async function handleApi(request, env, url) {
   { const cr = await handleConnectApi(request, env, url, ip); if (cr) return cr; }
 
   if (p === '/api/health') return json({ ok: true, service: 'pointmint-agents', time: now() });
+
+  // Match Point scoreboard (SPEC §33). Public aggregate; no PII.
+  { const r = await handlePointsApi(request, env, url, ip); if (r) return r; }
 
   // ----- public browsing -----
   if (p === '/api/network' && method === 'GET') {

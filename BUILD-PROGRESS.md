@@ -233,3 +233,11 @@ Remote D1 migrations applied: 0006–0012 (photos, posts, twin scores, graph dem
 ## 2026-10-25 — SPEC §31 Extension API (core vs extensions)
 - Filed **SPEC §31** in `SPEC.md` (changelog updated): core vs extensions split; lifecycle draft → probation → graduated; trust-weighted vouch graduation (≥1000); manifest `pointmint.extension.json`; sandbox + owner veto/kill switch (§32); D1 + MCP outline. Spec only — not implemented. No matchpoint-v1 changes.
 - Repo standup: root `.gitignore`, root `README.md`, git init + push to GitHub `Jekekel/pointmint` (public). Live D1 dumps stay gitignored under `backups/d1/`.
+
+## 2026-10-25 — Points scoreboard / Match Point sync (SPEC §33)
+- Michael (voice): a sports scoreboard at the very top, top-left, immediately to the right of the PointMint logo. Four types only: Human, Bot, Buy, Sell. Brand sync with Match Point — keeping points of the matches.
+- Filed as **SPEC §33** (next free section; §40 user_number and §41 Feed Algorithm were not in `SPEC.md`). Changelog updated. No matchpoint-v1 / Momentum / IAAI edits.
+- UI: `section#scoreboard` is the next sibling of `a.brand` inside `header#hud` (`prototype/public-next/index.html`, styles in `deck.css`, loader `startPoints` in `app.js`). Glass + mint, live dot, tabular counts. `--hud` 52px → 64px so the board clears the glass columns. `deck.css` and `app.js` cache-bust `?v=21`. Same files copied to `prototype/public/` (Worker assets).
+- API: `GET /api/points` → `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }` from `prototype/src/points.js`. Phase 0 sums existing posts, intros, messages, community threads, and non-private buy/sell cards (plus accepted intros). Phase 1 ledger is spec only.
+- Glass columns, PM guide thread, For You, twin avatars, Trust Score, and the private bot window are untouched.
+- Local check: `GET /api/points` on a migrated local D1 returned `human` 89, `bot` 149, `buy` 42, `sell` 47 (`phase: aggregate`). Desktop 1440: board is the next sibling of the logo, 8px gap, 235×48, 20px counts; three glass columns still open. Phone 390: board sits on the logo's row (272×44). Screenshots: `screenshots/points-scoreboard/desktop.png`, `mobile.png`.

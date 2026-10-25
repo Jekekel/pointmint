@@ -2,7 +2,7 @@
    Leverage UX layout (left 256–300 · fluid middle · right ~380), PointMint palette. Sharp: 1px hairlines,
    10–14px radii, 8pt grid, -0.01em tracking. No inline styles (CSP); widths are custom properties set via the CSSOM. */
 
-:root { --wl: 280px; --wr: 380px; --hud: 52px; --gut: 8px; --r-col: 14px; --r-row: 10px;
+:root { --wl: 280px; --wr: 380px; --hud: 64px; --gut: 8px; --r-col: 14px; --r-row: 10px;
   --spring: cubic-bezier(.34, 1.56, .64, 1); --glass-line: rgba(255, 255, 255, 0.16); --glass-hi: rgba(255, 255, 255, 0.14); }
 html, body { height: 100%; overflow: hidden; background: #05070b; }
 body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", Helvetica, Arial, sans-serif; letter-spacing: -0.01em; font-size: 14px; line-height: 1.45; }
@@ -14,14 +14,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Se
 #graph:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
 
 /* ---------- HUD: brand, graph search, filter chips ---------- */
-.hud { position: fixed; z-index: 5; top: var(--gut); left: var(--gut); right: var(--gut); height: 44px; display: flex; align-items: center; gap: 8px; pointer-events: none; }
+.hud { position: fixed; z-index: 5; top: var(--gut); left: var(--gut); right: var(--gut); height: auto; min-height: 48px; display: flex; align-items: center; gap: 8px; pointer-events: none; }
 .hud > * { pointer-events: auto; }
 .hud .brand, .gsearch, .chips, .hud .ribbon { height: 40px; border-radius: 12px; background: rgba(12, 14, 20, 0.42); border: 1px solid var(--glass-line);
   -webkit-backdrop-filter: blur(22px) saturate(1.7); backdrop-filter: blur(22px) saturate(1.7); box-shadow: inset 0 1px 0 var(--glass-hi), 0 8px 24px rgba(0, 0, 0, 0.3); }
-.hud .brand { display: inline-flex; align-items: center; gap: 8px; padding: 0 12px 0 8px; font-weight: 600; font-size: 14px; color: var(--text); text-decoration: none; white-space: nowrap; }
+.hud .brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 0; flex: none; padding: 0 12px 0 8px; font-weight: 600; font-size: 14px; color: var(--text); text-decoration: none; white-space: nowrap; }
 .hud .brand-mark { width: 24px; height: 24px; }
 .hud .brand-sub { color: var(--text-2); font-weight: 500; }
 .hud .brand-tag { color: var(--accent); font-weight: 500; font-size: 12.5px; letter-spacing: -0.01em; }
+@media (max-width: 1680px) { .hud .brand-tag { display: none; } .gsearch { width: 200px; } }
+@media (max-width: 1420px) { .hud .brand-sub { display: none; } }
 @media (max-width: 1279px) { .hud .brand-tag { display: none; } }
 .gsearch { position: relative; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; width: 280px; }
 .gsearch .ic { width: 16px; height: 16px; color: var(--text-2); flex: none; }
@@ -35,7 +37,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Se
 #gqList li span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #gqList li[aria-selected="true"], #gqList li:hover { background: rgba(255, 255, 255, 0.08); }
 #gqList .t-dim { font-size: 11px; color: var(--text-3); }
-.chips { display: flex; align-items: center; gap: 2px; padding: 0 4px; overflow-x: auto; scrollbar-width: none; }
+.chips { display: flex; align-items: center; gap: 2px; padding: 0 4px; overflow-x: auto; scrollbar-width: none; flex: 1 1 120px; min-width: 0; }
 .chips::-webkit-scrollbar { display: none; }
 .chips button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); font: 500 12.5px/1 inherit; font-family: inherit; letter-spacing: -0.005em; cursor: pointer; white-space: nowrap; }
 .chips button:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
@@ -47,6 +49,33 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Se
 .cd.p { background: linear-gradient(90deg, var(--human) 50%, var(--agent) 50%); transform: rotate(45deg) scale(.8); border-radius: 1px; } .cd.v { background: #7fd8a6; width: 6px; height: 6px; }
 .hud .ribbon { margin: 0 0 0 auto; position: static; display: inline-flex; align-items: center; padding: 0 12px; font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .hud .ribbon b { color: var(--text); font-weight: 600; margin-right: 2px; }
+
+/* ---------- Match points scoreboard (SPEC §33): immediately right of the logo ---------- */
+.scoreboard { position: relative; display: flex; align-items: stretch; flex: none; height: 48px; margin: 0; padding: 0; border-radius: 12px; color: var(--text);
+  background: linear-gradient(180deg, rgba(61, 217, 193, 0.20), rgba(12, 14, 20, 0.62));
+  border: 1px solid rgba(61, 217, 193, 0.62);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7); backdrop-filter: blur(22px) saturate(1.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 0 1px rgba(61, 217, 193, 0.18), 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 24px rgba(61, 217, 193, 0.22); }
+.sb-mark { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 52px; margin: 0; padding: 0;
+  border-right: 1px solid rgba(61, 217, 193, 0.32); }
+.sb-word { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); line-height: 1; }
+.sb-live { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.sb-scores { display: flex; align-items: stretch; margin: 0; padding: 0; list-style: none; }
+.sb-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 54px; padding: 2px 10px 1px; }
+.sb-cell + .sb-cell { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.12); }
+.sb-n { font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--accent); }
+.sb-l { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); line-height: 1.1; }
+.sb-cell[data-pt="human"] .sb-n { color: var(--human); }
+.sb-cell[data-pt="bot"] .sb-n { color: var(--agent); }
+.sb-cell[data-pt="buy"] .sb-n { color: var(--accent); }
+.sb-cell[data-pt="sell"] .sb-n { color: #f2c14e; }
+.sb-n[data-tick="1"] { animation: sbTick .7s var(--ease-spring); }
+@keyframes sbTick { 0% { transform: translateY(3px); opacity: .35; } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .sb-live { animation: sbPulse 1.8s ease-out infinite; }
+  @keyframes sbPulse { 0% { box-shadow: 0 0 0 0 rgba(61, 217, 193, 0.65); } 100% { box-shadow: 0 0 0 7px rgba(61, 217, 193, 0); } }
+}
+@media (prefers-reduced-motion: reduce) { .sb-n[data-tick="1"] { animation: none; } }
 
 /* ---------- deck: three columns ---------- */
 .deck { --wl-cur: var(--wl); --wr-cur: var(--wr); position: fixed; z-index: 2; top: calc(var(--gut) + var(--hud)); left: var(--gut); right: var(--gut); bottom: var(--gut);
@@ -296,14 +325,20 @@ body.resizing { cursor: col-resize; user-select: none; }
 
 /* ---------- 1024–1279: the agent column starts as a rail (JS), narrower left ---------- */
 @media (max-width: 1279px) { :root { --wl: 256px; } .hud .ribbon span { display: none; } .gsearch { width: 220px; } }
-@media (max-width: 1180px) { .hud .brand-sub { display: none; } }
+@media (max-width: 1180px) {
+  .hud .brand-sub { display: none; }
+  .sb-word { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .sb-mark { width: 22px; border-right: 0; }
+}
 
 /* ---------- under 1024: graph full screen, one column in a bottom sheet ---------- */
 @media (max-width: 1023px) {
   .hud { flex-wrap: wrap; height: auto; }
   .hud .brand span { display: none; } .hud .ribbon { display: none; }
-  .gsearch { flex: 1; width: auto; }
-  .chips { order: 3; flex: 1 1 100%; height: 36px; }
+  .scoreboard { order: 1; flex: 1 0 220px; min-width: 0; height: 44px; }
+  .hud .me-btn { order: 2; } .hud .cx-btn { order: 3; }
+  .gsearch { order: 4; flex: 1 1 100%; width: auto; min-width: 0; }
+  .chips { order: 5; flex: 1 1 100%; height: 36px; }
   .chips button { height: 28px; }
   .deck { top: auto; left: 0; right: 0; bottom: 0; height: 48vh; height: 48dvh; display: flex; flex-direction: column; border-radius: 16px 16px 0 0; padding: 0 8px 8px;
     background: rgba(8, 10, 14, 0.72); border-top: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(24px) saturate(1.5); backdrop-filter: blur(24px) saturate(1.5);
@@ -324,8 +359,14 @@ body.resizing { cursor: col-resize; user-select: none; }
   .dock .pc-seg label { padding: 0 8px; }
   .twin { grid-template-columns: 1fr; justify-items: center; }
 }
+@media (max-width: 400px) {
+  .scoreboard { flex-basis: 250px; }
+  .sb-cell { min-width: 44px; padding: 2px 4px 1px; }
+  .sb-n { font-size: 16px; }
+  .sb-l { letter-spacing: 0.04em; }
+}
 @media (max-width: 1023px) and (prefers-reduced-motion: reduce) { .deck { transition: none; } }
-@media (prefers-reduced-transparency: reduce) { .col-l, .col-r, .col-m, .hud .brand, .gsearch, .chips { background: #0c0f15; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-transparency: reduce) { .col-l, .col-r, .col-m, .hud .brand, .gsearch, .chips, .scoreboard { background: #0c0f15; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 
 /* fused "together" post inside the feed: the seam sits exactly in the middle */
 .col-m .stream { --split: calc(50% - 8px); }
@@ -375,3 +416,12 @@ body.resizing { cursor: col-resize; user-select: none; }
 .hud .me-btn:hover { background: rgba(30, 144, 255, 0.32); }
 .hud .me-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media (max-width: 1279px) { .hud .me-btn span { display: none; } .hud .me-btn { padding: 0 11px; } }
+/* Under 1500px the scoreboard stays full height beside the logo, and the other HUD labels tuck in so the filter chips keep a readable strip. */
+@media (max-width: 1500px) and (min-width: 1024px) {
+  .gsearch { width: 180px; }
+  .hud .me-btn span, .hud .cx-btn span, .hud .ribbon span { display: none; }
+  .hud .me-btn, .hud .cx-btn { padding: 0 11px; }
+  .sb-word { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .sb-mark { width: 22px; border-right: 0; }
+  .sb-cell { min-width: 52px; padding: 2px 8px 1px; }
+}
