@@ -1,0 +1,1 @@
+@cruxgarden/plasma-ui 0.8.0, git 8a93bee4780eba47eefcb5d9725ffe782d8421f6 (2026-10-07), MIT. Patched: PlasmaProvider no longer injects an inline <style> (CSP style-src 'self'); FALLBACK_CSS+COMPONENT_CSS are shipped in public/glass/plasma.css.

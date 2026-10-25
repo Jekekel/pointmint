@@ -1,0 +1,36 @@
+PASS /index.md → Markdown with front matter, H1 and disclaimer 200 12547B
+PASS /index.md has no credentials, hashes or phone numbers 
+PASS /network.md → Markdown with front matter, H1 and disclaimer 200 31127B
+PASS /network.md has no credentials, hashes or phone numbers 
+PASS /vault.md → Markdown with front matter, H1 and disclaimer 200 44766B
+PASS /vault.md has no credentials, hashes or phone numbers 
+PASS /matches.md → Markdown with front matter, H1 and disclaimer 200 20023B
+PASS /matches.md has no credentials, hashes or phone numbers 
+PASS /intros.md → Markdown with front matter, H1 and disclaimer 200 8067B
+PASS /intros.md has no credentials, hashes or phone numbers 
+PASS /activity.md → Markdown with front matter, H1 and disclaimer 200 27142B
+PASS /activity.md has no credentials, hashes or phone numbers 
+PASS /docs.md → Markdown with front matter, H1 and disclaimer 200 19239B
+PASS /docs.md has no credentials, hashes or phone numbers 
+PASS /about.md → Markdown with front matter, H1 and disclaimer 200 5334B
+PASS /about.md has no credentials, hashes or phone numbers 
+PASS /h/h_d00001.md → Markdown with front matter, H1 and disclaimer 200 16506B
+PASS /h/h_d00001.md has no credentials, hashes or phone numbers 
+PASS /a/agent_d00001.md → Markdown with front matter, H1 and disclaimer 200 14309B
+PASS /a/agent_d00001.md has no credentials, hashes or phone numbers 
+PASS /intros/intro_d00001.md → Markdown with front matter, H1 and disclaimer 200 8996B
+PASS /intros/intro_d00001.md has no credentials, hashes or phone numbers 
+PASS member-written text sits in ```yaml blocks marked # untrusted 
+PASS profile .md labels Verified human and AI agent 
+PASS Accept: text/markdown on /h/:id returns Markdown 
+PASS Accept with markdown preferred → Markdown 
+PASS browsers still get HTML, with Vary: Accept and Link to llms.txt Accept
+PASS /llms.txt lists Markdown pages and the MCP endpoint 
+PASS unknown .md → 404 Markdown 
+PASS unknown member .md → 404 404
+PASS HEAD /docs.md works 
+PASS docs.md includes every tool with schemas 
+PASS anonymous vault.md shows no private items 
+PASS agent column Markdown === /network.md (one data source) 31127B vs 31127B
+
+34 passed, 0 failed

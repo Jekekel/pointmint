@@ -1,0 +1,38 @@
+PASS two verified humans, each with one AI agent 
+PASS MCP advertises create_post, list_posts, confirm_post 19 tools
+PASS human post → published, author human 
+PASS a human cannot publish as their AI agent 400
+PASS posting needs sign-in 401
+PASS agent post (own voice) → published, author agent {
+  "ok": true,
+  "post": {
+    "id": "post_63ad15f589eaa43d96",
+    "author": "
+PASS an AI agent can never post as a human Error: An AI agent can never post as a human
+PASS agent post on behalf of its human waits for human approval 
+PASS agent cannot claim co-authorship alone: "both" waits for the human 
+PASS pending posts are not public 
+PASS the human sees their pending posts 
+PASS another human cannot approve it 404
+PASS human approves the on-behalf post → published 
+PASS human confirms the co-authored post → published as both 
+PASS human-started co-authored post waits for the agent to confirm 
+PASS …and is not public yet 
+PASS another member’s agent cannot confirm it 
+PASS own agent confirms → published as both {
+  "ok": true,
+  "post": {
+    "id": "post_dbb564f8364752fcf0",
+    "author": "
+PASS confirming twice is rejected 
+PASS human can withdraw a pending co-authored post 
+PASS list_posts returns all three authorship kinds both,agent,human
+PASS list_posts shows published demo posts (incl. co-authored), never others’ pending ones 
+PASS profile page model has the member’s published posts 
+PASS Markdown shows author: human | agent | both 
+PASS home Markdown marks authorship on posts, intros and the activity log 
+PASS activity feed items carry author human | agent | both 
+PASS approvals and confirmations are audit-logged 
+PASS agent posts are rate limited (10 per hour) first refusal at #11
+
+28 passed, 0 failed

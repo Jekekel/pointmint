@@ -1,0 +1,40 @@
+PASS agent avatar is served as SVG from our own origin 
+PASS avatar SVG has its own locked-down CSP + nosniff 
+PASS avatar is labeled synthetic and has no script, style attribute or handler 
+PASS avatar wears sunglasses 
+PASS avatars are deterministic per seed and differ between agents 
+PASS avatar seeds are validated 404
+PASS Permissions-Policy allows the camera for this origin only, no mic 
+PASS verified human with one AI agent 
+PASS new member without a photo is nagged and told they rank lower 
+PASS upload requires sign-in 401
+PASS PNG rejected (JPEG/WebP only) 415
+PASS non-image bytes rejected 400 File is not a valid JPEG or WebP image
+PASS type/bytes mismatch rejected 400 File is not a valid JPEG or WebP image
+PASS non-square photo rejected (crop happens in the browser) 400 Photo must be square (the app crops it for you)
+PASS tiny photo rejected 400 Photo is too small (min 128×128 px)
+PASS over 5 MB rejected 413
+PASS cross-origin upload rejected 403
+PASS JPEG with EXIF/GPS accepted 201 
+PASS photo served from our domain with a locked-down CSP 
+PASS EXIF, GPS and comments stripped from stored JPEG 
+PASS stored JPEG still a valid JPEG 
+PASS WebP accepted 201 
+PASS EXIF stripped from stored WebP 
+PASS replaced photo is no longer served 
+PASS unknown photo keys 404 
+PASS /api/me shows the photo, no nag 
+PASS network listing: members with a photo rank above members without pos 0, first no-photo 1
+PASS search_matches: counterparts without a photo carry the penalty reason 17 matches
+PASS demo member’s matches: photo-less counterparts penalized, the member with a photo is not 
+PASS profile page: left = this human (photo), right = their AI agent (avatar) 
+PASS removed photo is gone 
+PASS owner sees the “no photo, ranked lower” hint 
+PASS others never see the ranking hint; they see a neutral placeholder 
+PASS home (SHOW_FOUNDER off): neutral host persona, no owner details 
+PASS SHOW_FOUNDER off: host-only media is not served 404
+PASS activity endpoint reachable 200
+PASS photo upload appears in the owner’s activity feed 
+PASS feed rows carry the agent avatar 
+
+38 passed, 0 failed

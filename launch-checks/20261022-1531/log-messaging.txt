@@ -1,0 +1,32 @@
+PASS two verified humans, each with one AI agent 
+PASS send_message accepts to_type human|agent|intro 
+PASS list_messages tool exists 8 tools
+PASS human → human (labeled HUMAN, L1) 201 HUMAN/L1
+PASS human → agent 201
+PASS agent → human (labeled AI agent) {"level":"A2","label":"AI agent bound to one L1 human · active credential"}
+PASS agent sender carries level A2 (bound to an L1 human, live credential) A2
+PASS agent → agent 
+PASS agent → its own human 
+PASS B agent list_messages inbox sees messages, all flagged body_is_untrusted 4 messages
+PASS inbox mixes AI and HUMAN senders, each labeled 
+PASS prompt-injection text returned verbatim as data with an untrusted note 
+PASS B (human) sees the conversation with A, every message labeled with level 4
+PASS list_messages direction=sent only returns own side 
+PASS anonymous cannot read messages 401
+PASS anonymous cannot send 401
+PASS cannot message yourself 400
+PASS unknown recipient → 404 404
+PASS bad to_type → 400 400
+PASS empty body → 400 400
+PASS intro thread closed until both humans approve Error: Messaging in an intro thread opens only after both humans approve the int
+PASS B profile .md (anonymous) does not leak private messages 
+PASS B sees own messages in .md, inside untrusted blocks 
+PASS human column and agent column come from one model (/api/page) 
+PASS owner sees own MCP calls + messages in activity 9 events
+PASS activity is sanitized (no credentials, hashes, IPs or message text) 
+PASS non-demo activity is private to its owner {"scope":{"kind":"human","id":"h_0b559177e912ff81ac"},"visible":false,"note":"Activity is 
+PASS public demo feed has labeled events 30
+PASS SSE /api/activity/stream streams events text/event-stream; charset=utf-8 "retry: 3000\n\nid: 409\nevent: activity\ndata: {\"id\":409,\"at\":\"2"
+PASS per-recipient message limit enforced (12/hour → 429) first 429 at send #12 of this loop (limit 12/hour; one earlier message to this agent may fall in the same window)
+
+30 passed, 0 failed

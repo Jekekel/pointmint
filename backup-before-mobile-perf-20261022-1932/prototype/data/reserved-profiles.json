@@ -1,0 +1,1239 @@
+{
+ "about": "Reserved, unclaimed public-figure profiles. ONLY public, non-sensitive facts (name, public role, company, notable public affiliations), each with a source URL. Sources: Wikipedia/Wikidata, SEC EDGAR, company sites, press. Never LinkedIn (no scraping). No photos, no likeness, no contact details, no agent. Facts are phrased historically so they stay true; 'retrieved' records when the source was checked.",
+ "retrieved": "2026-10-22",
+ "entities": [
+  {
+   "id": "industry:coffee",
+   "type": "industry",
+   "name": "Coffee, food & restaurants"
+  },
+  {
+   "id": "industry:fintech",
+   "type": "industry",
+   "name": "Fintech & financial services"
+  },
+  {
+   "id": "industry:design",
+   "type": "industry",
+   "name": "Design, brand & consumer"
+  },
+  {
+   "id": "industry:realestate",
+   "type": "industry",
+   "name": "Real estate & hospitality"
+  },
+  {
+   "id": "industry:health",
+   "type": "industry",
+   "name": "Health & wellness"
+  },
+  {
+   "id": "industry:manufacturing",
+   "type": "industry",
+   "name": "Manufacturing & hardware"
+  },
+  {
+   "id": "industry:aerospace",
+   "type": "industry",
+   "name": "Aerospace"
+  },
+  {
+   "id": "industry:software",
+   "type": "industry",
+   "name": "Software & internet"
+  },
+  {
+   "id": "industry:ai",
+   "type": "industry",
+   "name": "Artificial intelligence"
+  },
+  {
+   "id": "industry:media",
+   "type": "industry",
+   "name": "Media & entertainment"
+  },
+  {
+   "id": "industry:vc",
+   "type": "industry",
+   "name": "Venture capital & investing"
+  },
+  {
+   "id": "company:spacex",
+   "type": "company",
+   "name": "SpaceX",
+   "industries": [
+    "aerospace",
+    "manufacturing"
+   ],
+   "source": "https://en.wikipedia.org/wiki/SpaceX"
+  },
+  {
+   "id": "company:tesla",
+   "type": "company",
+   "name": "Tesla",
+   "industries": [
+    "manufacturing"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Tesla,_Inc."
+  },
+  {
+   "id": "company:paypal",
+   "type": "company",
+   "name": "PayPal",
+   "industries": [
+    "fintech"
+   ],
+   "source": "https://en.wikipedia.org/wiki/PayPal"
+  },
+  {
+   "id": "company:amazon",
+   "type": "company",
+   "name": "Amazon",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Amazon_(company)"
+  },
+  {
+   "id": "company:blue-origin",
+   "type": "company",
+   "name": "Blue Origin",
+   "industries": [
+    "aerospace"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Blue_Origin"
+  },
+  {
+   "id": "company:microsoft",
+   "type": "company",
+   "name": "Microsoft",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Microsoft"
+  },
+  {
+   "id": "company:berkshire",
+   "type": "company",
+   "name": "Berkshire Hathaway",
+   "industries": [
+    "fintech",
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Berkshire_Hathaway"
+  },
+  {
+   "id": "company:meta",
+   "type": "company",
+   "name": "Meta Platforms (Facebook)",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Meta_Platforms"
+  },
+  {
+   "id": "company:google",
+   "type": "company",
+   "name": "Google / Alphabet",
+   "industries": [
+    "software",
+    "ai"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Google"
+  },
+  {
+   "id": "company:apple",
+   "type": "company",
+   "name": "Apple",
+   "industries": [
+    "manufacturing",
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Apple_Inc."
+  },
+  {
+   "id": "company:nvidia",
+   "type": "company",
+   "name": "Nvidia",
+   "industries": [
+    "manufacturing",
+    "ai"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Nvidia"
+  },
+  {
+   "id": "company:openai",
+   "type": "company",
+   "name": "OpenAI",
+   "industries": [
+    "ai"
+   ],
+   "source": "https://en.wikipedia.org/wiki/OpenAI"
+  },
+  {
+   "id": "company:linkedin",
+   "type": "company",
+   "name": "LinkedIn",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/LinkedIn"
+  },
+  {
+   "id": "company:palantir",
+   "type": "company",
+   "name": "Palantir",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Palantir_Technologies"
+  },
+  {
+   "id": "company:starbucks",
+   "type": "company",
+   "name": "Starbucks",
+   "industries": [
+    "coffee"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Starbucks"
+  },
+  {
+   "id": "company:netscape",
+   "type": "company",
+   "name": "Netscape",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Netscape"
+  },
+  {
+   "id": "company:airbnb",
+   "type": "company",
+   "name": "Airbnb",
+   "industries": [
+    "realestate",
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Airbnb"
+  },
+  {
+   "id": "company:stripe",
+   "type": "company",
+   "name": "Stripe",
+   "industries": [
+    "fintech"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Stripe,_Inc."
+  },
+  {
+   "id": "company:twitter",
+   "type": "company",
+   "name": "Twitter",
+   "industries": [
+    "software",
+    "media"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Twitter"
+  },
+  {
+   "id": "company:block",
+   "type": "company",
+   "name": "Block (Square)",
+   "industries": [
+    "fintech"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Block,_Inc."
+  },
+  {
+   "id": "company:spotify",
+   "type": "company",
+   "name": "Spotify",
+   "industries": [
+    "media",
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Spotify"
+  },
+  {
+   "id": "company:netflix",
+   "type": "company",
+   "name": "Netflix",
+   "industries": [
+    "media"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Netflix"
+  },
+  {
+   "id": "company:jpmorgan",
+   "type": "company",
+   "name": "JPMorgan Chase",
+   "industries": [
+    "fintech"
+   ],
+   "source": "https://en.wikipedia.org/wiki/JPMorgan_Chase"
+  },
+  {
+   "id": "company:gm",
+   "type": "company",
+   "name": "General Motors",
+   "industries": [
+    "manufacturing"
+   ],
+   "source": "https://en.wikipedia.org/wiki/General_Motors"
+  },
+  {
+   "id": "company:amd",
+   "type": "company",
+   "name": "AMD",
+   "industries": [
+    "manufacturing"
+   ],
+   "source": "https://en.wikipedia.org/wiki/AMD"
+  },
+  {
+   "id": "company:dell",
+   "type": "company",
+   "name": "Dell Technologies",
+   "industries": [
+    "manufacturing"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Dell_Technologies"
+  },
+  {
+   "id": "company:softbank",
+   "type": "company",
+   "name": "SoftBank Group",
+   "industries": [
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/SoftBank_Group"
+  },
+  {
+   "id": "company:bumble",
+   "type": "company",
+   "name": "Bumble",
+   "industries": [
+    "software"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Bumble"
+  },
+  {
+   "id": "company:spanx",
+   "type": "company",
+   "name": "Spanx",
+   "industries": [
+    "design"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Spanx"
+  },
+  {
+   "id": "company:pepsico",
+   "type": "company",
+   "name": "PepsiCo",
+   "industries": [
+    "coffee"
+   ],
+   "source": "https://en.wikipedia.org/wiki/PepsiCo"
+  },
+  {
+   "id": "company:ibm",
+   "type": "company",
+   "name": "IBM",
+   "industries": [
+    "software",
+    "ai"
+   ],
+   "source": "https://en.wikipedia.org/wiki/IBM"
+  },
+  {
+   "id": "investor:a16z",
+   "type": "investor",
+   "name": "Andreessen Horowitz",
+   "industries": [
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Andreessen_Horowitz"
+  },
+  {
+   "id": "investor:founders-fund",
+   "type": "investor",
+   "name": "Founders Fund",
+   "industries": [
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Founders_Fund"
+  },
+  {
+   "id": "investor:greylock",
+   "type": "investor",
+   "name": "Greylock Partners",
+   "industries": [
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Greylock_Partners"
+  },
+  {
+   "id": "investor:yc",
+   "type": "investor",
+   "name": "Y Combinator",
+   "industries": [
+    "vc"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Y_Combinator"
+  },
+  {
+   "id": "school:upenn",
+   "type": "school",
+   "name": "University of Pennsylvania",
+   "source": "https://en.wikipedia.org/wiki/University_of_Pennsylvania"
+  },
+  {
+   "id": "school:princeton",
+   "type": "school",
+   "name": "Princeton University",
+   "source": "https://en.wikipedia.org/wiki/Princeton_University"
+  },
+  {
+   "id": "school:harvard",
+   "type": "school",
+   "name": "Harvard University",
+   "source": "https://en.wikipedia.org/wiki/Harvard_University"
+  },
+  {
+   "id": "school:columbia",
+   "type": "school",
+   "name": "Columbia University",
+   "source": "https://en.wikipedia.org/wiki/Columbia_University"
+  },
+  {
+   "id": "school:stanford",
+   "type": "school",
+   "name": "Stanford University",
+   "source": "https://en.wikipedia.org/wiki/Stanford_University"
+  },
+  {
+   "id": "school:duke",
+   "type": "school",
+   "name": "Duke University",
+   "source": "https://en.wikipedia.org/wiki/Duke_University"
+  },
+  {
+   "id": "school:uchicago",
+   "type": "school",
+   "name": "University of Chicago",
+   "source": "https://en.wikipedia.org/wiki/University_of_Chicago"
+  },
+  {
+   "id": "school:mit",
+   "type": "school",
+   "name": "MIT",
+   "source": "https://en.wikipedia.org/wiki/Massachusetts_Institute_of_Technology"
+  },
+  {
+   "id": "school:uiuc",
+   "type": "school",
+   "name": "University of Illinois Urbana-Champaign",
+   "source": "https://en.wikipedia.org/wiki/University_of_Illinois_Urbana-Champaign"
+  },
+  {
+   "id": "school:risd",
+   "type": "school",
+   "name": "Rhode Island School of Design",
+   "source": "https://en.wikipedia.org/wiki/Rhode_Island_School_of_Design"
+  },
+  {
+   "id": "school:umich",
+   "type": "school",
+   "name": "University of Michigan",
+   "source": "https://en.wikipedia.org/wiki/University_of_Michigan"
+  },
+  {
+   "id": "school:ut-austin",
+   "type": "school",
+   "name": "University of Texas at Austin",
+   "source": "https://en.wikipedia.org/wiki/University_of_Texas_at_Austin"
+  },
+  {
+   "id": "school:berkeley",
+   "type": "school",
+   "name": "UC Berkeley",
+   "source": "https://en.wikipedia.org/wiki/University_of_California,_Berkeley"
+  },
+  {
+   "id": "school:yale",
+   "type": "school",
+   "name": "Yale University",
+   "source": "https://en.wikipedia.org/wiki/Yale_University"
+  }
+ ],
+ "profiles": [
+  {
+   "id": "rp_elon_musk",
+   "name": "Elon Musk",
+   "title": "Founder of SpaceX",
+   "source": "https://en.wikipedia.org/wiki/Elon_Musk",
+   "facts": [
+    [
+     "founded",
+     "company:spacex",
+     "Founded SpaceX in 2002",
+     "https://en.wikipedia.org/wiki/SpaceX"
+    ],
+    [
+     "co_founded",
+     "company:paypal",
+     "Co-founded X.com, which merged into PayPal",
+     "https://en.wikipedia.org/wiki/PayPal"
+    ],
+    [
+     "led",
+     "company:tesla",
+     "Early investor in and chief executive of Tesla",
+     "https://en.wikipedia.org/wiki/Tesla,_Inc."
+    ],
+    [
+     "studied_at",
+     "school:upenn",
+     "Studied at the University of Pennsylvania",
+     "https://en.wikipedia.org/wiki/Elon_Musk"
+    ]
+   ]
+  },
+  {
+   "id": "rp_jeff_bezos",
+   "name": "Jeff Bezos",
+   "title": "Founder of Amazon",
+   "source": "https://en.wikipedia.org/wiki/Jeff_Bezos",
+   "facts": [
+    [
+     "founded",
+     "company:amazon",
+     "Founded Amazon in 1994",
+     "https://en.wikipedia.org/wiki/Amazon_(company)"
+    ],
+    [
+     "founded",
+     "company:blue-origin",
+     "Founded Blue Origin in 2000",
+     "https://en.wikipedia.org/wiki/Blue_Origin"
+    ],
+    [
+     "studied_at",
+     "school:princeton",
+     "Graduated from Princeton University",
+     "https://en.wikipedia.org/wiki/Jeff_Bezos"
+    ]
+   ]
+  },
+  {
+   "id": "rp_bill_gates",
+   "name": "Bill Gates",
+   "title": "Co-founder of Microsoft",
+   "source": "https://en.wikipedia.org/wiki/Bill_Gates",
+   "facts": [
+    [
+     "co_founded",
+     "company:microsoft",
+     "Co-founded Microsoft in 1975",
+     "https://en.wikipedia.org/wiki/Microsoft"
+    ],
+    [
+     "studied_at",
+     "school:harvard",
+     "Attended Harvard University",
+     "https://en.wikipedia.org/wiki/Bill_Gates"
+    ]
+   ]
+  },
+  {
+   "id": "rp_warren_buffett",
+   "name": "Warren Buffett",
+   "title": "Chairman of Berkshire Hathaway",
+   "source": "https://en.wikipedia.org/wiki/Warren_Buffett",
+   "facts": [
+    [
+     "led",
+     "company:berkshire",
+     "Long-time chairman and chief executive of Berkshire Hathaway",
+     "https://en.wikipedia.org/wiki/Berkshire_Hathaway"
+    ],
+    [
+     "studied_at",
+     "school:columbia",
+     "Graduate of Columbia Business School",
+     "https://en.wikipedia.org/wiki/Warren_Buffett"
+    ]
+   ]
+  },
+  {
+   "id": "rp_mark_zuckerberg",
+   "name": "Mark Zuckerberg",
+   "title": "Co-founder of Facebook (Meta)",
+   "source": "https://en.wikipedia.org/wiki/Mark_Zuckerberg",
+   "facts": [
+    [
+     "co_founded",
+     "company:meta",
+     "Co-founded Facebook in 2004",
+     "https://en.wikipedia.org/wiki/Meta_Platforms"
+    ],
+    [
+     "studied_at",
+     "school:harvard",
+     "Attended Harvard University",
+     "https://en.wikipedia.org/wiki/Mark_Zuckerberg"
+    ]
+   ]
+  },
+  {
+   "id": "rp_sundar_pichai",
+   "name": "Sundar Pichai",
+   "title": "Chief executive of Google and Alphabet",
+   "source": "https://en.wikipedia.org/wiki/Sundar_Pichai",
+   "facts": [
+    [
+     "led",
+     "company:google",
+     "Became CEO of Google in 2015 and of Alphabet in 2019",
+     "https://en.wikipedia.org/wiki/Sundar_Pichai"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Holds a master's degree from Stanford University",
+     "https://en.wikipedia.org/wiki/Sundar_Pichai"
+    ],
+    [
+     "studied_at",
+     "school:upenn",
+     "Holds an MBA from the Wharton School, University of Pennsylvania",
+     "https://en.wikipedia.org/wiki/Sundar_Pichai"
+    ]
+   ]
+  },
+  {
+   "id": "rp_satya_nadella",
+   "name": "Satya Nadella",
+   "title": "Chief executive of Microsoft",
+   "source": "https://en.wikipedia.org/wiki/Satya_Nadella",
+   "facts": [
+    [
+     "led",
+     "company:microsoft",
+     "Became CEO of Microsoft in 2014",
+     "https://en.wikipedia.org/wiki/Satya_Nadella"
+    ],
+    [
+     "studied_at",
+     "school:uchicago",
+     "Holds an MBA from the University of Chicago Booth School of Business",
+     "https://en.wikipedia.org/wiki/Satya_Nadella"
+    ]
+   ]
+  },
+  {
+   "id": "rp_tim_cook",
+   "name": "Tim Cook",
+   "title": "Chief executive of Apple",
+   "source": "https://en.wikipedia.org/wiki/Tim_Cook",
+   "facts": [
+    [
+     "led",
+     "company:apple",
+     "Became CEO of Apple in 2011",
+     "https://en.wikipedia.org/wiki/Tim_Cook"
+    ],
+    [
+     "studied_at",
+     "school:duke",
+     "Holds an MBA from Duke University's Fuqua School of Business",
+     "https://en.wikipedia.org/wiki/Tim_Cook"
+    ]
+   ]
+  },
+  {
+   "id": "rp_jensen_huang",
+   "name": "Jensen Huang",
+   "title": "Co-founder of Nvidia",
+   "source": "https://en.wikipedia.org/wiki/Jensen_Huang",
+   "facts": [
+    [
+     "co_founded",
+     "company:nvidia",
+     "Co-founded Nvidia in 1993",
+     "https://en.wikipedia.org/wiki/Nvidia"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Holds a master's degree from Stanford University",
+     "https://en.wikipedia.org/wiki/Jensen_Huang"
+    ]
+   ]
+  },
+  {
+   "id": "rp_sam_altman",
+   "name": "Sam Altman",
+   "title": "Chief executive of OpenAI",
+   "source": "https://en.wikipedia.org/wiki/Sam_Altman",
+   "facts": [
+    [
+     "co_founded",
+     "company:openai",
+     "Co-founded OpenAI in 2015",
+     "https://en.wikipedia.org/wiki/OpenAI"
+    ],
+    [
+     "led",
+     "investor:yc",
+     "President of Y Combinator from 2014 to 2019",
+     "https://en.wikipedia.org/wiki/Sam_Altman"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Attended Stanford University",
+     "https://en.wikipedia.org/wiki/Sam_Altman"
+    ]
+   ]
+  },
+  {
+   "id": "rp_reid_hoffman",
+   "name": "Reid Hoffman",
+   "title": "Co-founder of LinkedIn",
+   "source": "https://en.wikipedia.org/wiki/Reid_Hoffman",
+   "facts": [
+    [
+     "co_founded",
+     "company:linkedin",
+     "Co-founded LinkedIn in 2002",
+     "https://en.wikipedia.org/wiki/LinkedIn"
+    ],
+    [
+     "invests_with",
+     "investor:greylock",
+     "Partner at Greylock Partners",
+     "https://en.wikipedia.org/wiki/Reid_Hoffman"
+    ],
+    [
+     "worked_at",
+     "company:paypal",
+     "Executive at PayPal",
+     "https://en.wikipedia.org/wiki/Reid_Hoffman"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Graduated from Stanford University",
+     "https://en.wikipedia.org/wiki/Reid_Hoffman"
+    ]
+   ]
+  },
+  {
+   "id": "rp_peter_thiel",
+   "name": "Peter Thiel",
+   "title": "Co-founder of PayPal and Palantir",
+   "source": "https://en.wikipedia.org/wiki/Peter_Thiel",
+   "facts": [
+    [
+     "co_founded",
+     "company:paypal",
+     "Co-founded PayPal",
+     "https://en.wikipedia.org/wiki/PayPal"
+    ],
+    [
+     "co_founded",
+     "company:palantir",
+     "Co-founded Palantir",
+     "https://en.wikipedia.org/wiki/Palantir_Technologies"
+    ],
+    [
+     "founded",
+     "investor:founders-fund",
+     "Founding partner of Founders Fund",
+     "https://en.wikipedia.org/wiki/Founders_Fund"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Graduated from Stanford University",
+     "https://en.wikipedia.org/wiki/Peter_Thiel"
+    ]
+   ]
+  },
+  {
+   "id": "rp_howard_schultz",
+   "name": "Howard Schultz",
+   "title": "Former chairman and chief executive of Starbucks",
+   "source": "https://en.wikipedia.org/wiki/Howard_Schultz",
+   "facts": [
+    [
+     "led",
+     "company:starbucks",
+     "Led Starbucks as chairman and chief executive over several terms",
+     "https://en.wikipedia.org/wiki/Howard_Schultz"
+    ]
+   ]
+  },
+  {
+   "id": "rp_sheryl_sandberg",
+   "name": "Sheryl Sandberg",
+   "title": "Former COO of Facebook (Meta)",
+   "source": "https://en.wikipedia.org/wiki/Sheryl_Sandberg",
+   "facts": [
+    [
+     "worked_at",
+     "company:meta",
+     "Chief operating officer of Facebook/Meta from 2008 to 2022",
+     "https://en.wikipedia.org/wiki/Sheryl_Sandberg"
+    ],
+    [
+     "studied_at",
+     "school:harvard",
+     "Graduated from Harvard University",
+     "https://en.wikipedia.org/wiki/Sheryl_Sandberg"
+    ]
+   ]
+  },
+  {
+   "id": "rp_marc_andreessen",
+   "name": "Marc Andreessen",
+   "title": "Co-founder of Andreessen Horowitz",
+   "source": "https://en.wikipedia.org/wiki/Marc_Andreessen",
+   "facts": [
+    [
+     "co_founded",
+     "company:netscape",
+     "Co-founded Netscape",
+     "https://en.wikipedia.org/wiki/Netscape"
+    ],
+    [
+     "co_founded",
+     "investor:a16z",
+     "Co-founded Andreessen Horowitz in 2009",
+     "https://en.wikipedia.org/wiki/Andreessen_Horowitz"
+    ],
+    [
+     "studied_at",
+     "school:uiuc",
+     "Graduated from the University of Illinois Urbana-Champaign",
+     "https://en.wikipedia.org/wiki/Marc_Andreessen"
+    ]
+   ]
+  },
+  {
+   "id": "rp_brian_chesky",
+   "name": "Brian Chesky",
+   "title": "Co-founder of Airbnb",
+   "source": "https://en.wikipedia.org/wiki/Brian_Chesky",
+   "facts": [
+    [
+     "co_founded",
+     "company:airbnb",
+     "Co-founded Airbnb in 2008",
+     "https://en.wikipedia.org/wiki/Airbnb"
+    ],
+    [
+     "studied_at",
+     "school:risd",
+     "Graduated from the Rhode Island School of Design",
+     "https://en.wikipedia.org/wiki/Brian_Chesky"
+    ]
+   ]
+  },
+  {
+   "id": "rp_patrick_collison",
+   "name": "Patrick Collison",
+   "title": "Co-founder of Stripe",
+   "source": "https://en.wikipedia.org/wiki/Patrick_Collison",
+   "facts": [
+    [
+     "co_founded",
+     "company:stripe",
+     "Co-founded Stripe in 2010",
+     "https://en.wikipedia.org/wiki/Stripe,_Inc."
+    ],
+    [
+     "studied_at",
+     "school:mit",
+     "Attended MIT",
+     "https://en.wikipedia.org/wiki/Patrick_Collison"
+    ]
+   ]
+  },
+  {
+   "id": "rp_john_collison",
+   "name": "John Collison",
+   "title": "Co-founder of Stripe",
+   "source": "https://en.wikipedia.org/wiki/John_Collison",
+   "facts": [
+    [
+     "co_founded",
+     "company:stripe",
+     "Co-founded Stripe in 2010",
+     "https://en.wikipedia.org/wiki/Stripe,_Inc."
+    ],
+    [
+     "studied_at",
+     "school:harvard",
+     "Attended Harvard University",
+     "https://en.wikipedia.org/wiki/John_Collison"
+    ]
+   ]
+  },
+  {
+   "id": "rp_jack_dorsey",
+   "name": "Jack Dorsey",
+   "title": "Co-founder of Twitter and Block",
+   "source": "https://en.wikipedia.org/wiki/Jack_Dorsey",
+   "facts": [
+    [
+     "co_founded",
+     "company:twitter",
+     "Co-founded Twitter in 2006",
+     "https://en.wikipedia.org/wiki/Twitter"
+    ],
+    [
+     "co_founded",
+     "company:block",
+     "Co-founded Square (now Block) in 2009",
+     "https://en.wikipedia.org/wiki/Block,_Inc."
+    ]
+   ]
+  },
+  {
+   "id": "rp_daniel_ek",
+   "name": "Daniel Ek",
+   "title": "Co-founder of Spotify",
+   "source": "https://en.wikipedia.org/wiki/Daniel_Ek",
+   "facts": [
+    [
+     "co_founded",
+     "company:spotify",
+     "Co-founded Spotify in 2006",
+     "https://en.wikipedia.org/wiki/Spotify"
+    ]
+   ]
+  },
+  {
+   "id": "rp_reed_hastings",
+   "name": "Reed Hastings",
+   "title": "Co-founder of Netflix",
+   "source": "https://en.wikipedia.org/wiki/Reed_Hastings",
+   "facts": [
+    [
+     "co_founded",
+     "company:netflix",
+     "Co-founded Netflix in 1997",
+     "https://en.wikipedia.org/wiki/Netflix"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Holds a master's degree from Stanford University",
+     "https://en.wikipedia.org/wiki/Reed_Hastings"
+    ]
+   ]
+  },
+  {
+   "id": "rp_larry_page",
+   "name": "Larry Page",
+   "title": "Co-founder of Google",
+   "source": "https://en.wikipedia.org/wiki/Larry_Page",
+   "facts": [
+    [
+     "co_founded",
+     "company:google",
+     "Co-founded Google in 1998",
+     "https://en.wikipedia.org/wiki/Google"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Graduate studies at Stanford University",
+     "https://en.wikipedia.org/wiki/Larry_Page"
+    ],
+    [
+     "studied_at",
+     "school:umich",
+     "Graduated from the University of Michigan",
+     "https://en.wikipedia.org/wiki/Larry_Page"
+    ]
+   ]
+  },
+  {
+   "id": "rp_sergey_brin",
+   "name": "Sergey Brin",
+   "title": "Co-founder of Google",
+   "source": "https://en.wikipedia.org/wiki/Sergey_Brin",
+   "facts": [
+    [
+     "co_founded",
+     "company:google",
+     "Co-founded Google in 1998",
+     "https://en.wikipedia.org/wiki/Google"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Graduate studies at Stanford University",
+     "https://en.wikipedia.org/wiki/Sergey_Brin"
+    ]
+   ]
+  },
+  {
+   "id": "rp_jamie_dimon",
+   "name": "Jamie Dimon",
+   "title": "Chief executive of JPMorgan Chase",
+   "source": "https://en.wikipedia.org/wiki/Jamie_Dimon",
+   "facts": [
+    [
+     "led",
+     "company:jpmorgan",
+     "Became CEO of JPMorgan Chase in 2005",
+     "https://en.wikipedia.org/wiki/Jamie_Dimon"
+    ],
+    [
+     "studied_at",
+     "school:harvard",
+     "Holds an MBA from Harvard Business School",
+     "https://en.wikipedia.org/wiki/Jamie_Dimon"
+    ]
+   ]
+  },
+  {
+   "id": "rp_mary_barra",
+   "name": "Mary Barra",
+   "title": "Chief executive of General Motors",
+   "source": "https://en.wikipedia.org/wiki/Mary_Barra",
+   "facts": [
+    [
+     "led",
+     "company:gm",
+     "Became CEO of General Motors in 2014",
+     "https://en.wikipedia.org/wiki/Mary_Barra"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Holds an MBA from Stanford Graduate School of Business",
+     "https://en.wikipedia.org/wiki/Mary_Barra"
+    ]
+   ]
+  },
+  {
+   "id": "rp_lisa_su",
+   "name": "Lisa Su",
+   "title": "Chief executive of AMD",
+   "source": "https://en.wikipedia.org/wiki/Lisa_Su",
+   "facts": [
+    [
+     "led",
+     "company:amd",
+     "Became CEO of AMD in 2014",
+     "https://en.wikipedia.org/wiki/Lisa_Su"
+    ],
+    [
+     "studied_at",
+     "school:mit",
+     "Holds degrees including a PhD from MIT",
+     "https://en.wikipedia.org/wiki/Lisa_Su"
+    ]
+   ]
+  },
+  {
+   "id": "rp_michael_dell",
+   "name": "Michael Dell",
+   "title": "Founder of Dell Technologies",
+   "source": "https://en.wikipedia.org/wiki/Michael_Dell",
+   "facts": [
+    [
+     "founded",
+     "company:dell",
+     "Founded Dell in 1984",
+     "https://en.wikipedia.org/wiki/Dell_Technologies"
+    ],
+    [
+     "studied_at",
+     "school:ut-austin",
+     "Attended the University of Texas at Austin",
+     "https://en.wikipedia.org/wiki/Michael_Dell"
+    ]
+   ]
+  },
+  {
+   "id": "rp_masayoshi_son",
+   "name": "Masayoshi Son",
+   "title": "Founder of SoftBank Group",
+   "source": "https://en.wikipedia.org/wiki/Masayoshi_Son",
+   "facts": [
+    [
+     "founded",
+     "company:softbank",
+     "Founded SoftBank in 1981",
+     "https://en.wikipedia.org/wiki/SoftBank_Group"
+    ],
+    [
+     "studied_at",
+     "school:berkeley",
+     "Graduated from UC Berkeley",
+     "https://en.wikipedia.org/wiki/Masayoshi_Son"
+    ]
+   ]
+  },
+  {
+   "id": "rp_whitney_wolfe_herd",
+   "name": "Whitney Wolfe Herd",
+   "title": "Founder of Bumble",
+   "source": "https://en.wikipedia.org/wiki/Whitney_Wolfe_Herd",
+   "facts": [
+    [
+     "founded",
+     "company:bumble",
+     "Founded Bumble in 2014",
+     "https://en.wikipedia.org/wiki/Bumble"
+    ]
+   ]
+  },
+  {
+   "id": "rp_sara_blakely",
+   "name": "Sara Blakely",
+   "title": "Founder of Spanx",
+   "source": "https://en.wikipedia.org/wiki/Sara_Blakely",
+   "facts": [
+    [
+     "founded",
+     "company:spanx",
+     "Founded Spanx in 2000",
+     "https://en.wikipedia.org/wiki/Spanx"
+    ]
+   ]
+  },
+  {
+   "id": "rp_indra_nooyi",
+   "name": "Indra Nooyi",
+   "title": "Former chief executive of PepsiCo",
+   "source": "https://en.wikipedia.org/wiki/Indra_Nooyi",
+   "facts": [
+    [
+     "led",
+     "company:pepsico",
+     "Chief executive of PepsiCo from 2006 to 2018",
+     "https://en.wikipedia.org/wiki/Indra_Nooyi"
+    ],
+    [
+     "studied_at",
+     "school:yale",
+     "Graduated from the Yale School of Management",
+     "https://en.wikipedia.org/wiki/Indra_Nooyi"
+    ]
+   ]
+  },
+  {
+   "id": "rp_arvind_krishna",
+   "name": "Arvind Krishna",
+   "title": "Chief executive of IBM",
+   "source": "https://en.wikipedia.org/wiki/Arvind_Krishna",
+   "facts": [
+    [
+     "led",
+     "company:ibm",
+     "Became CEO of IBM in 2020",
+     "https://en.wikipedia.org/wiki/Arvind_Krishna"
+    ],
+    [
+     "studied_at",
+     "school:uiuc",
+     "Holds a PhD from the University of Illinois Urbana-Champaign",
+     "https://en.wikipedia.org/wiki/Arvind_Krishna"
+    ]
+   ]
+  }
+ ],
+ "demo_profiles": [
+  {
+   "id": "rp_demo_rowan_ashby",
+   "name": "Rowan Ashby",
+   "title": "Founder of Ashby Roasting Co. (fictional)",
+   "demo": true,
+   "high_profile": false,
+   "source": "https://example.com/pointmint-demo/rowan-ashby",
+   "facts": [
+    [
+     "founded",
+     "company:demo-ashby",
+     "Founded Ashby Roasting Co. (fictional demo company)",
+     "https://example.com/pointmint-demo/rowan-ashby"
+    ],
+    [
+     "studied_at",
+     "school:stanford",
+     "Fictional demo fact: studied at Stanford University",
+     "https://example.com/pointmint-demo/rowan-ashby"
+    ]
+   ]
+  },
+  {
+   "id": "rp_demo_marisol_vega",
+   "name": "Marisol Vega",
+   "title": "Managing partner, Vega Seed Fund (fictional)",
+   "demo": true,
+   "high_profile": true,
+   "source": "https://example.com/pointmint-demo/marisol-vega",
+   "facts": [
+    [
+     "founded",
+     "investor:demo-vega",
+     "Founded Vega Seed Fund (fictional demo fund)",
+     "https://example.com/pointmint-demo/marisol-vega"
+    ]
+   ]
+  },
+  {
+   "id": "rp_demo_theo_brandt",
+   "name": "Theo Brandt",
+   "title": "Chair, Brandt Logistics (fictional)",
+   "demo": true,
+   "high_profile": true,
+   "source": "https://example.com/pointmint-demo/theo-brandt",
+   "facts": [
+    [
+     "led",
+     "company:demo-brandt",
+     "Chairs Brandt Logistics (fictional demo company)",
+     "https://example.com/pointmint-demo/theo-brandt"
+    ]
+   ]
+  }
+ ],
+ "demo_entities": [
+  {
+   "id": "company:demo-ashby",
+   "type": "company",
+   "name": "Ashby Roasting Co. (fictional)",
+   "industries": [
+    "coffee"
+   ],
+   "source": "https://example.com/pointmint-demo/rowan-ashby"
+  },
+  {
+   "id": "investor:demo-vega",
+   "type": "investor",
+   "name": "Vega Seed Fund (fictional)",
+   "industries": [
+    "fintech",
+    "vc"
+   ],
+   "source": "https://example.com/pointmint-demo/marisol-vega"
+  },
+  {
+   "id": "company:demo-brandt",
+   "type": "company",
+   "name": "Brandt Logistics (fictional)",
+   "industries": [
+    "manufacturing"
+   ],
+   "source": "https://example.com/pointmint-demo/theo-brandt"
+  }
+ ]
+}

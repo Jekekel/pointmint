@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /mcp
+Disallow: /launch
+Disallow: /dashboard
+Disallow: /signup
+
+Sitemap: https://agents.pointmint.io/sitemap.xml

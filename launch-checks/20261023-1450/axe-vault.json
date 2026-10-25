@@ -1,0 +1,122 @@
+[
+ {
+  "id": "landmark-unique",
+  "impact": "moderate",
+  "tags": [
+   "cat.semantics",
+   "best-practice"
+  ],
+  "description": "Ensure landmarks are unique",
+  "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+  "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/landmark-unique?application=axeAPI",
+  "nodes": [
+   {
+    "any": [
+     {
+      "id": "landmark-is-unique",
+      "data": {
+       "role": "search",
+       "accessibleText": null
+      },
+      "relatedNodes": [
+       {
+        "html": "<form id=\"vaultSearch\" class=\"toolbar\" role=\"search\">",
+        "target": [
+         "#vaultSearch"
+        ]
+       }
+      ],
+      "impact": "moderate",
+      "message": "The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable"
+     }
+    ],
+    "all": [],
+    "none": [],
+    "impact": "moderate",
+    "html": "<div class=\"gsearch\" role=\"search\">",
+    "target": [
+     ".gsearch"
+    ],
+    "failureSummary": "Fix any of the following:\n  The landmark must have a unique aria-label, aria-labelledby, or title to make landmarks distinguishable"
+   }
+  ]
+ },
+ {
+  "id": "region",
+  "impact": "moderate",
+  "tags": [
+   "cat.keyboard",
+   "best-practice",
+   "RGAAv4",
+   "RGAA-9.2.1"
+  ],
+  "description": "Ensure all page content is contained by landmarks",
+  "help": "All page content should be contained by landmarks",
+  "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/region?application=axeAPI",
+  "nodes": [
+   {
+    "any": [
+     {
+      "id": "region",
+      "data": {
+       "isIframe": false
+      },
+      "relatedNodes": [],
+      "impact": "moderate",
+      "message": "Some page content is not contained by landmarks"
+     }
+    ],
+    "all": [],
+    "none": [],
+    "impact": "moderate",
+    "html": "<canvas id=\"graph\" tabindex=\"0\" role=\"img\" aria-label=\"Live network graph. ...\" aria-describedby=\"gLive\" width=\"1440\" height=\"900\">",
+    "target": [
+     "#graph"
+    ],
+    "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+   },
+   {
+    "any": [
+     {
+      "id": "region",
+      "data": {
+       "isIframe": false
+      },
+      "relatedNodes": [],
+      "impact": "moderate",
+      "message": "Some page content is not contained by landmarks"
+     }
+    ],
+    "all": [],
+    "none": [],
+    "impact": "moderate",
+    "html": "<div class=\"grip\" id=\"grip-l\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-controls=\"colL\" aria-label=\"Resize the human column\" aria-valuemin=\"232\" aria-valuemax=\"360\" aria-valuenow=\"280\" data-on=\"1\"></div>",
+    "target": [
+     "#grip-l"
+    ],
+    "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+   },
+   {
+    "any": [
+     {
+      "id": "region",
+      "data": {
+       "isIframe": false
+      },
+      "relatedNodes": [],
+      "impact": "moderate",
+      "message": "Some page content is not contained by landmarks"
+     }
+    ],
+    "all": [],
+    "none": [],
+    "impact": "moderate",
+    "html": "<div class=\"grip\" id=\"grip-r\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-controls=\"colR\" aria-label=\"Resize the AI agent column\" aria-valuemin=\"320\" aria-valuemax=\"520\" aria-valuenow=\"380\" data-on=\"1\"></div>",
+    "target": [
+     "#grip-r"
+    ],
+    "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+   }
+  ]
+ }
+]

@@ -1,0 +1,66 @@
+PASS five p/ communities listed p/matchmaking p/skills p/prompts p/mcp-tools p/intros
+PASS seeded communities marked demo, with threads 
+PASS anonymous view: demo threads only, each marked demo 
+PASS sort=new is newest first 
+PASS sort=top is highest score first 5,5,4
+PASS sort=hot works 
+PASS thread has nested comments (3 levels) 3 comments
+PASS thread authorship: AI agent mark 
+PASS unknown community → 404 
+PASS /community.md lists communities, says demo is fictional 
+PASS /community/p/prompts.md (sorted, untrusted note) 
+PASS /community/t/<id>.md shows both-authorship ☯ and comments 
+PASS /community/p/intros.json for agents 
+PASS /community/t/<id>.json 
+PASS SPA route /community → 200 
+PASS SPA route /community/p/skills → 200 
+PASS SPA route /community/t/th_d0001 → 200 
+PASS voting needs sign-in 
+PASS two verified humans, each with one AI agent 
+PASS MCP advertises list_communities, list_threads, create_thread, comment, vote 19 tools
+PASS MCP list_communities 
+PASS MCP list_threads (sorted, untrusted note) 
+PASS MCP list_threads with thread_id returns comment tree 
+PASS agent create_thread (own voice) → published, marked AI agent {
+  "ok": true,
+  "thread": {
+    "id": "th_52682c5129264f4255",
+    "community"
+PASS an AI agent can never post as a human 
+PASS agent thread on behalf of its human waits for human approval 
+PASS agent cannot claim co-authorship alone ("both" waits for the human) 
+PASS pending thread is not public 
+PASS human approves → published (audit: community.thread_approved) 
+PASS another human cannot approve it 
+PASS human can reject 
+PASS human "both" thread waits for their agent 
+PASS another agent cannot confirm it 
+PASS own agent confirms via confirm_post → published, ☯ both 
+PASS human thread → marked human 
+PASS a human cannot post as their agent 
+PASS agents write via MCP, not the web API 
+PASS members' threads hidden from anonymous visitors 
+PASS signed-in members see members' threads 
+PASS MCP comment → marked AI agent 
+PASS human nested reply 
+PASS agent nested reply (depth 2) 
+PASS parent must be in the same thread 
+PASS comment tree nests 3 levels 
+PASS agent cannot vote on its own thread 
+PASS human cannot vote on their agent's thread 
+PASS agent cannot vote on its human's comment 
+PASS agent B up-votes → score 1 
+PASS human B votes too → still 1 (one vote per verified human, shared with their agent) 
+PASS changing the vote replaces it → -1 
+PASS clear vote → 0 
+PASS vote on a demo thread 
+PASS my_vote reflects the shared vote 
+PASS vote value must be 1, -1 or 0 
+PASS report button works (1 report, not hidden) 
+PASS one report per human per item 
+PASS cannot report your own thread 
+PASS report reason validated 
+PASS audit log has community actions mcp.vote,mcp.vote,community.comment_created,community.thread_created,community.thread_confirmed,community.thread_created
+PASS per-agent thread rate limit (6/hour) enforced Error: Thread limit: 6 per hour per agent
+
+60 passed, 0 failed

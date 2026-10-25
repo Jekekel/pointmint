@@ -1,0 +1,28 @@
+// node claimflow.mjs <base> <outdir>   — UI walk-through: sign up (simulated SMS) → claim a FICTIONAL demo reserved profile → LinkedIn ZIP import
+import { chromium } from "playwright-core";
+const [base, out] = process.argv.slice(2);
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage(); const errs = [];
+p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); p.on('pageerror', e => errs.push('PAGEERR ' + e.message + ' @ ' + (e.stack||'').split('\n').slice(0,4).join(' | ') + ' url=' + p.url()));
+await p.goto(base + '/signup'); await p.waitForTimeout(1500);
+await p.fill('#phone', '+1 555 ' + (200 + Math.floor(Math.random() * 700)) + ' ' + (1000 + Math.floor(Math.random() * 8999)));
+await p.click('#startForm button'); await p.waitForSelector('#demoCode');
+await p.fill('#otp', (await p.textContent('#demoCode')).trim()); await p.fill('#vname', 'Rowan Ashby');
+await p.click('#verifyForm button'); await p.waitForTimeout(1500);
+await p.evaluate(() => { history.pushState({}, '', '/p/rp_demo_rowan_ashby'); dispatchEvent(new PopStateEvent('popstate')); }); await p.waitForTimeout(2500);
+await p.screenshot({ path: out + '/reserved-unclaimed.png' });
+await p.click('[data-action="claim-open"]'); await p.waitForTimeout(600);
+await p.fill('#cl-legal', 'Rowan J. Ashby'); await p.check('#cl-attest');
+await p.screenshot({ path: out + '/claim-form.png' });
+await p.click('#claimForm button'); await p.waitForSelector('.claim-res'); await p.waitForTimeout(2500);
+await p.locator('#claimOut').scrollIntoViewIfNeeded(); await p.screenshot({ path: out + '/claim-approved.png' });
+await p.click('text=Import from LinkedIn (optional)'); await p.waitForTimeout(1800);
+await p.setInputFiles('#liZip', 'prototype/scripts/fixtures/linkedin-export-sample.zip'); await p.waitForSelector('#importForm');
+await p.locator('#importForm').scrollIntoViewIfNeeded(); await p.waitForTimeout(400); await p.screenshot({ path: out + '/linkedin-review.png' });
+const found = await p.evaluate(() => [...document.querySelectorAll('#importForm label b')].map(x => x.textContent));
+console.log('parsed:', JSON.stringify(found));
+await p.click('#importForm button.btn'); await p.waitForSelector('#impOut p'); console.log('saved:', await p.textContent('#impOut'));
+await p.evaluate(() => { history.pushState({}, '', '/connect?to=rp_patrick_collison'); dispatchEvent(new PopStateEvent('popstate')); }); await p.waitForTimeout(4000);
+await p.screenshot({ path: out + '/connect-after-import.png' });
+console.log(errs.length ? errs.join('\n') : 'no errors'); await b.close();

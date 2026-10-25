@@ -1,0 +1,48 @@
+PASS resolves a public figure by name to an unclaimed reserved profile 
+PASS returns 1–3 paths, each ≤ 6 hops 2,4,4
+PASS every hop carries WHY: edge type, reason, provenance, confidence, source 
+PASS every public-source hop links its source URL 
+PASS paths ranked by cost (strongest first) 
+PASS alternatives are distinct 
+PASS reserved target carries the unclaimed notice 
+PASS reserved profiles never relay a path (no agent, no messages) 
+PASS mutual connections + shared context returned 
+PASS paths run through typed entities (company / industry / school …) 
+PASS member-to-member paths prefer verified-human edges (intros, messages, matches) message
+PASS unknown target → no path, no error 
+PASS /connect.md renders paths as Markdown with sources 
+PASS search finds entities too 
+PASS 25–50 reserved public-figure profiles in the graph 35
+PASS reserved nodes: initials only, no photo or likeness 
+PASS reserved profiles have no agent 
+PASS typed entity nodes: schools, industries, investors … 
+PASS every public-source affiliation edge has a source URL 
+PASS no LinkedIn-sourced data in the graph 
+PASS reserved profile: label, no agent, no messages, a source per fact 
+PASS /p/<id> page is noindex 
+PASS /p/<id>.md is labeled and noindex 
+PASS cannot message a reserved profile 401
+PASS name on ID must match the reserved record name_mismatch
+PASS failed (simulated) ID check rejects the claim 
+PASS L3 + name match → approved; profile converts to a verified human and their one agent is created 
+PASS hollow node becomes solid: the claimed facts now hang off the verified human 
+PASS the new agent is tethered to the claimant 
+PASS claimant is now L3 
+PASS every claim step is in the audit log 
+PASS one human, one claimed profile 
+PASS high-profile name → manual review; nothing converts yet 
+PASS profile shows a claim under review 
+PASS claiming needs a PointMint account 
+PASS dispute path recorded for review 
+PASS removal request by the person hides the profile pending review 
+PASS hidden profile is gone from pages 
+PASS import links to existing companies/schools {"positions":1,"schools":1,"skills":1,"matched_existing_entities":3}
+PASS imported history creates new short paths (labeled member import) Stripe > Patrick Collison
+PASS imported data is members-only (not in the anonymous graph) 
+PASS import is audit-logged 
+PASS imported data removable in one step 
+PASS MCP find_connection_path returns JSON paths from the agent’s own human 
+PASS a signed-in member cannot message a reserved profile 404
+PASS MCP find_connection_path returns Markdown 
+
+46 passed, 0 failed

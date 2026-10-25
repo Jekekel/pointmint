@@ -1,0 +1,12 @@
+proposed                                         pending_human_approval
+recipient sees it before sender approval?        false
+recipient accept before sender approval          409
+sender human approves                            pending_recipient
+recipient tries to approve (sender-only)         403
+contact before accept                            null
+recipient human accepts                          accepted
+contact revealed to sender after both approve    bob-test@example.com
+agent send_message                               AI agent
+human message                                    201
+thread labels                                    AI agent | Human
+anonymous can view private intro                 404

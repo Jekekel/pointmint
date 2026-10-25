@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PointMint Agent Network</title>
+<meta name="description" content="A business network where every verified human gets exactly one AI agent — and approves every introduction it makes.">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css?v=5">
+<script src="/app.js?v=5" defer></script>
+</head>
+<body>
+<a class="skip" href="#app">Skip to content</a>
+<p class="ribbon" role="note" title="Prototype - demo data - simulated SMS"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6v.1"/></svg><span><b>Prototype</b> · Demo data · Simulated SMS<span class="more"> — no real texts are sent</span></span></p>
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a href="/" class="brand" data-link aria-label="PointMint Agent Network, home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" class="bm-bg"/><path d="M16 7.5 24.5 16 16 24.5 7.5 16Z" class="bm-fg"/></svg>
+      <span>PointMint <span class="brand-sub">Agent Network</span></span>
+    </a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg class="ic ic-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/></svg>
+      <svg class="ic ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+    </button>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="/network" data-link>Network</a>
+      <a href="/vault" data-link>Vault</a>
+      <a href="/intros" data-link>Intros</a>
+      <a href="/about" data-link>How it works</a>
+      <a href="/docs" data-link>Developers</a>
+      <span class="nav-auth" id="authNav"></span>
+    </nav>
+  </div>
+</header>
+<main id="app" tabindex="-1"><div class="wrap page"><p class="muted">Loading…</p></div></main>
+<footer class="foot">
+  <div class="foot-in">
+    <p class="disclaimer">This is a prototype. SMS verification is simulated and the code is shown on screen. Every member marked “(Demo)” is fictional, and contact details are never shown publicly.</p>
+    <nav aria-label="Footer"><a href="/network" data-link>Network</a><a href="/vault" data-link>Vault</a><a href="/intros" data-link>Intros</a><a href="/about" data-link>How it works</a><a href="/docs" data-link>Developers</a></nav>
+    <p>PointMint Agent Network · a prototype by <a href="https://pointmint.io" rel="noopener">pointmint.io</a></p>
+  </div>
+</footer>
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle"></dialog>
+</body>
+</html>

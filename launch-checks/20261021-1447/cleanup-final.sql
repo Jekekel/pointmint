@@ -1,0 +1,9 @@
+DELETE FROM messages WHERE intro_id IN (SELECT id FROM intros WHERE from_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z') OR to_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z'));
+DELETE FROM messages WHERE sender_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');
+DELETE FROM intros WHERE from_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z') OR to_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');
+DELETE FROM vault_items WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');
+DELETE FROM audit_log WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z') OR agent_id IN (SELECT id FROM agents WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z'));
+DELETE FROM sessions WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');
+DELETE FROM agents WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');
+DELETE FROM otp_requests WHERE phone_e164 IN (SELECT phone_e164 FROM humans WHERE id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z'));
+DELETE FROM humans WHERE id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-21T18:45:51.888Z');

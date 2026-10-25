@@ -1,0 +1,14 @@
+import { chromium, webkit } from "playwright-core";
+const eng = process.argv[2] || 'chromium', w = +(process.argv[3] || 1024);
+const b = eng === "webkit" ? await webkit.launch() : await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const p = await (await b.newContext({ viewport: { width: w, height: 640 } })).newPage();
+const errs = []; p.on("console", m => { if (m.type() === "error") errs.push(m.text().slice(0, 300)); });
+await p.goto("https://agents.pointmint.io/", { waitUntil: "load" }); await p.waitForTimeout(1500);
+await p.click('[data-viewbtn="human"]'); await p.waitForTimeout(2500);
+console.log('after human', await p.evaluate(() => document.documentElement.className));
+await p.screenshot({ path: `/tmp/repro/${eng}-human.png` });
+await p.click('[data-viewbtn="split"]'); await p.waitForTimeout(2500);
+console.log('after split', await p.evaluate(() => [document.documentElement.className, document.querySelectorAll('canvas').length, [...document.querySelectorAll('body > *')].map(e => e.tagName + '.' + e.className).join(' ')]));
+await p.screenshot({ path: `/tmp/repro/${eng}-backtosplit.png` });
+console.log(errs.join('\n'));
+await b.close();

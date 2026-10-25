@@ -1,0 +1,22 @@
+// node final-local.mjs <base> <outdir> — signed-in screenshots on a LOCAL dev server: profile with photo, without photo (rank hint)
+import { chromium } from "playwright-core"; import { readFileSync } from "node:fs";
+const [base, out] = process.argv.slice(2);
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage(); const errs = [];
+p.on('pageerror', e => errs.push('PAGEERR ' + e.message));
+await p.goto(base + '/signup'); await p.waitForTimeout(1500);
+await p.fill('#phone', '+1 555 ' + (200 + Math.floor(Math.random() * 700)) + ' ' + (1000 + Math.floor(Math.random() * 8999)));
+await p.click('#startForm button'); await p.waitForSelector('#demoCode');
+await p.fill('#otp', (await p.textContent('#demoCode')).trim()); await p.fill('#vname', 'Ava Lindqvist');
+await p.click('#verifyForm button'); await p.waitForTimeout(2000);
+const me = await p.evaluate(async () => (await (await fetch('/api/me')).json()));
+const id = (me.human || me).id; console.log('id', id);
+const go = async (path, file, w = 1440, h = 900) => { await p.setViewportSize({ width: w, height: h }); await p.evaluate(u => { history.pushState({}, '', u); dispatchEvent(new PopStateEvent('popstate')); }, path); await p.waitForTimeout(3500); await p.screenshot({ path: `${out}/${file}` }); };
+await go('/h/' + id, 'profile-no-photo-rank-hint-1440.png');
+const bytes = [...readFileSync('prototype/scripts/fixtures/face-exif.jpg')];
+console.log('upload', await p.evaluate(async a => (await fetch('/api/me/photo', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: new Uint8Array(a) })).status, bytes));
+await go('/h/' + id, 'profile-with-photo-1440.png');
+await go('/h/' + id, 'profile-with-photo-1024.png', 1024, 768);
+await go('/network', 'network-photo-ranks-first-1440.png');
+console.log(errs.length ? errs.join('\n') : 'no errors'); await b.close();

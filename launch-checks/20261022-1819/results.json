@@ -1,0 +1,2420 @@
+{
+ "base": "https://agents.pointmint.io",
+ "verdict": "NO-GO",
+ "started": "2026-10-22T22:19:51.939Z",
+ "runtime_ms": 1834165,
+ "results": [
+  {
+   "area": "1 Routes",
+   "check": "GET / returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 88 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /network returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 20 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /vault returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 31 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /intros returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 98 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /about returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 34 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /docs returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 27 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /signup returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 31 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /a/agent_d00001 returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 22 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /h/h_d00001 returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 31 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /connect?to=Elon%20Musk returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 34 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "GET /p/rp_elon_musk returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200 in 26 ms"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/health returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/network returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/showcase/intros returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/humans/h_d00001 returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/agents/agent_d00001 returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "API /api/vault/browse returns 200",
+   "status": "PASS",
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "1 Routes",
+   "check": "Unknown API path returns a clean 404",
+   "status": "PASS",
+   "detail": "HTTP 404"
+  },
+  {
+   "area": "9 Security",
+   "check": "Homepage: Content-Security-Policy",
+   "status": "PASS",
+   "detail": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; obje"
+  },
+  {
+   "area": "9 Security",
+   "check": "Homepage: HSTS",
+   "status": "PASS",
+   "detail": "max-age=31536000; includeSubDomains"
+  },
+  {
+   "area": "9 Security",
+   "check": "Homepage: X-Frame-Options",
+   "status": "PASS",
+   "detail": "DENY"
+  },
+  {
+   "area": "9 Security",
+   "check": "Homepage: X-Content-Type-Options nosniff",
+   "status": "PASS",
+   "detail": "nosniff"
+  },
+  {
+   "area": "9 Security",
+   "check": "Homepage: Referrer-Policy",
+   "status": "PASS",
+   "detail": "strict-origin-when-cross-origin"
+  },
+  {
+   "area": "9 Security",
+   "check": "API: Content-Security-Policy",
+   "status": "PASS",
+   "detail": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; obje"
+  },
+  {
+   "area": "9 Security",
+   "check": "API: HSTS",
+   "status": "PASS",
+   "detail": "max-age=31536000; includeSubDomains"
+  },
+  {
+   "area": "9 Security",
+   "check": "API: X-Frame-Options",
+   "status": "PASS",
+   "detail": "DENY"
+  },
+  {
+   "area": "9 Security",
+   "check": "API: X-Content-Type-Options nosniff",
+   "status": "PASS",
+   "detail": "nosniff"
+  },
+  {
+   "area": "9 Security",
+   "check": "API: Referrer-Policy",
+   "status": "PASS",
+   "detail": "strict-origin-when-cross-origin"
+  },
+  {
+   "area": "9 Security",
+   "check": "Private /launch screen is noindex and rejects requests without the key",
+   "status": "PASS",
+   "detail": "page 200 x-robots-tag \"noindex, nofollow, noarchive\", API without key 401"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "Page <title>",
+   "status": "PASS",
+   "detail": "PointMint Agent Network"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "Meta description",
+   "status": "PASS",
+   "detail": "115 chars"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "Canonical link",
+   "status": "PASS",
+   "detail": "https://agents.pointmint.io/"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "og:title tag",
+   "status": "PASS",
+   "detail": "PointMint Agent Network — your AI agent, networking for you"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "og:description tag",
+   "status": "PASS",
+   "detail": "A business network where every verified human gets exactly one AI agent — and approves every introduction it makes."
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "og:image tag",
+   "status": "PASS",
+   "detail": "https://agents.pointmint.io/og-image.jpg"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "og:image image reachable",
+   "status": "PASS",
+   "detail": "HTTP 200 image/jpeg 0.14 MB"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "twitter:card tag",
+   "status": "PASS",
+   "detail": "summary_large_image"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "twitter:image tag",
+   "status": "PASS",
+   "detail": "https://agents.pointmint.io/og-image.jpg"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "twitter:image image reachable",
+   "status": "PASS",
+   "detail": "HTTP 200 image/jpeg 0.14 MB"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "Favicon reachable",
+   "status": "PASS",
+   "detail": "/favicon.svg HTTP 200 image/svg+xml"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "robots.txt",
+   "status": "PASS",
+   "detail": "User-agent: * | Allow: / | Disallow: /api/"
+  },
+  {
+   "area": "8 SEO/share",
+   "check": "sitemap.xml",
+   "status": "PASS",
+   "detail": "present"
+  },
+  {
+   "area": "4 Labels",
+   "check": "API: every member is a \"Verified human\" and every agent an \"AI agent\"",
+   "status": "PASS",
+   "detail": "62 members"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/ renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "24 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "16 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/: all images decode",
+   "status": "PASS",
+   "detail": "38 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/: images have alt text",
+   "status": "PASS",
+   "detail": "38 <img>"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/: video has a loadable source",
+   "status": "PASS",
+   "detail": "src https://agents.pointmint.io/glass/media/loop.mp4 readyState 0 error null"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/: video has a poster image",
+   "status": "PASS",
+   "detail": "https://agents.pointmint.io/glass/media/loop.jpg"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2,2,3,3,3,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/network renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Network · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/network: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "122 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/network: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "124 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/network: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/network: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/network: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/network: all images decode",
+   "status": "PASS",
+   "detail": "141 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/network: images have alt text",
+   "status": "PASS",
+   "detail": "141 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/network: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/network: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/network: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/vault renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Vault · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/vault: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/vault: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "120 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/vault: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/vault: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/vault: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/vault: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/vault: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/vault: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/vault: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/vault: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/intros renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Intros · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "24 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "24 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/intros: all images decode",
+   "status": "PASS",
+   "detail": "34 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/intros: images have alt text",
+   "status": "PASS",
+   "detail": "34 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/intros: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/intros: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/intros: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/about renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"How it works · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/about: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/about: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/about: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/about: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/about: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/about: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/about: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/about: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2,2,2,2,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/about: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/about: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/docs renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Developers · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/docs: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/docs: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/docs: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/docs: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/docs: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/docs: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/docs: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/docs: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2,3,3,3,3,2,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/docs: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/docs: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/signup renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Sign in · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/signup: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/signup: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/signup: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/signup: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/signup: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/signup: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/signup: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/signup: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/signup: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/signup: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00001 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Dana's Claude · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00001: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "23 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00001: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "6 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00001: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00001: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00001: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/a/agent_d00001: all images decode",
+   "status": "PASS",
+   "detail": "35 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/a/agent_d00001: images have alt text",
+   "status": "PASS",
+   "detail": "35 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/a/agent_d00001: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 2,1,2,2,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/a/agent_d00001: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/a/agent_d00001: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00001 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Dana Reyes (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00001: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "40 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00001: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "21 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00001: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00001: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00001: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/h/h_d00001: all images decode",
+   "status": "PASS",
+   "detail": "52 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/h/h_d00001: images have alt text",
+   "status": "PASS",
+   "detail": "52 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/h/h_d00001: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 2,1,2,2,3,3,3,2,2,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/h/h_d00001: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/h/h_d00001: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/connect?to=Elon%20Musk renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"How am I connected? · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect?to=Elon%20Musk: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect?to=Elon%20Musk: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "2 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect?to=Elon%20Musk: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/connect?to=Elon%20Musk: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/connect?to=Elon%20Musk: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/connect?to=Elon%20Musk: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/connect?to=Elon%20Musk: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/connect?to=Elon%20Musk: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/connect?to=Elon%20Musk: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/connect?to=Elon%20Musk: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/p/rp_elon_musk renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Unclaimed profile · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/p/rp_elon_musk: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/p/rp_elon_musk: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/p/rp_elon_musk: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/p/rp_elon_musk: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/p/rp_elon_musk: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "/p/rp_elon_musk: all images decode",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/p/rp_elon_musk: images have alt text",
+   "status": "PASS",
+   "detail": "18 <img>"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/p/rp_elon_musk: heading order",
+   "status": "PASS",
+   "detail": "1 h1; sequence 1,2,2,2"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "/p/rp_elon_musk: focus is visible on interactive elements",
+   "status": "PASS",
+   "detail": "12 tested"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/p/rp_elon_musk: layout shift (CLS) desktop",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/connect renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"How am I connected? · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/connect: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/connect: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/connect: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/matches renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Matches · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/matches: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "51 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/matches: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "52 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/matches: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/matches: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/matches: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/activity renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Activity · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/activity: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "110 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/activity: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "14 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/activity: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/activity: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/activity: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/llms.txt renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/llms.txt: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/llms.txt: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/llms.txt: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/llms.txt: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/llms.txt: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/graph.md renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/graph.md: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/graph.md: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/graph.md: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/graph.md: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/graph.md: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00002 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Marcus Chen (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00002: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "34 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00002: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "18 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00002: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00002: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00002: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00002 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Marcus-Grok · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00002: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "17 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00002: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00002: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00002: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00002: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/intros/intro_d00001 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Intro · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00001: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "7 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00001: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "7 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00001: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00001: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00001: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00003 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Ledgerly Assistant · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00003: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "24 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00003: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "2 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00003: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00003: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00003: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00003 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Priya Natarajan (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00003: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "41 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00003: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "19 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00003: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00003: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00003: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00004 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Tom Okafor (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00004: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "27 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00004: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "20 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00004: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00004: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00004: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00004 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Tom's Claude · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00004: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "8 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00004: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00004: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00004: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00004: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/intros/intro_d00002 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Intro · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00002: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "3 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00002: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00002: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00002: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00002: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00005 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Elena Petrova (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00005: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "26 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00005: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "20 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00005: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00005: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00005: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00005 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Petrova Broker Bot · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00005: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "9 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00005: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00005: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00005: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00005: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/intros/intro_d00003 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Intro · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00003: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "3 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00003: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00003: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00003: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00003: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00007 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Northstar GPT · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00007: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "10 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00007: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "3 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00007: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00007: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00007: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00007 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Sofia Alvarez (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00007: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "27 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00007: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "18 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00007: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00007: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00007: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00008 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Ben Hartley (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00008: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "26 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00008: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "17 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00008: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00008: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00008: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00008 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Ben's Assistant · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00008: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "9 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00008: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "2 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00008: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00008: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00008: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/intros/intro_d00004 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Intro · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00004: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "5 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00004: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "5 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/intros/intro_d00004: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00004: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/intros/intro_d00004: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/index.md renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/index.md: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "0 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/index.md: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "0 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/index.md: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/index.md: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/index.md: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00006 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Jamal Wright (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00006: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "37 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00006: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "19 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00006: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00006: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00006: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00006 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Jamal-Grok · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00006: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "20 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00006: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "4 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00006: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00006: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00006: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00009 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Ava Park (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00009: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "22 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00009: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "23 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00009: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00009: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00009: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00009 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Ava's Claude · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00009: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "5 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00009: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "8 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00009: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00009: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00009: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00010 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Noah Lindqvist (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00010: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "21 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00010: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "22 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00010: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00010: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00010: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/a/agent_d00010 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Noah's agent · AI agent · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00010: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "4 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00010: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "5 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/a/agent_d00010: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00010: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/a/agent_d00010: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "1 Routes",
+   "check": "/h/h_d00011 renders in a real browser",
+   "status": "PASS",
+   "detail": "HTTP 200, title \"Mia Costa (Demo) · PointMint Agent Network\""
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00011: every AI agent element labeled \"AI agent\"",
+   "status": "PASS",
+   "detail": "21 agent elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00011: every human shown carries a \"Verified human\" label",
+   "status": "PASS",
+   "detail": "20 human elements"
+  },
+  {
+   "area": "4 Labels",
+   "check": "/h/h_d00011: prototype disclaimer present",
+   "status": "PASS",
+   "detail": "found"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00011: no console errors",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "3 Console",
+   "check": "/h/h_d00011: no failed requests",
+   "status": "PASS",
+   "detail": "clean"
+  },
+  {
+   "area": "2 Assets",
+   "check": "All internal links and assets return 2xx",
+   "status": "PASS",
+   "detail": "284 internal URLs checked across 40 pages"
+  },
+  {
+   "area": "2 Assets",
+   "check": "External links reachable",
+   "status": "PASS",
+   "detail": "5 external URLs"
+  },
+  {
+   "area": "2 Assets",
+   "check": "Media weight (images ≤ 2 MB, videos ≤ 8 MB)",
+   "status": "PASS",
+   "detail": "66 media files; landing page media total 0.00 MB"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/network: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/network: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/vault: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/vault: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/intros: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/intros: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/about: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/about: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/docs: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/docs: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/signup: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/signup: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/a/agent_d00001: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/a/agent_d00001: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/h/h_d00001: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/h/h_d00001: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/connect?to=Elon%20Musk: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/connect?to=Elon%20Musk: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/p/rp_elon_musk: no horizontal overflow at 390 px",
+   "status": "PASS",
+   "detail": "page width 390px vs viewport 390px"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/p/rp_elon_musk: layout shift (CLS) mobile",
+   "status": "PASS",
+   "detail": "CLS 0.000"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/network: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/vault: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/intros: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/about: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/docs: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/signup: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/a/agent_d00001: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/h/h_d00001: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/connect?to=Elon%20Musk: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "5 Visual",
+   "check": "/p/rp_elon_musk: dark mode applies (dark background, light text)",
+   "status": "PASS",
+   "detail": "bg luminance 0.03, text 0.96"
+  },
+  {
+   "area": "1 Routes",
+   "check": "404 page is sane (no 5xx, shows \"not found\", has a way home, keeps nav + disclaimer)",
+   "status": "PASS",
+   "detail": "HTTP 404; \"not found\" shown true; console: Failed to load resource: the server responded with a status of 404 ()"
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "axe-core: no serious/critical violations on 11 key pages",
+   "status": "PASS",
+   "detail": ""
+  },
+  {
+   "area": "6 Accessibility",
+   "check": "axe-core minor/moderate issues",
+   "status": "NOTE",
+   "detail": "landmark-unique (moderate, 3 pages); region (moderate, 11 pages)"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse mobile: Performance",
+   "status": "WARN",
+   "detail": "score 69"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse mobile: Accessibility",
+   "status": "PASS",
+   "detail": "score 100"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse mobile: Best Practices",
+   "status": "PASS",
+   "detail": "score 93"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse mobile: SEO",
+   "status": "PASS",
+   "detail": "score 100"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse key metrics (mobile, simulated slow 4G)",
+   "status": "NOTE",
+   "detail": "FCP 1.6 s, LCP 1.7 s, TBT 9,740 ms, CLS 0, Speed Index 2.8 s; total weight Total size was 227 KiB"
+  },
+  {
+   "area": "7 Performance",
+   "check": "Lighthouse opportunities",
+   "status": "NOTE",
+   "detail": "Total Blocking Time; Max Potential First Input Delay; Browser errors were logged to the console; Time to Interactive; Minimize main-thread work; Reduce JavaScript execution time; Uses ARIA roles on incompatible elements; Serve static assets with an efficient cache policy"
+  },
+  {
+   "area": "10 Functional",
+   "check": "e2e.mjs (sign-up, one-agent rule, vault, MCP tools, intros, audit, rotate/revoke, rate limits)",
+   "status": "PASS",
+   "detail": "48 passed, 0 failed in 13s"
+  },
+  {
+   "area": "11 MCP",
+   "check": "/mcp without a token is rejected with 401",
+   "status": "PASS",
+   "detail": "HTTP 401"
+  },
+  {
+   "area": "11 MCP",
+   "check": "/mcp with a bogus token is rejected with 401",
+   "status": "PASS",
+   "detail": "HTTP 401"
+  },
+  {
+   "area": "9 Security",
+   "check": "Sign-in cookie flags (__Host-, HttpOnly, Secure, SameSite, Path=/)",
+   "status": "PASS",
+   "detail": "__Host-pm_session=<redacted>; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800"
+  },
+  {
+   "area": "11 MCP",
+   "check": "initialize works with a fresh credential",
+   "status": "PASS",
+   "detail": "protocol 2025-06-18, server pointmint-agent-network"
+  },
+  {
+   "area": "11 MCP",
+   "check": "tools/list works",
+   "status": "PASS",
+   "detail": "14 tools: find_connection_path, get_my_profile, get_my_vault, add_vault_item, search_matches, propose_intro, list_intros, send_message, list_messages, create_post, list_posts, get_twin_score, get_graph_neighborhood, confirm_post"
+  },
+  {
+   "area": "11 MCP",
+   "check": "Credential rejected after revoke",
+   "status": "PASS",
+   "detail": "HTTP 401"
+  },
+  {
+   "area": "10 Functional",
+   "check": "two-humans.mjs (agent proposes → human approves → recipient accepts → contact revealed → labeled messages)",
+   "status": "PASS",
+   "detail": "12/12 expectations met in 5s"
+  },
+  {
+   "area": "10 Functional",
+   "check": "ratetest.mjs (MCP 60 calls/min per credential, 61st → 429)",
+   "status": "PASS",
+   "detail": "calls 1-60 all 200: true | first 429 at call # 61 | retry-after present"
+  },
+  {
+   "area": "10 Functional",
+   "check": "messaging.mjs (human↔human, human↔agent, agent↔agent, labels + levels, untrusted bodies, permissions, sanitized feed, SSE, rate limit)",
+   "status": "PASS",
+   "detail": "30 passed, 0 failed in 14s"
+  },
+  {
+   "area": "10 Functional",
+   "check": "photos.mjs (photo upload: type/size/square checks, EXIF+GPS stripped, served from our domain; AI avatars in sunglasses; ranking penalty; owner-only hint; identity columns)",
+   "status": "PASS",
+   "detail": "38 passed, 0 failed"
+  },
+  {
+   "area": "10 Functional",
+   "check": "posts.mjs (posts: human | agent | both authorship, co-author consent both ways, agent never posts as a human, approvals, rate limits, audit)",
+   "status": "PASS",
+   "detail": "28 passed, 0 failed"
+  },
+  {
+   "area": "10 Functional",
+   "check": "twin-graph.mjs (knowledge graph JSON/MD + MCP neighbourhood, permissions; Digital Twin Score components, agent cannot inflate it; post media)",
+   "status": "PASS",
+   "detail": "34 passed, 0 failed"
+  },
+  {
+   "area": "10 Functional",
+   "check": "connect.mjs (six degrees: paths ≤6 hops with WHY + source per hop, typed entities, reserved unclaimed profiles (noindex, no agent, no messages), L3 claim flow + manual review + audit, opt-out/dispute, consented LinkedIn import, MCP find_connection_path)",
+   "status": "PASS",
+   "detail": "46 passed, 0 failed"
+  },
+  {
+   "area": "10 Functional",
+   "check": "markdown.mjs (/<page>.md, Accept: text/markdown, /llms.txt, untrusted blocks, one data source)",
+   "status": "PASS",
+   "detail": "34 passed, 0 failed"
+  },
+  {
+   "area": "10 Functional",
+   "check": "After cleanup: exactly 56 demo humans / 56 agents / 38 intros",
+   "status": "FAIL",
+   "detail": "humans 62, agents 61, intros 41, public cards 120; non-demo members still present: E2E Tester, Test Alice, Test Bob, Rate Tester, Msg Tester A, Msg Tester B"
+  },
+  {
+   "area": "3 Console",
+   "check": "Cloudflare Web Analytics beacon blocked by CSP (known, ignored)",
+   "status": "NOTE",
+   "detail": "124 occurrences of static.cloudflareinsights.com being refused by script-src 'self'. Harmless; analytics just isn't collected. Allow the host in CSP or turn off the beacon if analytics is wanted."
+  }
+ ]
+}

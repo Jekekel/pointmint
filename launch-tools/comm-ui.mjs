@@ -1,0 +1,52 @@
+// node comm-ui.mjs <base> <outdir> — community UI: tabs, nav, sort, vote, comment, reply, report, mobile
+import { chromium } from "playwright-core";
+const [base, out = '../screenshots/community'] = process.argv.slice(2);
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
+let pass = 0, fail = 0; const ok = (c, m, x = '') => { c ? pass++ : fail++; console.log(c ? 'PASS' : 'FAIL', m, x); };
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage(); const errs = [];
+p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/429|401|403/.test(m.text())) errs.push(m.text()); });
+await p.goto(base + '/', { waitUntil: 'load' }); await p.waitForTimeout(1500);
+ok(await p.locator('#app .m-tabs a', { hasText: 'Community' }).count() === 1, 'Community tab in the panel header');
+ok(await p.locator('.lc-nav a[href="/community"]').count() === 1, 'Community in the left nav');
+await p.click('#app .m-tabs a:has-text("Community")'); await p.waitForTimeout(800);
+ok(p.url().endsWith('/community') && await p.locator('.cm-card').count() === 5, 'tab opens /community with 5 p/ communities');
+await p.click('.cm-card:has-text("p/prompts")'); await p.waitForTimeout(800);
+ok(/\/community\/p\/prompts$/.test(p.url()) && await p.locator('.thread-row').count() >= 2, 'community page lists threads');
+await p.click('.cm-sort a:has-text("New")'); await p.waitForTimeout(600); ok(/sort=new/.test(p.url()) && await p.locator('.cm-sort a.on').innerText() === 'New', 'sort tabs work');
+ok(await p.locator('.thread-row .badge.demo').count() >= 2, 'demo threads labeled Demo');
+ok(await p.locator('.thread-row .am').count() >= 2, 'author marks shown');
+// signed out vote → sign-in prompt
+await p.locator('.thread-row .cv').first().click(); await p.waitForTimeout(300);
+ok(await p.locator('dialog[open], .modal, [role=dialog]').count() >= 1, 'signed-out vote asks to sign in');
+await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+// sign in
+await p.goto(base + '/signup'); await p.waitForTimeout(800);
+const phone = '+1 (555) ' + (100 + Math.floor(Math.random() * 800)) + '-' + (1000 + Math.floor(Math.random() * 8000));
+await p.fill('#startForm input[name=phone]', phone); await p.click('#startForm button'); await p.waitForSelector('#demoCode');
+await p.fill('#otp', await p.locator('#demoCode').innerText()); if (await p.locator('#vname').count()) await p.fill('#vname', 'Community UI Tester');
+await p.click('#verifyForm button'); await p.waitForTimeout(1500);
+await p.goto(base + '/community/t/th_d0001'); await p.waitForTimeout(1200);
+const s0 = Number(await p.locator('.cm-thread .cs').innerText());
+const up = p.locator('.cm-thread .cv').first(); const was = await up.getAttribute('aria-pressed');
+await up.click(); await p.waitForTimeout(700);
+const s1 = Number(await p.locator('.cm-thread .cs').innerText());
+ok(was === 'true' ? s1 === s0 - 1 : s1 === s0 + 1, 'up-vote changes the score', `${s0} → ${s1}`);
+await p.fill('#cc-root', 'Comment from the UI test (test account).'); await p.click('.cm-comments > .cm-cform button'); await p.waitForTimeout(1200);
+ok(await p.locator('.cm-c .cm-body', { hasText: 'Comment from the UI test' }).count() === 1, 'comment posted, marked human');
+const mine = p.locator('.cm-c', { hasText: 'Comment from the UI test' }).first();
+ok(await mine.locator('.cv').first().isDisabled(), 'own comment: vote buttons disabled');
+await p.locator('.cm-c [data-action="creply"]').first().click(); await p.waitForTimeout(300);
+const slot = p.locator('.cm-replyslot:not([hidden]) textarea'); await slot.fill('Nested reply from the UI test.'); await p.locator('.cm-replyslot:not([hidden]) button').click(); await p.waitForTimeout(1200);
+ok(await p.locator('.cm-tree .cm-tree .cm-body', { hasText: 'Nested reply from the UI test' }).count() === 1, 'nested reply posted');
+await p.screenshot({ path: out + '/community-thread-signed-in.png' });
+await p.goto(base + '/community/p/skills'); await p.waitForTimeout(1000);
+await p.click('.cm-compose > summary'); await p.fill('#ct-title', 'UI test thread'); await p.fill('#ct-body', 'Posted from the browser test (test account).'); await p.click('#cmThreadForm button'); await p.waitForTimeout(1500);
+ok(/\/community\/t\/th_/.test(p.url()) && await p.locator('.cm-ttitle').innerText() === 'UI test thread', 'new thread posted and opened');
+ok(errs.length === 0, 'no console errors', errs.slice(0, 3).join(' | '));
+// mobile
+const m = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+const mp = await m.newPage(); await mp.goto(base + '/community/p/matchmaking'); await mp.waitForTimeout(2500);
+ok(await mp.locator('.thread-row').count() >= 2, 'mobile: community page renders in the sheet');
+await mp.screenshot({ path: out + '/community-mobile.png' });
+await b.close(); console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

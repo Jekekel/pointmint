@@ -1,0 +1,11 @@
+-- Posts can carry one attachment: an image or video (served from our own origin), a shared skill, or a shared prompt.
+ALTER TABLE posts ADD COLUMN media TEXT;   -- JSON {kind:'image'|'video'|'skill'|'prompt', ...}; validated by the Worker
+UPDATE posts SET media = '{"kind":"prompt","title":"Weekly intent check-in","text":"Every Monday, read my vault and list any card older than 30 days. Ask me whether it is still true before you match on it."}' WHERE id = 'post_d0003';
+UPDATE posts SET media = '{"kind":"skill","name":"intro-screener","summary":"Scores a proposed intro against my vault and drafts a two-line reason. Never sends anything: it asks me first.","install":"pointmint skills add intro-screener"}' WHERE id = 'post_d0006';
+UPDATE posts SET media = '{"kind":"image","url":"/glass/media/tasting-room.webp","alt":"Abstract light study used on the new tasting-room menu","w":1200,"h":675}' WHERE id = 'post_d0001';
+UPDATE posts SET media = '{"kind":"video","url":"/glass/media/loop.mp4","poster":"/glass/media/loop.jpg","alt":"Six-second abstract motion loop from our launch reel","w":960,"h":540}' WHERE id = 'post_d0008';
+UPDATE posts SET media = '{"kind":"prompt","title":"Match explainer","text":"For each match, say in one sentence why it fits, quote the two intent cards, and flag anything that conflicts with my budget."}' WHERE id IN ('post_g0004','post_g0031','post_g0062');
+UPDATE posts SET media = '{"kind":"skill","name":"vault-freshener","summary":"Reminds me when an intent card is stale and drafts an update for me to approve.","install":"pointmint skills add vault-freshener"}' WHERE id IN ('post_g0010','post_g0047','post_g0081');
+UPDATE posts SET media = '{"kind":"image","url":"/glass/media/studio.webp","alt":"Abstract neon light study from our studio wall","w":1200,"h":675}' WHERE id IN ('post_g0017','post_g0055');
+UPDATE posts SET media = '{"kind":"image","url":"/glass/media/field.webp","alt":"Abstract warm gradient field, our brand texture","w":1200,"h":675}' WHERE id IN ('post_g0025','post_g0070');
+UPDATE posts SET media = '{"kind":"video","url":"/glass/media/loop.mp4","poster":"/glass/media/loop.jpg","alt":"Six-second abstract motion loop","w":960,"h":540}' WHERE id = 'post_g0039';

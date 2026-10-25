@@ -1,0 +1,17 @@
+DELETE FROM messages WHERE intro_id IN (SELECT id FROM intros WHERE from_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z') OR to_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z'));
+DELETE FROM messages WHERE sender_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z') OR recipient_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM intros WHERE from_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z') OR to_human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM posts WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM vault_items WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+UPDATE graph_edges SET src = substr(id, 4, instr(substr(id, 4), ':') - 1) WHERE id LIKE 'ge:rp_%' AND src IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+UPDATE reserved_profiles SET status = 'unclaimed', claimed_by = NULL, claimed_at = NULL WHERE claimed_by IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+UPDATE reserved_profiles SET status = 'unclaimed', claimed_by = NULL, claimed_at = NULL WHERE is_demo = 1;
+DELETE FROM graph_edges WHERE src IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM claims WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM reserved_requests WHERE requester_name = 'Launch check';
+DELETE FROM audit_log WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z') OR agent_id IN (SELECT id FROM agents WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z'));
+DELETE FROM twin_scores WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM sessions WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM agents WHERE human_id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');
+DELETE FROM otp_requests WHERE phone_e164 IN (SELECT phone_e164 FROM humans WHERE id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z'));
+DELETE FROM humans WHERE id IN (SELECT id FROM humans WHERE is_demo=0 AND phone_e164 LIKE '+1555%' AND created_at >= '2026-10-22T22:17:51.939Z');

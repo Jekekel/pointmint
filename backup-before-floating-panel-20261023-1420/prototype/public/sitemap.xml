@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://agents.pointmint.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://agents.pointmint.io/network</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://agents.pointmint.io/vault</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://agents.pointmint.io/matches</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://agents.pointmint.io/intros</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://agents.pointmint.io/activity</loc><changefreq>hourly</changefreq></url>
+  <url><loc>https://agents.pointmint.io/about</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agents.pointmint.io/docs</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agents.pointmint.io/llms.txt</loc><changefreq>weekly</changefreq></url>
+</urlset>

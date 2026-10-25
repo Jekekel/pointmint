@@ -1,0 +1,65 @@
+# Dependencies & build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Cloudflare / local secrets
+.wrangler/
+**/.wrangler/
+.dev.vars
+**/.dev.vars
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_rsa.*
+*.p12
+*.pfx
+credentials.json
+**/credentials.json
+.cfapi*
+.npmrc
+
+# OS / editor
+.DS_Store
+**/.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs & caches
+*.log
+npm-debug.log*
+.cache/
+.parcel-cache/
+tmp/
+temp/
+
+# Live D1 / PII dumps (never commit production data)
+backups/d1/*.sql
+**/remote-d1*.sql
+**/remote-d1-before.sql
+*.sqlite
+*.sqlite3
+
+# Local tooling scratch / bulky generated artifacts
+glass-tools/tmp/
+glass-tools/node_modules/
+launch-tools/node_modules/
+perf/before/
+perf/after/
+
+# Token / secret file names
+*.token
+.secrets/
+secrets/

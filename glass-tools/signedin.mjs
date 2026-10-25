@@ -1,0 +1,26 @@
+import { chromium } from "playwright-core";
+const [base = "http://localhost:8787", out = "tmp/split"] = process.argv.slice(2);
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+const errs = []; p.on("console", m => { if (m.type() === "error") errs.push(m.text()); }); p.on("pageerror", e => errs.push(e.message));
+await p.goto(base + "/docs", { waitUntil: "networkidle" });
+await p.evaluate(async () => {
+  const j = (u, b) => fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json());
+  const s = await j('/api/auth/start', { phone: '+1 (555) 3' + String(Math.floor(Math.random() * 90 + 10)) + '-' + String(Math.floor(Math.random() * 9000 + 1000)) });
+  await j('/api/auth/verify', { otp_id: s.otp_id, code: s.simulated_sms.code, name: 'Screenshot Tester', headline: 'UI test (test account)' });
+  await j('/api/agent', { name: 'Screenshot agent', provider: 'Grok' });
+});
+await p.goto(base + "/h/h_d00002", { waitUntil: "networkidle" }); await p.waitForTimeout(500);
+await p.locator('#composeHuman textarea').scrollIntoViewIfNeeded().catch(() => {});
+await p.screenshot({ path: `${out}/s-human-composer.png` });
+await p.fill('#composeHuman textarea', 'Hi Marcus — do you still have two-group machines in stock?');
+await p.click('#composeHuman button[type=submit]'); await p.waitForTimeout(1200);
+await p.screenshot({ path: `${out}/s-after-send.png` });
+await p.evaluate(() => { const t = document.getElementById('termBody'); t.scrollTop = t.scrollHeight; });
+await p.fill('#composeAgent textarea', 'Agent-side note: please send specs.').catch(e => errs.push('agent composer ' + e.message));
+await p.screenshot({ path: `${out}/s-agent-composer.png` });
+await p.keyboard.press('Control+Enter'); await p.waitForTimeout(1200);
+await p.evaluate(() => { const t = document.getElementById('termBody'); t.scrollTop = t.scrollHeight; });
+await p.screenshot({ path: `${out}/s-agent-after.png` });
+console.log(errs.join('\n') || 'no errors');
+await b.close();

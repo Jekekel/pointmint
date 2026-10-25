@@ -1,0 +1,50 @@
+PASS GET / loads with prototype banner 
+PASS security headers CSP/HSTS/XFO present 
+PASS GET /about 200 
+PASS GET /docs 200 
+PASS GET /network 200 
+PASS GET /app.js 200 
+PASS demo network browsable anonymously {"humans":19,"agents":17,"public_items":26,"intros":8}
+PASS every member labeled human / AI agent 
+PASS demo intros+messages with Human/AI labels 
+PASS no contact info leaked to anonymous viewers 
+PASS demo matches computed top=70 Bookkeeping software that handles wholesale invoicing <-> Ledgerly — bookkeeping SaaS for small businesses
+PASS OTP start returns simulated SMS e164=+15551879271
+PASS wrong OTP rejected Incorrect code. 4 attempt(s) left.
+PASS correct OTP creates human + session cookie 
+PASS OTP cannot be reused 
+PASS session works, human verified +15•••••71
+PASS agent minted, credential shown once prefix=pm_agent_geaA…
+PASS second agent mint REJECTED 409 You already have an AI agent. Each verified human gets exactly one agent — rotate its credential instead.
+PASS vault item created via UI API 
+PASS invalid vault input rejected type must be one of: buy, sell, seek, acquire
+PASS MCP without credential -> 401 
+PASS MCP with bogus credential -> 401 
+PASS MCP initialize protocol=2025-06-18
+PASS notifications/initialized -> 202 
+PASS MCP tools/list get_my_profile,get_my_vault,add_vault_item,search_matches,propose_intro,list_intros,send_message,list_messages
+PASS MCP tools/call search_matches n=5 top=66 "Refurbished commercial espresso machines" (Marcus Chen (Demo))
+PASS MCP add_vault_item (created_by=agent) 
+PASS MCP get_my_profile 
+PASS MCP get_my_vault 
+PASS MCP propose_intro -> pending_human_approval intro_c8c770fe93d8bf6bcd
+PASS MCP send_message blocked before approval Error: Messaging in an intro thread opens only after both humans approve the intro
+PASS MCP list_intros 
+PASS no contact info before approvals 
+PASS sender human cannot accept on recipient behalf 
+PASS human approves -> sent (pending_recipient) 
+PASS double approve rejected 
+PASS audit log records MCP actions labeled AI agent ai=8 total=13
+PASS rotate issues new credential prefix=pm_agent_jZxT…
+PASS old credential rejected after rotation 
+PASS new credential works 
+PASS still exactly one agent after rotation 
+PASS per-credential MCP rate limit enforced 429 after 50 calls this minute
+PASS revoke 
+PASS revoked credential rejected 401
+PASS same phone maps to existing human (one per phone) 
+PASS OTP locked after 5 wrong attempts Too many attempts. Request a new code.
+PASS demo phone numbers cannot be claimed 
+PASS bad phone rejected 
+
+48 passed, 0 failed  (test human h_009e41779d67fc2d35)

@@ -1,0 +1,36 @@
+PASS /graph.json is public JSON 460 nodes, 831 edges
+PASS 40–80 fictional demo humans seeded 56
+PASS every demo human has its one agent node 68 agents
+PASS each human is tethered to exactly its own agent 
+PASS edge type present: intent 
+PASS edge type present: match 
+PASS edge type present: intro 
+PASS edge type present: message 
+PASS edge type present: together 
+PASS vault intents are satellite nodes (buy/sell/seek/acquire) 
+PASS anonymous graph shows public intents only 
+PASS no phone numbers, contacts or credentials in the graph 
+PASS humans carry real photos (or none), agents carry sunglasses avatars 
+PASS anonymous graph: intros only between fictional demo members 
+PASS /graph.md is agent-readable Markdown with untrusted fences 
+PASS llms.txt lists the graph 
+PASS twin score 0–100 for a demo member 47
+PASS six weighted components (25/20/10/25/10/10) vault:25,verification:20,profile:10,alignment:25,outcomes:10,collaboration:10
+PASS every component shows points, detail and a tip 
+PASS total = sum of components 
+PASS profile Markdown carries digital_twin_score {total, components[]} 
+PASS graph human nodes carry cached twin totals 56 cached
+PASS MCP get_twin_score for my human 10
+PASS agent-only actions do not raise the score 10 → 10
+PASS human-confirmed actions raise it (recomputed on the event) 10 → 31
+PASS get_twin_score refuses non-demo members other than my own 
+PASS get_graph_neighborhood returns the pair and its edges 11 nodes
+PASS default neighbourhood is my own human (marked you) 
+PASS unknown node → error 
+PASS human posts with a shared prompt 
+PASS images must be served from our own origin (no hotlinks) 
+PASS an AI agent cannot attach images or video 
+PASS demo posts carry media 
+PASS /api/graph?focus= returns a neighbourhood 
+
+34 passed, 0 failed

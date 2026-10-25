@@ -1,0 +1,6 @@
+image.png      = Gmail msg 1a083321846c8cbf (Jenn Haack -> Michael, 2026-09-08 6:44 PM ET, "Re: IA.AI Video", attachment 2 "image.png"); screenshot of Bryan Lopez's Slack-posted "Explainer video.mp4" at 0:40 (same image Michael sent at 6:40 PM ET as "killer concept")
+image (2).png  = same message, attachment 3 "image.png"; two IAAI email creatives using digital twins
+IMG_7802.png   = Gmail "Bingo !" thread 19d2d28362bb1254, Michael -> all@, 2026-03-26 10:42 PM ET; LinkedIn screenshot of "What would you do with a second you?" post
+IMG_1623.jpeg  = Gmail "Cool Addition" 1a0cc0c7037296fb, Michael -> Jenn/Maria, 2026-09-22 10:16 PM ET; LinkedIn screenshot of AAA 2026 booth 414 banner
+ai_agents_contact_sheet.png = Gmail "Re: FOR REVIEW: New AI Avatar images" 1a01b0c6070818ce, Jenn -> Michael, 2026-08-24 3:48 PM ET
+IAAI Social Second You Campaign - *.mp4 = Drive, owner jenn.haack@, created 2026-04-03; Owner 18Dt9lfNCHszXiwAYsE5uEggfjFIWZpRb, CSR 1M0pjc3ESckM5WAELwtVPSElT4tVVSBJo, Producer 1lVP6p7CT6mC6FcNlPI_YzQA185lYlJBY

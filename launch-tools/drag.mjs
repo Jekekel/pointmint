@@ -1,0 +1,10 @@
+import { chromium } from "playwright-core";
+const [base, out, r = "30"] = process.argv.slice(2);
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
+const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+await p.goto(base + '/', { waitUntil: 'load' }); await p.waitForTimeout(1200);
+const d = await p.locator('#divider').boundingBox();
+await p.mouse.move(d.x + 8, d.y + 200); await p.mouse.down(); await p.mouse.move(1280 * (+r / 100), d.y + 200, { steps: 8 }); await p.mouse.up();
+await p.waitForTimeout(400); await p.evaluate(() => scrollTo(0, 0)); await p.screenshot({ path: out });
+const seam = await p.evaluate(() => { const s = document.querySelector('.fuse-seam').getBoundingClientRect(), d = document.getElementById('divider').getBoundingClientRect(); return { seam: Math.round(s.x + s.width / 2), divider: Math.round(d.x + d.width / 2) }; });
+console.log(JSON.stringify(seam)); await b.close();
