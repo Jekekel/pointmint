@@ -3,12 +3,21 @@
 
 import { launchStatic, launchApi } from './launch.js';
 import { agentAvatarSvg, avatarResponse, cleanPhoto, photoUrl, PHOTO_MAX_BYTES, PHOTO_PENALTY } from './identity.js';
+import { twinAvatarUrl, twinAvatarNote, serveTwinAvatar, invalidateTwinCache } from './twin_avatar.js';
 import { handleCommunityApi, communityView, COMMUNITY_TOOLS, callCommunityTool, confirmThread } from './community.js';
 import { handlePostsApi, createPost, confirmPost, listPosts, POST_LIMITS } from './posts.js';
 import { getTwin, twinRankBonus, TWIN_RANK_MAX, TWIN_WEIGHTS } from './twin.js';
 import { oidcRoute } from './oidc.js';
 import { buildGraph, neighborhood, graphMarkdown } from './graph.js';
 import { handleConnectApi, findConnectionPaths, pathMarkdown, reservedDetail, reservedMarkdown, PATH_TOOL } from './connect.js';
+import { handleTop100Api } from './top100.js';
+import { handlePrivateWorkspaceApi, PRIVATE_WORKSPACE_TOOLS, callPrivateWorkspaceTool } from './private_workspace.js';
+import { handleGuideThreadApi, GUIDE_THREAD_TOOLS, callGuideThreadTool } from './guide_thread.js';
+import { handleHandlesApi } from './handles.js';
+import { handleTrustApi, TRUST_TOOLS, callTrustTool, getTrust, refreshTrustBatch, TRUST_FEEDBACK, pubTrust } from './trust.js';
+import { LANGUAGE_OPTIONS, normalizeLang, langLabel } from './translate.js';
+import { ensureUserNumber, formatUserNumber } from './user_number.js';
+import { handleForYouApi } from './for_you.js';
 import { handleSplitApi, maybeMarkdown, sendMessage, visibleMessages, pubMessage, demoHeartbeat, agentLevel, LEVELS, showFounder } from './split.js';
 import { handlePointsApi } from './points.js';
 
@@ -144,14 +153,22 @@ async function issueCredential(env, agentId) {
 }
 
 // ---------- serializers ----------
-function pubAgent(a, humanName) {
+function pubAgent(a, humanName, humanPhoto = null) {
   if (!a) return null;
-  return { id: a.id, kind: 'ai_agent', label: 'AI agent', name: a.name, provider: a.provider, bio: a.bio, avatar_url: `/avatars/${a.id}.svg`, avatar_note: 'Synthetic AI avatar (always wears sunglasses), never a photo', acts_for: { human_id: a.human_id, name: humanName ?? a.human_name },
+  // humanPhoto: { photo_key, photo_updated_at } for cache-bust; twin endpoint always re-resolves live photo.
+  const photo = humanPhoto || (a.photo_key || a.photo_updated_at ? a : null);
+  const hasPhoto = !!(photo && photo.photo_key);
+  return { id: a.id, kind: 'ai_agent', label: 'AI agent', name: a.name, provider: a.provider, bio: a.bio, avatar_url: twinAvatarUrl(a.id, photo), avatar_note: twinAvatarNote(hasPhoto), acts_for: { human_id: a.human_id, name: humanName ?? a.human_name },
     status: a.credential_hash && !a.revoked_at ? 'active' : (a.revoked_at ? 'revoked' : 'no_credential'), created_at: a.created_at };
 }
 function pubHuman(h) {
+  const handle = h.handle || null;
+  const user_number = h.user_number != null ? Number(h.user_number) : null;
   return { id: h.id, kind: 'human', label: 'Verified human', verified: !!h.phone_verified_at, level: h.verify_level === 'L3' ? 'L3' : h.phone_verified_at ? 'L1' : 'L0', claimed_profile_id: h.claimed_profile_id || undefined, is_demo: !!h.is_demo, name: h.name, headline: h.headline, company: h.company, bio: h.bio,
-    has_photo: !!h.photo_key, photo_url: photoUrl(h), created_at: h.created_at };
+    handle, href: handle ? '/' + handle : '/h/' + h.id, has_photo: !!h.photo_key, photo_url: photoUrl(h),
+    user_number: Number.isFinite(user_number) ? user_number : null,
+    user_number_label: formatUserNumber(user_number),
+    preferred_language: normalizeLang(h.preferred_language || 'en', 'en'), created_at: h.created_at };
 }
 function pubItem(v) {
   return { id: v.id, human_id: v.human_id, type: v.type, title: v.title, description: v.description, tags: v.tags ? v.tags.split(',') : [], budget_min: v.budget_min, budget_max: v.budget_max, visibility: v.visibility, created_by: v.created_by, author: v.created_by === 'agent' ? 'agent' : 'human', created_at: v.created_at, updated_at: v.updated_at,
@@ -197,7 +214,7 @@ async function computeMatches(env, humanId, { viewerCanSeeNetwork, limit = 20, i
     if (s && t.owner_twin != null) { const b = twinRankBonus(t.owner_twin); if (b) { s.score += b; s.reasons.push(`digital twin score ${t.owner_twin}/100 (+${b})`); } }
     if (s) out.push({ score: s.score, reasons: s.reasons, my_item: { id: m.id, type: m.type, title: m.title },
       their_item: { id: t.id, type: t.type, title: t.title, tags: t.tags ? t.tags.split(',') : [] },
-      counterpart: { human: { id: t.human_id, name: t.owner_name, kind: 'human', is_demo: !!t.owner_is_demo, has_photo: !!t.owner_photo, photo_url: photoUrl({ photo_key: t.owner_photo }) }, agent: t.agent_id ? { id: t.agent_id, name: t.agent_name, provider: t.agent_provider, kind: 'ai_agent', avatar_url: `/avatars/${t.agent_id}.svg` } : null } });
+      counterpart: { human: { id: t.human_id, name: t.owner_name, kind: 'human', is_demo: !!t.owner_is_demo, has_photo: !!t.owner_photo, photo_url: photoUrl({ photo_key: t.owner_photo }) }, agent: t.agent_id ? { id: t.agent_id, name: t.agent_name, provider: t.agent_provider, kind: 'ai_agent', avatar_url: twinAvatarUrl(t.agent_id, { photo_key: t.owner_photo }) } : null } });
   }
   out.sort((a, b) => b.score - a.score);
   return out.slice(0, limit);
@@ -216,8 +233,8 @@ async function introRow(env, id) {
 function pubIntro(i, viewerHumanId) {
   const role = viewerHumanId === i.from_human_id ? 'sender' : viewerHumanId === i.to_human_id ? 'recipient' : 'observer';
   const o = { id: i.id, status: i.status, status_label: STATUS_LABEL[i.status], author: i.proposed_by === 'agent' ? (i.sender_approved_at ? 'both' : 'agent') : 'human', proposed_by: i.proposed_by, proposed_by_label: i.proposed_by === 'agent' ? 'AI agent' : 'Human', reason: i.reason, viewer_role: role,
-    from: { human: { id: i.from_human_id, name: i.from_name, kind: 'human', photo_url: photoUrl({ photo_key: i.from_photo }) }, agent: i.from_agent_id ? { id: i.from_agent_id, name: i.from_agent_name, provider: i.from_agent_provider, kind: 'ai_agent', avatar_url: `/avatars/${i.from_agent_id}.svg` } : null },
-    to: { human: { id: i.to_human_id, name: i.to_name, kind: 'human', photo_url: photoUrl({ photo_key: i.to_photo }) }, agent: i.to_agent_id ? { id: i.to_agent_id, name: i.to_agent_name, provider: i.to_agent_provider, kind: 'ai_agent', avatar_url: `/avatars/${i.to_agent_id}.svg` } : null },
+    from: { human: { id: i.from_human_id, name: i.from_name, kind: 'human', photo_url: photoUrl({ photo_key: i.from_photo }) }, agent: i.from_agent_id ? { id: i.from_agent_id, name: i.from_agent_name, provider: i.from_agent_provider, kind: 'ai_agent', avatar_url: twinAvatarUrl(i.from_agent_id, { photo_key: i.from_photo }) } : null },
+    to: { human: { id: i.to_human_id, name: i.to_name, kind: 'human', photo_url: photoUrl({ photo_key: i.to_photo }) }, agent: i.to_agent_id ? { id: i.to_agent_id, name: i.to_agent_name, provider: i.to_agent_provider, kind: 'ai_agent', avatar_url: twinAvatarUrl(i.to_agent_id, { photo_key: i.to_photo }) } : null },
     from_item: i.from_item_id ? { id: i.from_item_id, title: i.from_item_title } : null, to_item: i.to_item_id ? { id: i.to_item_id, title: i.to_item_title } : null,
     is_demo: !!(i.from_demo && i.to_demo), created_at: i.created_at, sender_approved_at: i.sender_approved_at, recipient_decided_at: i.recipient_decided_at };
   // Contact info only after BOTH humans approved, and only to participants.
@@ -258,10 +275,12 @@ async function handleApi(request, env, url) {
   if (p.startsWith('/api/launch/')) return launchApi(request, env, url, { enforce, selfFetch: (u, init = {}) => handler.fetch(new Request(u, { ...init, headers: { ...(init.headers || {}), 'cf-connecting-ip': 'launch-check' } }), env, env.ctx) });
 
   { const cr = await handleConnectApi(request, env, url, ip); if (cr) return cr; }
+  { const hr = await handleHandlesApi(request, env, url, ip); if (hr) return hr; }
+  { const tr = await handleTrustApi(request, env, url, ip); if (tr) return tr; }
 
   if (p === '/api/health') return json({ ok: true, service: 'pointmint-agents', time: now() });
 
-  // Match Point scoreboard (SPEC §33). Public aggregate; no PII.
+  // Match Point scoreboard (SPEC §43). Public aggregate; no PII.
   { const r = await handlePointsApi(request, env, url, ip); if (r) return r; }
 
   // ----- public browsing -----
@@ -271,7 +290,7 @@ async function handleApi(request, env, url) {
       FROM humans h LEFT JOIN agents a ON a.human_id = h.id WHERE h.phone_verified_at IS NOT NULL ORDER BY (h.photo_key IS NULL) ASC, h.is_demo DESC, h.created_at ASC LIMIT 200`).all()).results;
     const stats = await env.DB.prepare("SELECT (SELECT COUNT(*) FROM humans WHERE phone_verified_at IS NOT NULL) AS humans, (SELECT COUNT(*) FROM agents) AS agents, (SELECT COUNT(*) FROM vault_items WHERE visibility='public') AS public_items, (SELECT COUNT(*) FROM intros) AS intros").first();
     return json({ stats, members: humans.map(h => ({ human: pubHuman(h), public_items: h.public_items,
-      agent: h.a_id ? pubAgent({ id: h.a_id, name: h.a_name, provider: h.a_provider, human_id: h.id, credential_hash: h.a_cred, revoked_at: h.a_rev, created_at: h.a_created, bio: '' }, h.name) : null })) });
+      agent: h.a_id ? pubAgent({ id: h.a_id, name: h.a_name, provider: h.a_provider, human_id: h.id, credential_hash: h.a_cred, revoked_at: h.a_rev, created_at: h.a_created, bio: '' }, h.name, h) : null })) });
   }
   if ((m = p.match(/^\/api\/humans\/([a-z]+_[a-f0-9]+)$/)) && method === 'GET') {
     const viewer = await currentHuman(request, env);
@@ -280,7 +299,7 @@ async function handleApi(request, env, url) {
     const a = await env.DB.prepare('SELECT * FROM agents WHERE human_id = ?').bind(h.id).first();
     const vis = viewer && viewer.id === h.id ? ['public', 'network', 'private'] : viewer ? ['public', 'network'] : ['public'];
     const items = (await env.DB.prepare(`SELECT * FROM vault_items WHERE human_id = ? AND visibility IN (${vis.map(() => '?').join(',')}) ORDER BY created_at`).bind(h.id, ...vis).all()).results;
-    return json({ human: pubHuman(h), agent: pubAgent(a, h.name), vault: items.map(pubItem) });
+    return json({ human: pubHuman(h), agent: pubAgent(a, h.name, h), vault: items.map(pubItem) });
   }
   if ((m = p.match(/^\/api\/agents\/([a-z]+_[a-f0-9]+)$/)) && method === 'GET') {
     const a = await env.DB.prepare('SELECT a.*, h.name AS human_name FROM agents a JOIN humans h ON h.id = a.human_id WHERE a.id = ?').bind(m[1]).first();
@@ -372,9 +391,11 @@ async function handleApi(request, env, url) {
       human = await env.DB.prepare('SELECT * FROM humans WHERE id = ?').bind(id).first();
       created = true;
     } else if (human.is_demo) throw new HttpError(403, 'Demo members cannot sign in');
+    // §40: assign sequential user_number once on first verified presence (signup or backfill gap). Never renumber.
+    human = await ensureUserNumber(env, human) || human;
     const tok = b64url(randBytes(32));
     await env.DB.prepare('INSERT INTO sessions (token_hash, human_id, expires_at) VALUES (?, ?, ?)').bind(await sha256(tok), human.id, unix() + SESSION_TTL).run();
-    await audit(env, { human_id: human.id, actor_type: 'human', action: created ? 'human.signed_up' : 'human.signed_in', detail: { phone: maskPhone(human.phone_e164) }, ip });
+    await audit(env, { human_id: human.id, actor_type: 'human', action: created ? 'human.signed_up' : 'human.signed_in', detail: { phone: maskPhone(human.phone_e164), user_number: human.user_number ?? null }, ip });
     return json({ ok: true, created, human: pubHuman(human) }, 200, { 'set-cookie': `${SESSION_COOKIE}=${tok}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_TTL}` });
   }
   if (p === '/api/auth/logout' && method === 'POST') {
@@ -390,7 +411,8 @@ async function handleApi(request, env, url) {
     const a = await env.DB.prepare('SELECT * FROM agents WHERE human_id = ?').bind(h.id).first();
     return json({ signed_in: true, human: { ...pubHuman(h), phone_masked: maskPhone(h.phone_e164), contact: h.contact, photo_source: h.photo_source || null,
         ...(h.photo_key ? {} : { photo_required: true, photo_note: `No photo: you are ranked lower in search and matches (−${PHOTO_PENALTY} points). Add a live photo of yourself.` }) },
-      agent: a ? { ...pubAgent(a, h.name), credential_prefix: a.credential_hash ? a.credential_prefix : null, credential_created_at: a.credential_created_at, revoked_at: a.revoked_at, last_used_at: a.last_used_at } : null });
+      agent: a ? { ...pubAgent(a, h.name, h), credential_prefix: a.credential_hash ? a.credential_prefix : null, credential_created_at: a.credential_created_at, revoked_at: a.revoked_at, last_used_at: a.last_used_at } : null,
+      language_options: LANGUAGE_OPTIONS });
   }
   if (p === '/api/me/photo' && method === 'POST') {
     const h = await requireHuman(request, env);
@@ -410,21 +432,23 @@ async function handleApi(request, env, url) {
     await env.PHOTOS.put(key, c.bytes, { httpMetadata: { contentType: mime, cacheControl: 'public, max-age=31536000, immutable' }, customMetadata: { human_id: h.id, source: src } });
     await env.DB.prepare('UPDATE humans SET photo_key = ?, photo_mime = ?, photo_bytes = ?, photo_source = ?, photo_updated_at = ? WHERE id = ?').bind(key, mime, c.bytes.length, src, now(), h.id).run();
     if (h.photo_key) await env.PHOTOS.delete(h.photo_key).catch(() => {});
+    await invalidateTwinCache(env, h.id);
     await audit(env, { human_id: h.id, actor_type: 'human', action: 'profile.photo_added', detail: { source: src, bytes: c.bytes.length, w: c.w, h: c.h }, ip });
     return json({ ok: true, photo_url: `/media/photos/${key}`, width: c.w, height: c.h, bytes: c.bytes.length, source: src, metadata_stripped: true }, 201);
   }
   if (p === '/api/me/photo' && method === 'DELETE') {
     const h = await requireHuman(request, env);
-    if (h.photo_key) { await env.PHOTOS?.delete(h.photo_key).catch(() => {}); await env.DB.prepare('UPDATE humans SET photo_key = NULL, photo_mime = NULL, photo_bytes = NULL, photo_source = NULL, photo_updated_at = ? WHERE id = ?').bind(now(), h.id).run(); await audit(env, { human_id: h.id, actor_type: 'human', action: 'profile.photo_removed', detail: {}, ip }); }
+    if (h.photo_key) { await env.PHOTOS?.delete(h.photo_key).catch(() => {}); await env.DB.prepare('UPDATE humans SET photo_key = NULL, photo_mime = NULL, photo_bytes = NULL, photo_source = NULL, photo_updated_at = ? WHERE id = ?').bind(now(), h.id).run(); await invalidateTwinCache(env, h.id); await audit(env, { human_id: h.id, actor_type: 'human', action: 'profile.photo_removed', detail: {}, ip }); }
     return json({ ok: true });
   }
   if (p === '/api/me' && method === 'PATCH') {
     const h = await requireHuman(request, env); const b = await readJson(request);
-    await env.DB.prepare('UPDATE humans SET name = ?, headline = ?, company = ?, bio = ?, contact = ? WHERE id = ?')
+    const lang = b.preferred_language !== undefined ? normalizeLang(str(b.preferred_language, 'preferred_language', { required: true, min: 2, max: 16 }), 'en') : normalizeLang(h.preferred_language || 'en', 'en');
+    await env.DB.prepare('UPDATE humans SET name = ?, headline = ?, company = ?, bio = ?, contact = ?, preferred_language = ? WHERE id = ?')
       .bind(b.name !== undefined ? str(b.name, 'name', { required: true, min: 2, max: 80 }) : h.name, b.headline !== undefined ? str(b.headline, 'headline', { max: 120 }) : h.headline,
-        b.company !== undefined ? str(b.company, 'company', { max: 80 }) : h.company, b.bio !== undefined ? str(b.bio, 'bio', { max: 1000 }) : h.bio, b.contact !== undefined ? str(b.contact, 'contact', { max: 200 }) : h.contact, h.id).run();
-    await audit(env, { human_id: h.id, actor_type: 'human', action: 'profile.updated', ip });
-    return json({ ok: true });
+        b.company !== undefined ? str(b.company, 'company', { max: 80 }) : h.company, b.bio !== undefined ? str(b.bio, 'bio', { max: 1000 }) : h.bio, b.contact !== undefined ? str(b.contact, 'contact', { max: 200 }) : h.contact, lang, h.id).run();
+    await audit(env, { human_id: h.id, actor_type: 'human', action: 'profile.updated', detail: { preferred_language: lang }, ip });
+    return json({ ok: true, preferred_language: lang, preferred_language_label: langLabel(lang) });
   }
 
   // ----- agent (exactly one per human) -----
@@ -541,6 +565,10 @@ async function handleApi(request, env, url) {
   { const r = await handleSplitApi(request, env, url, ip); if (r) return r; }
   { const r = await handlePostsApi(request, env, url, ip); if (r) return r; }
   { const r = await handleCommunityApi(request, env, url, ip); if (r) return r; }
+  { const r = await handleTop100Api(request, env, url, ip); if (r) return r; }
+  { const r = await handlePrivateWorkspaceApi(request, env, url, ip); if (r) return r; }
+  { const r = await handleGuideThreadApi(request, env, url, ip); if (r) return r; }
+  { const r = await handleForYouApi(request, env, url, ip, { currentHuman }); if (r) return r; }
 
   // ----- audit log -----
   if (p === '/api/audit' && method === 'GET') {
@@ -600,12 +628,15 @@ const TOOLS = [
   { name: 'confirm_post', description: 'Confirm a co-authored ("both") post or community thread your human started (post_… or th_… id). Only after both of you confirm is it published.', inputSchema: { type: 'object', properties: {
       post_id: { type: 'string', description: 'A post_… id or a community thread th_… id' } }, required: ['post_id'], additionalProperties: false } },
   ...COMMUNITY_TOOLS,
+  ...PRIVATE_WORKSPACE_TOOLS,
+  ...GUIDE_THREAD_TOOLS,
+  ...TRUST_TOOLS,
 ];
 
 async function callTool(env, agent, name, args) {
   const human = await env.DB.prepare('SELECT * FROM humans WHERE id = ?').bind(agent.human_id).first();
   switch (name) {
-    case 'get_my_profile': return { agent: pubAgent(agent, human.name), human: pubHuman(human), note: 'You are an AI agent. Always identify yourself as an AI agent acting for your human.' + (human.photo_key ? '' : ' Your human has no profile photo, so they rank lower in search and matches. Suggest they add one at /dashboard (you cannot upload it for them).') };
+    case 'get_my_profile': return { agent: pubAgent(agent, human.name, human), human: pubHuman(human), note: 'You are an AI agent. Always identify yourself as an AI agent acting for your human.' + (human.photo_key ? '' : ' Your human has no profile photo, so they rank lower in search and matches. Suggest they add one at /dashboard (you cannot upload it for them).') };
     case 'get_my_vault': return { items: (await env.DB.prepare('SELECT * FROM vault_items WHERE human_id = ? ORDER BY created_at DESC').bind(human.id).all()).results.map(pubItem) };
     case 'add_vault_item': return { item: await insertVaultItem(env, human.id, args, 'agent') };
     case 'search_matches': {
@@ -649,6 +680,9 @@ async function callTool(env, agent, name, args) {
     }
     case 'confirm_post': { const pid = String(args.post_id || ''); return pid.startsWith('th_') ? { ok: true, thread: await confirmThread(env, agent, pid) } : { ok: true, post: await confirmPost(env, agent, pid) }; }
     case 'list_communities': case 'list_threads': case 'create_thread': case 'comment': case 'vote': return callCommunityTool(env, agent, human, name, args);
+    case 'private_workspace_read': case 'private_workspace_send': return callPrivateWorkspaceTool(env, agent, human, name, args);
+    case 'guide_thread_read': case 'guide_thread_send': return callGuideThreadTool(env, agent, human, name, args);
+    case 'rate_agent': case 'get_trust_score': case 'list_my_ratings': case 'report_agent': return callTrustTool(env, agent, human, name, args, null);
     case 'list_messages': {
       const limit = Math.min(100, Math.max(1, Number(args.limit) || 30));
       const dir = args.direction ? oneOf(args.direction, 'direction', ['in', 'out', 'all']) : 'all';
@@ -749,7 +783,7 @@ async function agentHuman(request, env) {
 }
 
 // ---------- entry ----------
-const SPA_ROUTES = /^\/(?:|index\.html|network|vault|matches|activity|intros|signup|dashboard|about|docs|connect|import|community)\/?$|^\/(?:h|a|intros)\/[\w-]+\/?$|^\/community\/(?:p\/[a-z0-9-]{2,24}|t\/th_[a-z0-9]{3,40})\/?$|^\/p\/rp_[a-z0-9_]{3,60}\/?$/;
+const SPA_ROUTES = /^\/(?:|index\.html|network|vault|matches|activity|intros|signup|dashboard|about|docs|connect|import|community|for-you)\/?$|^\/(?:h|a|intros)\/[\w-]+\/?$|^\/community\/(?:p\/[a-z0-9-]{2,24}|t\/th_[a-z0-9]{3,40})\/?$|^\/p\/rp_[a-z0-9_]{3,60}\/?$|^\/[a-z0-9][a-z0-9_-]{2,31}\/?$/;
 const handler = {
   async fetch(request, env, ctx) {
     env.ctx = ctx;
@@ -757,11 +791,14 @@ const handler = {
     try {
       let resp, m0;
       if (url.pathname === '/mcp' || url.pathname === '/mcp/') resp = await handleMcp(request, env);
+      else if ((m0 = url.pathname.match(/^\/api\/twin-avatar\/([a-z0-9_]{1,48})$/)) && (request.method === 'GET' || request.method === 'HEAD')) resp = await serveTwinAvatar(env, { humanId: m0[1] }, request);
       else if (url.pathname.startsWith('/api/')) resp = await handleApi(request, env, url);
       else {
         if (request.method !== 'GET' && request.method !== 'HEAD') resp = json({ error: 'Method not allowed' }, 405);
-        else if (!showFounder(env) && /^\/(?:glass\/(?:michael\.jpg|twin[\w.-]*)|avatars\/agent_michael\.svg)$/.test(url.pathname)) resp = json({ error: 'Not found' }, 404, { 'x-robots-tag': 'noindex' }); // host-only media: hidden unless SHOW_FOUNDER
-        else if ((m0 = url.pathname.match(/^\/avatars\/([a-z0-9_]{1,48})\.svg$/))) resp = avatarResponse(m0[1], request);
+        else if (!showFounder(env) && /^\/(?:glass\/(?:michael\.jpg|twin[\w.-]*)|avatars\/(?:agent_michael\.svg|twin\/agent_michael\.svg))$/.test(url.pathname)) resp = json({ error: 'Not found' }, 404, { 'x-robots-tag': 'noindex' }); // host-only media: hidden unless SHOW_FOUNDER
+        else if (url.pathname === '/avatars/twin-placeholder.svg') resp = await serveTwinAvatar(env, {}, request);
+        else if ((m0 = url.pathname.match(/^\/avatars\/twin\/([a-z0-9_]{1,48})\.svg$/))) resp = await serveTwinAvatar(env, { agentId: m0[1] }, request);
+        else if ((m0 = url.pathname.match(/^\/avatars\/([a-z0-9_]{1,48})\.svg$/))) resp = avatarResponse(m0[1], request); // legacy synthetic robot (still sunglasses)
         else if ((m0 = url.pathname.match(/^\/media\/photos\/(h\/[a-z0-9_]+\/[a-f0-9]{8,40}\.(?:webp|jpg))$/))) resp = await servePhoto(env, m0[1], request);
         else if (url.pathname === '/launch' || url.pathname.startsWith('/launch/')) resp = launchStatic(url.pathname) || json({ error: 'Not found' }, 404, { 'x-robots-tag': 'noindex, nofollow' });
         else if ((url.pathname.startsWith('/.well-known/') || url.pathname.startsWith('/oauth/')) && (resp = oidcRoute(request, url))) { /* Sign in with PointMint: prototype stubs */ }
@@ -809,9 +846,10 @@ const handler = {
   async scheduled(controller, env, ctx) {
     env.ctx = ctx;
     ctx.waitUntil(refreshTwinBatch(env, 12).catch(e => console.error(JSON.stringify({ level: 'error', msg: 'twin', err: String(e && e.message || e) }))));
+    ctx.waitUntil(refreshTrustBatch(env, 12).catch(e => console.error(JSON.stringify({ level: 'error', msg: 'trust', err: String(e && e.message || e) }))));
     ctx.waitUntil(demoHeartbeat(env).catch(e => console.error(JSON.stringify({ level: 'error', msg: 'heartbeat', err: String(e && e.message || e) }))));
   },
 };
 const scorePairPublic = (a, b) => scorePair(a, b);
-export { getTwin, buildGraph, scorePairPublic, HttpError, json, str, rid, now, enforce, audit, safeParse, currentHuman, agentFromBearer, readJson, pubAgent, pubHuman, pubItem, computeMatches, introRow, pubIntro, messagesFor, TOOLS, callTool };
+export { getTwin, getTrust, buildGraph, scorePairPublic, HttpError, json, str, rid, now, enforce, audit, safeParse, currentHuman, agentFromBearer, readJson, pubAgent, pubHuman, pubItem, computeMatches, introRow, pubIntro, messagesFor, TOOLS, callTool, formatUserNumber, ensureUserNumber };
 export default handler;

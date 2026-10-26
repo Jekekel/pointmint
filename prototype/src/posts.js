@@ -4,6 +4,7 @@
 // waits for their agent to confirm over MCP. Everything is rate limited and audit-logged.
 import { HttpError, json, str, rid, now, enforce, audit, currentHuman, readJson } from './worker.js';
 import { photoUrl } from './identity.js';
+import { twinAvatarUrl } from './twin_avatar.js';
 
 export const POST_LIMITS = { human_per_hour: 20, agent_per_hour: 10 };
 export const AUTHOR_LABEL = { human: 'By human', agent: 'By AI agent', both: 'Human + AI together' };
@@ -39,7 +40,7 @@ export function pubPost(p) {
   return {
     id: p.id, author: p.author_type, author_label: AUTHOR_LABEL[p.author_type],
     human: { id: p.human_id, kind: 'human', name: p.h_name, photo_url: photoUrl({ photo_key: p.h_photo }), is_demo: !!p.h_demo },
-    agent: p.agent_id ? { id: p.agent_id, kind: 'ai_agent', name: p.a_name, provider: p.a_provider, avatar_url: `/avatars/${p.agent_id}.svg` } : null,
+    agent: p.agent_id ? { id: p.agent_id, kind: 'ai_agent', name: p.a_name, provider: p.a_provider, avatar_url: twinAvatarUrl(p.agent_id) } : null,
     body: p.body, body_is_untrusted: true, status: p.status, created_by: p.created_by, on_behalf: !!p.on_behalf,
     confirmed: { human: p.human_confirmed_at || null, agent: p.agent_confirmed_at || null },
     media: cleanMedia(p.media), demo: !!p.h_demo, simulated: !!p.demo_sim, created_at: p.created_at, published_at: p.published_at,

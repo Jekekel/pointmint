@@ -1,8 +1,130 @@
 # PointMint Agent Network — build progress
 
-Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; current version 08581850, deployed 2026-10-25 ~14:27 ET).
-Backup taken before this round: `backup-before-six-degrees-20261022-1727/` (code, plus `remote-d1-before.sql`, a full export of the production D1 database). Earlier backups are untouched.
-Remote D1 migrations applied: 0006–0012 (photos, posts, twin scores, graph demo, post media, entities/reserved, reserved seed).
+Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; current version **2fc0bc01**, deployed 2026-10-25 ~15:19 ET — PM rename + icon).
+Remote D1 migrations applied: 0006–**0019** (through preferred_language / message_translations).
+
+## Points HUD scoreboard — conflict-resolved against main, deploy not run (2026-10-26)
+- Michael (voice): a sports scoreboard at the very top, immediately to the right of the PointMint logo. Four types only: Human, Bot, Buy, Sell. Brand sync with Match Point — keeping points of the matches.
+- Filed as **SPEC §43 Points HUD Scoreboard**. The branch had used §33 because that checkout predated Reciprocal Top 100. On current main §33 stays Reciprocal Top 100, §40 stays user_number, §41 stays Feed Algorithm / For You. §42 is left free for Top 10. Changelog updated. No matchpoint-v1 / Momentum / IAAI edits.
+- UI: `section#scoreboard` is the next sibling of `a.brand` inside `header#hud`. Find me and How am I connected stay on the HUD; graph search stays in the connections column (the older HUD `.gsearch` markup was not restored). Styles in `deck.css` (scoreboard rules plus the trust-score and find-me rules already on main). Loader `startPoints` in `app.js`. `--hud` is 64px. Assets `?v=31` (bumped from main `?v=30`). Same files copied to `prototype/public/`.
+- API: `GET /api/points` → `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }` from `prototype/src/points.js`. Phase 0 sums existing posts, intros, messages, community threads, and non-private buy/sell cards (plus accepted intros). Phase 1 ledger is spec only.
+- Glass columns, PM guide thread, For You, twin avatars, Trust Score, Reciprocal Top 100, and the private bot window are untouched.
+- Screenshots from the original branch: `screenshots/points-scoreboard/`.
+
+
+## Feed Algorithm Work Stream / For You — CODE READY, DEPLOY NOT RUN (2026-10-25 ~15:25 ET)
+- **SPEC §41** filed as **"Feed Algorithm Work Stream"** (not a thin For You-only section). §40 Sequential user number left intact.
+- **Three pillars:** (1) vault-driven ranking / For You personalization; (2) explainability — every card **“Why did the algorithm show this to me?”** with viewer-specific `reasons[]`; (3) feedback loop — per-item **I like this** / **I don’t like this** → ranking. Motivation: TikTok opacity; PointMint must be explainable.
+- **Product surface:** `/for-you` middle-column stream; filters Both / Humans only / Bots only; **orange** human cards / **green** bot cards; stub content types (vault, match, intro, post, company, community). Distinct from §13.8 Human activity.
+- **API stub:** `GET /api/for-you?filter=&limit=` → ranked stub items (`actor_kind`, `score`, `reason`, `reasons[]`); `POST /api/for-you/feedback` `{item_id, signal: like|dislike|clear}` (signed-in → in-isolate memory v0; guests 401). Module `prototype/src/for_you.js`, wired in `worker.js`.
+- **UI:** `prototype/public-next/for-you.css` + `for-you.js` → synced `public/`; NAV + route + SPA_ROUTES + reserved handles; assets `?v=30`. Why? panel + like/dislike on every card (stub reasons OK).
+- **Local smoke:** humans filter → 4 human cards with reasons; bots → all `actor_kind=agent`; feedback anon 401 / signed-in 200.
+- **Production gate:** `node scripts/production-gate.mjs` → **OK** (PLATFORM_OWNER_HUMAN_IDS valid in local wrangler.toml). **Deploy not run this pass** — prefer SPEC + UI scaffold; avoid shipping alongside other locally-gated work (e.g. §40 user_number migration 0020 not on remote). Did **not** use deploy:unsafe-skip-gate. Did **not** touch matchpoint-v1. No secrets in chat.
+- Did **not** break glass columns / guide PM / private bot window / twin avatars.
+
+
+## Sequential user_number (User 001…) — CODE READY, DEPLOY GATED (2026-10-25 ~15:20 ET)
+- **Product:** Michael Lebor = User 001; Isaac Schulman = User 002; Yosef Birnboim = User 003 (reserved); all later verified humans auto-numbered chronologically; never renumber. Display `User 001`… (pad to 3 while n<1000).
+- **Migration (on disk, not applied to remote yet):** `prototype/migrations/0020_user_number.sql` — `humans.user_number`, `user_number_counter`, `user_number_reservations` + Michael seed + backfill from 004.
+- **Seed confirmation (live D1 read, pre-migration):** Michael Lebor = `h_8f0dd87584fc9f72a9` → will be **001**. **Isaac Schulman and Yosef Birnboim are NOT in D1** — no stub phones invented; numbers **002/003 reserved by name_norm** and claimed on first matching verified signup. Documented blocker until they appear.
+- **Worker:** `src/user_number.js` (`ensureUserNumber`, `formatUserNumber`); wired in `/api/auth/verify`; `pubHuman` emits `user_number` + `user_number_label`.
+- **UI:** `user-number-chip` on profile, identity header, left column, network rows, dashboard; `public-next`→`public`; assets prepared `?v=29`.
+- **SPEC §40.** Screenshots: `screenshots/user-number/` (local mock until gate-cleared deploy).
+- **HARD GATE:** no `wrangler deploy` / no remote `d1 migrations apply` from this task. Local `wrangler.toml` has `PLATFORM_OWNER_HUMAN_IDS = "h_8f0dd87584fc9f72a9"`. Deploy + migration apply remain blocked until parent/Michael explicitly clears the gate.
+- Did **not** touch matchpoint-v1, ambassador brief, activity feed, i18n, or twin-sunglasses parallel work beyond shared `?v=` / owner-ids var. No secrets.
+
+## Digital twin profile pictures (human photo + sunglasses) — CODE READY, DEPLOY GATED (2026-10-25 ~15:15 ET)
+- **Brand rule:** twin avatar = human profile photo + sunglasses overlay; no photo → sunglasses placeholder (never a blank circle).
+- **Worker module:** `prototype/src/twin_avatar.js` — SVG compose (photo as data-URI + fixed wayfarer overlay), R2 cache `twins/<agentId>/<photo_key>.svg`, invalidate on photo add/remove.
+- **Endpoints:** `GET /avatars/twin/<agentId>.svg`, `GET /api/twin-avatar/<humanId>`, `GET /avatars/twin-placeholder.svg`. Legacy `/avatars/<id>.svg` synthetic kept.
+- **avatar_url:** all serializers (`pubAgent`, split messages/activity, posts, graph, matches, intros) now emit twin URLs. Client `agentMark` / `twinSrc`; Mel dash uses twin-of-owner (not static mel.png when a human id exists). Asset `assets/sunglasses.svg` + client helper `twin-avatar.js`.
+- **SPEC §14.2** updated (brand rule recorded). Assets prepared at `?v=28`.
+- **Tests:** `node scripts/photos.mjs` → **48/48** passed against live (includes twin compose / placeholder / `/api/me` twin path) from an earlier deploy in this session.
+- **Screenshots:** `screenshots/twin-sunglasses/` (human-vs-twin-compose, placeholder, profile, Mel dash, home/network).
+- **HARD GATE (Michael voice):** do **not** `wrangler deploy` until `PLATFORM_OWNER_HUMAN_IDS` is set. Local `wrangler.toml` now has `PLATFORM_OWNER_HUMAN_IDS = "h_8f0dd87584fc9f72a9"` (Michael Lebor). **No further production deploy from this task** until parent/Michael explicitly clears the gate. Prior Worker tip in this session had twin code live; concurrent guide-thread work also touched `?v=28`.
+- Mel dash: local `public-next/app.js` prefers `a.avatar_url` → `/api/twin-avatar/<humanId>` → twin-placeholder (no static `mel.png` when a human id exists). That Mel-line tighten is **local-only** until a gate-cleared deploy.
+- `PLATFORM_OWNER_HUMAN_IDS` already set in local `wrangler.toml` to Michael’s id; production-gate script present. **Still aborted further deploy per hard gate / “locally only” steer.**
+- Did **not** touch matchpoint-v1. No secrets in chat.
+
+
+## Production deploy gate (2026-10-25) — HARD
+
+**Do not deploy** Worker `pointmint-agents` to live **agents.pointmint.io** until `PLATFORM_OWNER_HUMAN_IDS` in `prototype/wrangler.toml` `[vars]` (and Cloudflare Worker Variables/Secrets) contains Michael Lebor's verified human id (`h_…`).
+
+- Gate script: `prototype/scripts/production-gate.mjs` — aborts with exit 1 if missing/empty/invalid.
+- Preferred deploy: `npm run deploy` from `prototype/` (runs the gate, then `wrangler deploy`).
+- Raw `npx wrangler deploy` bypasses npm — agents and humans must still run `node scripts/production-gate.mjs` first; if the gate fails, **abort** and report the block.
+- `npm run deploy:unsafe-skip-gate` exists only for emergencies and must not be used for public launch.
+- No production deploy was run when this gate was added (gate-only change).
+
+
+## Human-legible activity + Multilingual (phase 1) — LIVE (2026-10-25 ~15:20 ET, Worker **ae958983**, assets **?v=28**)
+
+### Job 1 — Human activity panel
+- Bottom-right AI column default is glass **Human activity** panel (not terminal chrome).
+- Worker emits `summary_human` on `/api/activity` (+ page model); peer names resolved for send_message / propose_intro; never dumps raw args/bodies/files.
+- Demo heartbeat lines prefixed `Demo:` and de-emphasized.
+- Signed-in minted humans prefer **own** activity scope; others get humanized demo network.
+- **Developer view** (Markdown / connectors / copy .md) collapsed under `<details>`.
+- Files: `src/split.js` (summaryHuman, resolveActivityPeers), `public-next/app.js` + `split.css` → `public/`, SPEC §13.8.
+- Screenshots: `screenshots/human-activity/`.
+
+### Job 2 — Multilingual (SPEC + schema + UI chrome; translate stubbed)
+- SPEC **§39** Multilingual / real-time translation. Market research: `docs/multilingual-market-reference.md` (Europe + LatAm + Asia; LinkedIn contrast only).
+- Migration **`0019_preferred_language.sql`**: `humans.preferred_language` (BCP-47, default `en`) + `message_translations` cache table.
+- Worker: `src/translate.js` pluggable helper (`TRANSLATE_PROVIDER=stub` in wrangler vars; `TRANSLATE_API_KEY` via secret when enabling). Wired into `visibleMessages` attach path.
+- Dashboard **Language** control; message bubbles show flag + Translating… / Shown in… / pending chrome.
+- **Live:** preference storage + UI + stub. **Stubbed:** live provider translation (honest unavailable until key).
+- Did **not** touch matchpoint-v1. No secrets in code/chat. Coordinated with parallel twin_avatar / guide / trust work (migration 0019 after 0018).
+
+## PM rename + icon (guide thread) — LIVE (2026-10-25 ~15:19 ET, Worker **2fc0bc01**, assets ?v=29)
+- **Live:** https://agents.pointmint.io — `pm.svg` uploaded; app/split/index `?v=29`. Production gate OK (`PLATFORM_OWNER_HUMAN_IDS` set); `npm run deploy` from prototype/.
+- **Job A:** User-facing **PointMint guide** / similar → **PM** everywhere in three-way guide thread + related UI/copy/SPEC. Thread parties: human + named bot + **PM**. Code ids kept (`guide_thread`, `/api/guide-thread`, MCP `guide_thread_*`).
+- **Job B:** Asset `prototype/public-next/assets/pm.svg` (+ `public/assets/pm.svg`) — mint point on grayscale rounded tile; **no sunglasses**. Used next to PM lines, platform pill, entry **Talk with PM**, empty-state kicker.
+- Files: `src/guide_thread.js` (`PLATFORM_NAME='PM'`, title **Talk with PM**), `public-next/app.js` + `split.css` → `public/`, `src/split.js` activity copy, migration default title, SPEC §38, assets `?v=29`.
+- Mute / vault nudges / confidentiality unchanged. Did **not** touch matchpoint-v1. No secrets.
+
+## PM guide thread (three-way) — LIVE (rename deploy 2026-10-25 ~15:19 ET, Worker **2fc0bc01**, assets ?v=29; feature first live c1fb2c89)
+- **Product:** confidential three-way conversation — human + own AI agent (real name) + platform **PM**. Mute own bot → human + PM only. Vault-gap / buy-sell nudges (§0). Glass UI; labeled speakers + PM icon. Not on public feed/Markdown.
+- Migration **`0018_guide_threads.sql`**: `guide_threads` + `guide_thread_messages` (`speaker` human|own_agent|platform; `own_agent_muted`; visibility `owner_own_agent_platform_only`). Default title **Talk with PM**.
+- Worker: `src/guide_thread.js` — routes `GET/PATCH /api/guide-thread`, `GET/POST /api/guide-thread/messages`. Auth = owning human session OR own-agent Bearer (muted → agent 403). Platform replies = heuristic vault-gap nudges from `vault_items`.
+- MCP: `guide_thread_read` / `guide_thread_send` (own agent only; refuse when muted).
+- UI: Mel/agent dash **Talk with PM** (+ `pm.svg`); mute checkbox; `public-next`→`public` (?v=29). Keeps §35 private bot window separate.
+- SPEC §38. Screenshots: `screenshots/guide-thread/`.
+- How to open: sign in → Mel/agent micro-dashboard (AI column) → **Talk with PM**.
+- Did **not** touch matchpoint-v1. No secrets in chat/code.
+
+
+
+
+
+## Private bot window (core MVP) — LIVE (2026-10-25 ~15:05–15:07 ET, feature deploy d1262e8a; live tip f5c93576, assets ?v=27)
+- Refined former "Private with Mel" into **Private bot window**: every minted human ↔ their own named agent (Mel is only an example name).
+- UI: button `Private with {AgentName}`; kicker `Private · only you & {AgentName}`; panel title **Private bot window**; empty-state / compose not Mel-specific. Fallbacks: "your bot" / "Private bot window".
+- Two-way relay: in-app window + MCP `private_workspace_read`/`send` = same confidential thread; public §29 chat separate; §34 A2A still excludes this workspace.
+- Backend: `src/private_workspace.js` dynamic `privTitle`/`privLabel`/empty_state; soft title rename on ensure; MCP tool descriptions clarify private bot window relay. Auth unchanged (owner session or own-agent Bearer only).
+- SPEC §35 retitled; §34 cross-ref + §36 scope row updated. No new migration (soft rename). Did **not** touch Trust Score `0017_agent_trust.sql` beyond avoiding conflicts.
+- Files: `src/private_workspace.js`, `src/split.js`, `public-next/app.js`, `public-next/split.css` → synced `public/`, `index.html` (?v=27), SPEC.md, BUILD-PROGRESS. Screenshots: `screenshots/private-bot-window/`.
+- Smoke: guest `/api/private-workspace` → 401; assets `?v=27`; non-Mel agent **Nova** UI/API `Private with Nova` / `Private · only you & Nova`; MCP read/send same thread; other agent + `list_messages` + activity cannot see private body (28/28).
+
+## Agent Trust Score v1 — LIVE (2026-10-25 ~15:15 ET, assets ?v=27 with concurrent Private bot window, Worker version ba941ab5)
+- **Open launch:** any verified-human-bound agent may rate any other agent — **no prior-interaction gate**.
+- Buckets: peer **50%** / observed behavior **35%** / verification·identity **15%**; ten §30 dimensions; Bayesian prior (mean 3.0, N=20); **20 ratings/day/agent**; append-only `trust_audit`.
+- Migration **`0017_agent_trust.sql`**: `agent_ratings`, `agent_trust_scores`, `trust_overrides`, `trust_reports`, `trust_audit` + demo peer ratings among demo agents.
+- MCP (community peer feedback labeling): `rate_agent`, `get_trust_score`, `list_my_ratings`, **unified** `report_agent` with required `category`: `agent_report` | `system_feedback` (system_feedback does **not** change scores; agent_report does **not** auto-zero).
+- External channels (both): **report@pointmint.io** + https://github.com/Jekekel/pointmint/issues .
+- §32 veto: `trust_overrides` (`active`|`frozen`|`suspended`|`banned` + `score_clamp`); `POST /api/trust/override` for humans in `PLATFORM_OWNER_HUMAN_IDS`.
+- UI: Trust Score chip + glass card on AI column / profile; mailto + GitHub report links. Files: `src/trust.js`, `migrations/0017_agent_trust.sql`, worker/split wiring, `public-next`→`public` (?v=27). Docs: `docs/trust-score-feedback.md`. GitHub issue #1 + labels `trust-score`/`feedback`. SPEC §30.0/§30.7/§30.8. Screenshots: `screenshots/trust-score-v1/`.
+- Did **not** touch matchpoint-v1. Did **not** revert handles (§37 / 0016).
+
+
+## Handles (humans + companies) — LIVE (2026-10-25 ~15:05 ET, version 7b5ba95e, assets ?v=25)
+- Migration **`0016_handles.sql`**: global `handles(handle, kind, owner_id)` + `humans.handle` / `entities.handle` UNIQUE; seed `dana-reyes`, `marcus-chen`, `priya-natarajan` + demo companies `reyes-coffee`, `ledgerly`.
+- Routes: `/{handle}` → human or company; `/h/{id}` kept. `matchSplitRoute` / `SPA_ROUTES` / client render resolve handles; reserved list in `src/handles.js`.
+- API: `GET /api/handles/:handle`, `PATCH /api/me/handle` (rate limit), `GET /api/me/companies`, `PATCH /api/companies/:id/handle` (founded/co_founded/led only, §28).
+- UI: `@handle` chip + dashboard handle field (glass); company handle editor when owned. `humanLink` / graph `href` / canonical prefer `/{handle}`.
+- Files: `migrations/0016_handles.sql`, `src/handles.js`, `src/worker.js`, `src/split.js`, `src/graph.js`, `src/connect.js`, `public-next/app.js`, `connect.js`, `styles.css`, `index.html` (?v=25), SPEC §37. Screenshots: `screenshots/handles/`.
+- Live examples: `/h/h_d00001` and `/dana-reyes`; `/reyes-coffee` (company). No secrets. No matchpoint-v1.
 
 ## Phase 1 — visual + privacy: DONE, LIVE (smoke 2026-10-22 18:40 ET)
 - Knowledge-graph background (Canvas2D force graph) behind three glass columns: human | feed | AI agent.
@@ -234,10 +356,55 @@ Remote D1 migrations applied: 0006–0012 (photos, posts, twin scores, graph dem
 - Filed **SPEC §31** in `SPEC.md` (changelog updated): core vs extensions split; lifecycle draft → probation → graduated; trust-weighted vouch graduation (≥1000); manifest `pointmint.extension.json`; sandbox + owner veto/kill switch (§32); D1 + MCP outline. Spec only — not implemented. No matchpoint-v1 changes.
 - Repo standup: root `.gitignore`, root `README.md`, git init + push to GitHub `Jekekel/pointmint` (public). Live D1 dumps stay gitignored under `backups/d1/`.
 
-## 2026-10-25 — Points scoreboard / Match Point sync (SPEC §33)
-- Michael (voice): a sports scoreboard at the very top, top-left, immediately to the right of the PointMint logo. Four types only: Human, Bot, Buy, Sell. Brand sync with Match Point — keeping points of the matches.
-- Filed as **SPEC §33** (next free section; §40 user_number and §41 Feed Algorithm were not in `SPEC.md`). Changelog updated. No matchpoint-v1 / Momentum / IAAI edits.
-- UI: `section#scoreboard` is the next sibling of `a.brand` inside `header#hud` (`prototype/public-next/index.html`, styles in `deck.css`, loader `startPoints` in `app.js`). Glass + mint, live dot, tabular counts. `--hud` 52px → 64px so the board clears the glass columns. `deck.css` and `app.js` cache-bust `?v=21`. Same files copied to `prototype/public/` (Worker assets).
-- API: `GET /api/points` → `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }` from `prototype/src/points.js`. Phase 0 sums existing posts, intros, messages, community threads, and non-private buy/sell cards (plus accepted intros). Phase 1 ledger is spec only.
-- Glass columns, PM guide thread, For You, twin avatars, Trust Score, and the private bot window are untouched.
-- Local check: `GET /api/points` on a migrated local D1 returned `human` 89, `bot` 149, `buy` 42, `sell` 47 (`phase: aggregate`). Desktop 1440: board is the next sibling of the logo, 8px gap, 235×48, 20px counts; three glass columns still open. Phone 390: board sits on the logo's row (272×44). Screenshots: `screenshots/points-scoreboard/desktop.png`, `mobile.png`.
+## Mel · Grok Bot micro-dashboard — LIVE (2026-10-25 ~14:40 ET, version b99245f0)
+- Deployed version **b99245f0** to https://agents.pointmint.io (`?v=21`). Live checks: Mel dash for signed-in owner (Active · connected + masked cred); guests keep generic agent header; `/assets/mel.png` 200; no Momentum in HTML; `/glass/michael.jpg` 404.
+- Owner UX: Mel (Grok Bot — “Ask the Grok bot”) micro-dashboard at the **very top** of the third (AI agent) column for the signed-in owner’s own agent home. Portrait, Grok Bot badge, model Grok, status, masked `pm_agent_…` credential. Guests / other members keep the generic agent header (no Mel branding).
+- Mel portrait: copied from Grok Bot avatar → `public-next/assets/mel.png` (mirrored under `public/assets/`).
+- Files: `public-next/app.js` (`melDash`, `grokBadge`, `maskAgentCred`), `split.css`, `index.html` (`?v=21`), `src/split.js` (`agent_home` status/provider/credential_prefix). SPEC §29 extended. Also fixed a corrupted duplicate fragment in `agentColumn` term-tail markup.
+- Assets `?v=21`. No matchpoint-v1 / Momentum / IAAI changes. No Momentum branding in public UI. Secrets never echoed in full.
+- Screenshots: `screenshots/mel-dash/`.
+
+## Reciprocal Top 100 — LIVE (2026-10-25 ~14:40 ET, version 22ccfb8a)
+- Product: every L1+ human maintains a **Reciprocal Top 100**; profiles show the owner's list with per-row **Reciprocated** / **Not reciprocated** (mutual badge); server LEFT JOIN for reverse edge.
+- D1: migration `0014_top100_contacts.sql` (+ fictional demo seed among h_d00001…07 only).
+- Worker: `src/top100.js` routes under `/api/top100/*`; `split.js` embeds `data.top100` on human pages / Markdown.
+- UI: `public-next/top100.js` + `top100.css` (glass); profile section + dashboard editor; assets `?v=22`.
+- SPEC §33; changelog updated. No matchpoint-v1 / Momentum / IAAI. No secrets in reports.
+- Screenshots: `screenshots/reciprocal-top100/`.
+- Verify: sign in → open `/h/h_d00001` → Reciprocal Top 100 shows Marcus **Reciprocated**, Priya **Not reciprocated**.
+
+
+## Find-me / How-am-I-connected UX — LIVE (2026-10-25 ~14:52 ET)
+- Owner: unify human↔agent identity path; How-am-I-connected multi-select popup with live graph paths; move filter search out of HUD into narrow second column; graph fills the right of that column area; AI column minimized by default in this mode; not a separate page (takes over FEED column); glass theme.
+- Files (`prototype/public-next/` → synced `public/`): `index.html` (`?v=24`), `connect.js`, `connect.css`, `app.js`, `graph.js` (multi-path `showPath`), `deck.css`. Mel micro-dashboard left intact.
+- Deployed version **337e5712-de71-4b87-8e21-16650c7cdd0c** to https://agents.pointmint.io (`?v=24`). Prior: 00e5c25e (path-key fix), 09e21eca (initial UX).
+- Verify: HUD has no `.gsearch`/`.chips`; `/connect` sets `data-cx=on`, middle ~292px with `#gq` + chips, agent `data-r=rail` (expandable); picker multi-select lights multiple paths (`PMGraph.showPath` paths[]); human/agent → same `/h/…` + tether highlight.
+- Backup: `backup-before-find-me-ux-20261025/`. No matchpoint-v1 / Momentum / IAAI. No secrets in reports.
+- Screenshots: `screenshots/find-me-ux/`.
+- SPEC §19.4 updated.
+
+
+## Private with Mel · confidential dialogue — LIVE (2026-10-25 ~14:45 ET, version 10191c17, assets ?v=22)
+- Owner ask: dedicated **internal confidential** window (Michael ↔ Mel only) for strategy/objectives/to-dos about **pointment.io** — not appointments, not the public agent-column chat (§29), not the network feed.
+- Schema: `private_workspaces` + `private_workspace_messages` (`kind=private_owner_agent`, `visibility=owner_agent_only`). Migration `0015_private_workspaces.sql`.
+- Worker: `src/private_workspace.js` — auth = owning human session OR that human's own agent Bearer; hard reject otherwise. Routes `GET/POST /api/private-workspace…`. MCP `private_workspace_read` / `private_workspace_send` scoped to caller only. Never joined into `messages` / activity `SHOWN` / Markdown bodies.
+- UI: Mel dash **Private with Mel** button → glass panel **Private · only you & Mel** / Confidential strategy empty state (pointment.io). `public-next/app.js`, `split.css`. Assets `?v=22`.
+- SPEC §35. Screenshots: `screenshots/private-workspace/`.
+- Live: https://agents.pointmint.io — Worker version **10191c17**. Guest `/api/private-workspace` → 401; privacy smoke 21/21 (own agent MCP read OK; other agent + `list_messages` + activity feed cannot see private body).
+- How to open: sign in → Mel micro-dashboard (AI column) → **Private with Mel**.
+- Screenshots: `screenshots/private-workspace/` (`desktop-guest.png`, `desktop-mel-dash-entry.png`, `desktop-private-open.png`, `desktop-private-thread.png`, `mobile-private-open.png`).
+- No matchpoint-v1 / Momentum / IAAI changes. No secrets in reports.
+
+
+## Agent-to-agent relay / broker — SPEC FILED (2026-10-25 ~14:45 ET)
+- SPEC §34 (Calendly shelved; slot reused): relay/broker via Worker MCP, two-sided consent + autonomy, one-bot-per-human, audit/rate limits, envelope format, discovery, MCP for outside agents, off-platform onboarding (OAuth / pairing code / JSON packet, poll or webhook), federation later.
+- **Not implemented.** No code, no matchpoint-v1 changes.
+
+## Message & sensitive-data encryption — SPEC FILED (2026-10-25 ~14:48 ET)
+- SPEC §36: TLS 1.2+ in transit; app-level encryption before D1 write; per-human DEK wrapped by human-controlled KEK (passkey/WebAuthn, human-held escrow); scope §35 threads, Calendly data, vault, §34 relay bodies; agents unwrap only as that human's agent via MCP; no plaintext logs. Cross-ref added in §32.3. Changelog updated.
+- **Not implemented.** No code, no matchpoint-v1 changes.
+
+## Guiding principle: vault first — SPEC FILED (2026-10-25 ~14:56 ET)
+- SPEC §0 "Guiding principle: The vault is the main course" inserted after the one-line, before §1. Vault (buy/sell/seek/acquire) is the main course; graph, six degrees, intros, community secondary; viewer-lens overlap Venn always visible on profiles; feeding the vault sharpens the agent at solving for X; all content/outreach distills to buy/sell; motivation always on. No renumbering. Changelog updated.
+- **Not implemented.** No code, no matchpoint-v1 changes.
+- 2026-10-25: Draft ambassador outreach brief at docs/ambassador-brief-draft.md (HELD, not executed).

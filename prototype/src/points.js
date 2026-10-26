@@ -1,4 +1,4 @@
-// Match Point scoreboard — phase 0 aggregate (SPEC §33).
+// Match Point scoreboard — phase 0 aggregate (SPEC §43).
 // Four types only: human, bot, buy, sell. Network-wide totals, not a per-member score
 // and not the final ledger. Private vault cards never count. Seek and acquire stay off
 // this board until a closed intro awards the buy side (phase 1).

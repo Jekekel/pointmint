@@ -63,3 +63,7 @@ perf/after/
 *.token
 .secrets/
 secrets/
+
+# Personal contact graph data (PII, keep off public repo)
+prototype/data/michael-*.json
+prototype/data/README-michael-*.txt

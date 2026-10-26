@@ -3,6 +3,7 @@
 // the viewer's own private cards); intros and direct messages only between fictional demo members or involving the viewer.
 import { now } from './worker.js';
 import { photoUrl } from './identity.js';
+import { twinAvatarUrl } from './twin_avatar.js';
 import { scorePairPublic as scorePair } from './worker.js';
 import { augmentGraph } from './connect.js';
 
@@ -11,15 +12,15 @@ const short = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, 
 
 export async function buildGraph(env, viewerId, { focus = null, depth = 1 } = {}) {
   const DB = env.DB;
-  const humans = (await DB.prepare(`SELECT h.id, h.name, h.headline, h.is_demo, h.photo_key, a.id AS a_id, a.name AS a_name, a.provider AS a_provider, a.credential_hash AS a_cred, a.revoked_at AS a_rev,
+  const humans = (await DB.prepare(`SELECT h.id, h.name, h.handle, h.headline, h.is_demo, h.photo_key, a.id AS a_id, a.name AS a_name, a.provider AS a_provider, a.credential_hash AS a_cred, a.revoked_at AS a_rev,
       t.total AS twin FROM humans h LEFT JOIN agents a ON a.human_id = h.id LEFT JOIN twin_scores t ON t.human_id = h.id
       WHERE h.phone_verified_at IS NOT NULL ORDER BY h.is_demo DESC, h.created_at LIMIT ?`).bind(LIMITS.humans).all()).results;
   const hset = new Set(humans.map(h => h.id)), demo = new Set(humans.filter(h => h.is_demo).map(h => h.id));
   const nodes = [], edges = [];
   for (const h of humans) {
-    nodes.push({ id: h.id, type: 'human', label: h.name, sub: short(h.headline, 60), demo: !!h.is_demo, you: h.id === viewerId, photo_url: photoUrl(h), has_photo: !!h.photo_key, twin: h.twin ?? null, href: `/h/${h.id}` });
+    nodes.push({ id: h.id, type: 'human', label: h.name, handle: h.handle || null, sub: short(h.headline, 60), demo: !!h.is_demo, you: h.id === viewerId, photo_url: photoUrl(h), has_photo: !!h.photo_key, twin: h.twin ?? null, href: h.handle ? `/${h.handle}` : `/h/${h.id}` });
     if (h.a_id) {
-      nodes.push({ id: h.a_id, type: 'agent', label: h.a_name, sub: `AI agent · ${h.a_provider} · acts for ${h.name}`, human_id: h.id, provider: h.a_provider, live: !!(h.a_cred && !h.a_rev), avatar_url: `/avatars/${h.a_id}.svg`, href: `/a/${h.a_id}` });
+      nodes.push({ id: h.a_id, type: 'agent', label: h.a_name, sub: `AI agent · ${h.a_provider} · acts for ${h.name}`, human_id: h.id, provider: h.a_provider, live: !!(h.a_cred && !h.a_rev), avatar_url: twinAvatarUrl(h.a_id, h), href: `/a/${h.a_id}` });
       edges.push({ id: `tether:${h.id}`, type: 'tether', source: h.id, target: h.a_id, label: 'One human, one AI agent' });
     }
   }
