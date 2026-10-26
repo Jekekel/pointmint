@@ -4,14 +4,23 @@ Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; cu
 
 ## Top 10 leaderboard — CODE READY, DEPLOY NOT RUN (2026-10-26)
 
-- **SPEC §42** filed as **Top 10 Leaderboard**. §33 Reciprocal Top 100, §40 user number, and §41 For You left intact. The HUD Match Point scoreboard (Human / Bot / Buy / Sell, branch `cursor/points-scoreboard-9423`) stays the platform-totals board; this PR does not renumber it onto §33.
+- **SPEC §42** filed as **Top 10 Leaderboard**. §33 Reciprocal Top 100, §40 user number, and §41 For You left intact. The HUD Match Point scoreboard is **SPEC §43** (merged from `cursor/points-scoreboard-9423`); this PR does not renumber it onto §33.
 - **Product:** `/leaderboard` (aliases `/top-10`, `/top10`) ranks verified human + agent pairs by points won. Same weights as `GET /api/points`. Activity chips: Posts, Intros accepted, Intros proposed, Vault buy, Vault sell, Matches, Community, Direct messages. 7-day sparkline. Nav **Top 10**. Reserved handles `leaderboard`, `top-10`, `top10`.
-- **API:** `GET /api/leaderboard/top10?scope=all|members` and `GET /api/points` (network totals, same SQL as the HUD branch). Module `prototype/src/leaderboard.js`. `reconciled` is true when the sum of pair buckets equals the network totals. Founder rows redact to “Member” / “AI agent” while `SHOW_FOUNDER` is off.
-- **UI:** `prototype/public-next/leaderboard.css` + `leaderboard.js` → synced `public/`. Assets `?v=31`. Glass / mint scoreboard in the middle column. Distinct copy from Reciprocal Top 100. Screenshots: `screenshots/leaderboard/` (desktop board, members-only empty state, mobile sheet expanded). Local smoke: `reconciled: true`; activity points sum to each row total; founder id redacts to Member / AI agent while `SHOW_FOUNDER` is off.
+- **API:** `GET /api/leaderboard/top10?scope=all|members` from `prototype/src/leaderboard.js`. `GET /api/points` stays on `prototype/src/points.js` (same network SQL; the leaderboard handler does not claim that route). `reconciled` is true when the sum of pair buckets equals the network totals. Founder rows redact to “Member” / “AI agent” while `SHOW_FOUNDER` is off.
+- **UI:** `prototype/public-next/leaderboard.css` + `leaderboard.js` → synced `public/`. HUD scoreboard markup kept beside the logo. Shared asset queries `?v=32` (both PRs had moved `?v=`; scoreboard was `?v=31`, Top 10 was `?v=31`). Glass / mint board in the middle column. Distinct copy from Reciprocal Top 100. Screenshots: `screenshots/leaderboard/`. Local smoke on the Top 10 branch: `reconciled: true`; activity points sum to each row total; founder id redacts to Member / AI agent while `SHOW_FOUNDER` is off.
 - **Deploy not run.** Did not touch matchpoint-v1, Momentum, or InsuranceAgency.ai. No secrets in chat.
 
 
 Remote D1 migrations applied: 0006–**0019** (through preferred_language / message_translations).
+
+## Points HUD scoreboard — conflict-resolved against main, deploy not run (2026-10-26)
+- Michael (voice): a sports scoreboard at the very top, immediately to the right of the PointMint logo. Four types only: Human, Bot, Buy, Sell. Brand sync with Match Point — keeping points of the matches.
+- Filed as **SPEC §43 Points HUD Scoreboard**. The branch had used §33 because that checkout predated Reciprocal Top 100. On current main §33 stays Reciprocal Top 100, §40 stays user_number, §41 stays Feed Algorithm / For You. §42 is left free for Top 10. Changelog updated. No matchpoint-v1 / Momentum / IAAI edits.
+- UI: `section#scoreboard` is the next sibling of `a.brand` inside `header#hud`. Find me and How am I connected stay on the HUD; graph search stays in the connections column (the older HUD `.gsearch` markup was not restored). Styles in `deck.css` (scoreboard rules plus the trust-score and find-me rules already on main). Loader `startPoints` in `app.js`. `--hud` is 64px. Assets `?v=31` (bumped from main `?v=30`). Same files copied to `prototype/public/`.
+- API: `GET /api/points` → `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }` from `prototype/src/points.js`. Phase 0 sums existing posts, intros, messages, community threads, and non-private buy/sell cards (plus accepted intros). Phase 1 ledger is spec only.
+- Glass columns, PM guide thread, For You, twin avatars, Trust Score, Reciprocal Top 100, and the private bot window are untouched.
+- Screenshots from the original branch: `screenshots/points-scoreboard/`.
+
 
 ## Feed Algorithm Work Stream / For You — CODE READY, DEPLOY NOT RUN (2026-10-25 ~15:25 ET)
 - **SPEC §41** filed as **"Feed Algorithm Work Stream"** (not a thin For You-only section). §40 Sequential user number left intact.

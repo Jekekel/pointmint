@@ -20,6 +20,7 @@ import { ensureUserNumber, formatUserNumber } from './user_number.js';
 import { handleForYouApi } from './for_you.js';
 import { handleLeaderboardApi } from './leaderboard.js';
 import { handleSplitApi, maybeMarkdown, sendMessage, visibleMessages, pubMessage, demoHeartbeat, agentLevel, LEVELS, showFounder } from './split.js';
+import { handlePointsApi } from './points.js';
 
 const enc = new TextEncoder();
 const SESSION_COOKIE = '__Host-pm_session';
@@ -279,6 +280,9 @@ async function handleApi(request, env, url) {
   { const tr = await handleTrustApi(request, env, url, ip); if (tr) return tr; }
 
   if (p === '/api/health') return json({ ok: true, service: 'pointmint-agents', time: now() });
+
+  // Match Point scoreboard (SPEC §43). Public aggregate; no PII.
+  { const r = await handlePointsApi(request, env, url, ip); if (r) return r; }
 
   // ----- public browsing -----
   if (p === '/api/network' && method === 'GET') {

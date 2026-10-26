@@ -1,7 +1,7 @@
 // Top 10 leaderboard (SPEC §42).
-// Points use the same four buckets as the HUD Match Point scoreboard:
-// Human, Bot, Buy, Sell — see branch cursor/points-scoreboard-9423 and GET /api/points.
-// This module is the per-pair ranking. The HUD (when shipped) is platform totals only.
+// Points use the same four buckets as the HUD Match Point scoreboard (SPEC §43):
+// Human, Bot, Buy, Sell. GET /api/points is served by points.js. This module
+// is the per-pair ranking and repeats that network SQL on the top10 payload.
 // Private vault cards never score. Seek and acquire stay off the board in this phase.
 // Private bot window and PM guide threads are different tables and are not counted.
 import { json, enforce, now, currentHuman } from './worker.js';
@@ -391,15 +391,9 @@ export async function top10(env, { scope = 'all', viewerId = null } = {}) {
 export async function handleLeaderboardApi(request, env, url, ip) {
   const p = url.pathname;
   const method = request.method;
-  const isPoints = p === '/api/points';
-  const isTop = p === '/api/leaderboard/top10';
-  if (!isPoints && !isTop) return null;
+  if (p !== '/api/leaderboard/top10') return null;
   if (method !== 'GET' && method !== 'HEAD') return null;
-  await enforce(env, (isPoints ? 'points:ip:' : 'leaderboard:ip:') + ip, 120, 60);
-  if (isPoints) {
-    const pts = await networkPoints(env);
-    return json(pts, 200, { vary: 'Cookie' });
-  }
+  await enforce(env, 'leaderboard:ip:' + ip, 120, 60);
   const raw = (url.searchParams.get('scope') || 'all').toLowerCase();
   const scope = raw === 'members' || raw === 'live' ? 'members' : 'all';
   let viewerId = null;
