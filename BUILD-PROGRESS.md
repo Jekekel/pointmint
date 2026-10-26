@@ -1,6 +1,16 @@
 # PointMint Agent Network — build progress
 
 Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; current version **2fc0bc01**, deployed 2026-10-25 ~15:19 ET — PM rename + icon).
+
+## Top 10 leaderboard — CODE READY, DEPLOY NOT RUN (2026-10-26)
+
+- **SPEC §42** filed as **Top 10 Leaderboard**. §33 Reciprocal Top 100, §40 user number, and §41 For You left intact. The HUD Match Point scoreboard is **SPEC §43** (merged from `cursor/points-scoreboard-9423`); this PR does not renumber it onto §33.
+- **Product:** `/leaderboard` (aliases `/top-10`, `/top10`) ranks verified human + agent pairs by points won. Same weights as `GET /api/points`. Activity chips: Posts, Intros accepted, Intros proposed, Vault buy, Vault sell, Matches, Community, Direct messages. 7-day sparkline. Nav **Top 10**. Reserved handles `leaderboard`, `top-10`, `top10`.
+- **API:** `GET /api/leaderboard/top10?scope=all|members` from `prototype/src/leaderboard.js`. `GET /api/points` stays on `prototype/src/points.js` (same network SQL; the leaderboard handler does not claim that route). `reconciled` is true when the sum of pair buckets equals the network totals. Founder rows redact to “Member” / “AI agent” while `SHOW_FOUNDER` is off.
+- **UI:** `prototype/public-next/leaderboard.css` + `leaderboard.js` → synced `public/`. HUD scoreboard markup kept beside the logo. Shared asset queries `?v=32` (both PRs had moved `?v=`; scoreboard was `?v=31`, Top 10 was `?v=31`). Glass / mint board in the middle column. Distinct copy from Reciprocal Top 100. Screenshots: `screenshots/leaderboard/`. Local smoke on the Top 10 branch: `reconciled: true`; activity points sum to each row total; founder id redacts to Member / AI agent while `SHOW_FOUNDER` is off.
+- **Deploy not run.** Did not touch matchpoint-v1, Momentum, or InsuranceAgency.ai. No secrets in chat.
+
+
 Remote D1 migrations applied: 0006–**0019** (through preferred_language / message_translations).
 
 ## Points HUD scoreboard — conflict-resolved against main, deploy not run (2026-10-26)
