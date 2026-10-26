@@ -1502,6 +1502,39 @@ function startPulses() {
   tick(); setInterval(tick, 3000);
   setInterval(() => { if (document.hidden || !recent.length || Date.now() - lastLive < 5000) return; firePulse(recent[Math.floor(Math.random() * recent.length)], true); }, 1600);
 }
+// ---- Match points scoreboard (SPEC §43). Sits in the HUD; a failed fetch leaves the dashes. ----
+const POINT_LABEL = { human: 'Human', bot: 'Bot', buy: 'Buy', sell: 'Sell' };
+function paintPoints(p) {
+  const root = document.getElementById('scoreboard');
+  if (!root || !p) return;
+  for (const k of Object.keys(POINT_LABEL)) {
+    const cell = root.querySelector(`[data-pt="${k}"]`);
+    const el = cell && cell.querySelector('[data-count]');
+    if (!el) continue;
+    const n = Number(p[k]);
+    if (!Number.isFinite(n)) continue;
+    const shown = String(Math.max(0, Math.trunc(n)));
+    if (el.textContent !== shown) {
+      el.textContent = shown;
+      el.dataset.tick = '1';
+      setTimeout(() => { if (el.dataset.tick === '1') delete el.dataset.tick; }, 700);
+    }
+    cell.setAttribute('aria-label', POINT_LABEL[k] + ' ' + shown);
+  }
+  if (p.phase) root.dataset.phase = p.phase;
+}
+let pointsTimer = null;
+async function loadPoints() {
+  try { paintPoints(await api('/api/points')); }
+  catch { /* the board keeps its last figures; the rest of the page is unaffected */ }
+}
+function startPoints() {
+  loadPoints();
+  if (pointsTimer) return;
+  pointsTimer = setInterval(() => { if (!document.hidden) loadPoints(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadPoints(); });
+}
+
 function initHud() {
   // Search + chips live in the second-column find-me panel (recreated on navigate). Bind via delegation once.
   if (initHud.bound) return; initHud.bound = true;
@@ -1804,4 +1837,4 @@ document.addEventListener('submit', async (ev) => {
   } finally { if (btn) btn.disabled = false; }
 });
 
-loadMe().then(async () => { initHud(); initGrips(); applyRails(); await render(); initGraph(); });
+loadMe().then(async () => { initHud(); startPoints(); initGrips(); applyRails(); await render(); initGraph(); });

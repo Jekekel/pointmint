@@ -3,6 +3,15 @@
 Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; current version **2fc0bc01**, deployed 2026-10-25 ~15:19 ET — PM rename + icon).
 Remote D1 migrations applied: 0006–**0019** (through preferred_language / message_translations).
 
+## Points HUD scoreboard — conflict-resolved against main, deploy not run (2026-10-26)
+- Michael (voice): a sports scoreboard at the very top, immediately to the right of the PointMint logo. Four types only: Human, Bot, Buy, Sell. Brand sync with Match Point — keeping points of the matches.
+- Filed as **SPEC §43 Points HUD Scoreboard**. The branch had used §33 because that checkout predated Reciprocal Top 100. On current main §33 stays Reciprocal Top 100, §40 stays user_number, §41 stays Feed Algorithm / For You. §42 is left free for Top 10. Changelog updated. No matchpoint-v1 / Momentum / IAAI edits.
+- UI: `section#scoreboard` is the next sibling of `a.brand` inside `header#hud`. Find me and How am I connected stay on the HUD; graph search stays in the connections column (the older HUD `.gsearch` markup was not restored). Styles in `deck.css` (scoreboard rules plus the trust-score and find-me rules already on main). Loader `startPoints` in `app.js`. `--hud` is 64px. Assets `?v=31` (bumped from main `?v=30`). Same files copied to `prototype/public/`.
+- API: `GET /api/points` → `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }` from `prototype/src/points.js`. Phase 0 sums existing posts, intros, messages, community threads, and non-private buy/sell cards (plus accepted intros). Phase 1 ledger is spec only.
+- Glass columns, PM guide thread, For You, twin avatars, Trust Score, Reciprocal Top 100, and the private bot window are untouched.
+- Screenshots from the original branch: `screenshots/points-scoreboard/`.
+
+
 ## Feed Algorithm Work Stream / For You — CODE READY, DEPLOY NOT RUN (2026-10-25 ~15:25 ET)
 - **SPEC §41** filed as **"Feed Algorithm Work Stream"** (not a thin For You-only section). §40 Sequential user number left intact.
 - **Three pillars:** (1) vault-driven ranking / For You personalization; (2) explainability — every card **“Why did the algorithm show this to me?”** with viewer-specific `reasons[]`; (3) feedback loop — per-item **I like this** / **I don’t like this** → ranking. Motivation: TikTok opacity; PointMint must be explainable.
