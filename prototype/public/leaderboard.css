@@ -12,10 +12,17 @@
   box-shadow: inset 0 0 0 1px rgba(61, 217, 193, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .lb-net-k { margin: 0; font-size: 11px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent, #3dd9c1); }
-.lb-net-scores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
-.lb-net-scores li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lb-net-scores .num { font-size: 20px; font-weight: 650; letter-spacing: -0.03em; color: var(--text, #f4f7f7); }
-.lb-net-scores span:last-child { font-size: 11px; font-weight: 600; color: var(--text-2, #a8b8bb); }
+.lb-matrix { border-collapse: collapse; width: auto; }
+.lb-matrix th, .lb-matrix td { padding: 2px 8px; font-weight: 650; background: transparent; }
+.lb-matrix thead th { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; color: var(--text-2, #a8b8bb); }
+.lb-matrix thead th.buy { color: var(--accent, #3dd9c1); }
+.lb-matrix thead th.sell { color: #f2c14e; }
+.lb-matrix tbody th { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; text-align: right; }
+.lb-matrix tbody th.h, .lb-matrix td.h { color: #ffb47a; }
+.lb-matrix tbody th.b, .lb-matrix td.b { color: #9eb6ff; }
+.lb-matrix td { text-align: center; font-size: 16px; font-variant-numeric: tabular-nums; min-width: 36px; }
+.lb-matrix tbody tr + tr th, .lb-matrix tbody tr + tr td { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.lb-net .lb-matrix td { font-size: 20px; }
 
 .lb-filters { display: flex; flex-wrap: wrap; gap: 8px; }
 .lb-chip, .lb-act {
@@ -79,16 +86,8 @@
 .lb-pts .num { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.04em; color: var(--accent, #3dd9c1); }
 .lb-pts small { display: block; font-size: 10px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2, #a8b8bb); }
 
-.lb-break { grid-column: 2; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.lb-buckets { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.lb-buckets li {
-  display: inline-flex; align-items: baseline; gap: 4px;
-  font-size: 11px; font-weight: 650; color: var(--text-2, #a8b8bb);
-}
-.lb-buckets .num { font-size: 13px; color: var(--text, #f4f7f7); }
-.lb-buckets .h { color: #ffb47a; }
-.lb-buckets .b { color: #9eb6ff; }
-.lb-buckets .y { color: var(--accent, #3dd9c1); }
+.lb-break { grid-column: 2; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; min-width: 0; }
+.lb-break .lb-matrix { flex: none; }
 
 .lb-acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .lb-act b { color: var(--text, #f4f7f7); font-weight: 700; }
@@ -107,7 +106,7 @@
 .lb-you-note b { color: var(--accent, #3dd9c1); }
 
 @media (max-width: 640px) {
-  .lb-net-scores .num { font-size: 16px; }
+  .lb-net .lb-matrix td { font-size: 16px; }
   .lb-spark-wrap { margin-left: 0; }
   .lb-pts .num { font-size: 18px; }
 }

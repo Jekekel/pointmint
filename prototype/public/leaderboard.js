@@ -1,12 +1,22 @@
 // §42 Top 10 leaderboard UI. Classic deferred script.
 // Uses app.js globals (esc, api, head, avatar, agentMark, plain, humanPill, aiPill, demoBadge).
 (function () {
-  const BUCKETS = [
-    ['human', 'Human', 'h'],
-    ['bot', 'Bot', 'b'],
-    ['buy', 'Buy', 'y'],
-    ['sell', 'Sell', 'y'],
-  ];
+  function cellNum(v) {
+    return esc(String(Math.max(0, Math.trunc(Number(v) || 0))));
+  }
+
+  function matrix(points, label) {
+    const p = points || {};
+    const h = p.human || {};
+    const b = p.bot || {};
+    return `<table class="lb-matrix" aria-label="${esc(label || 'Points by actor and vault side')}">
+      <thead><tr><th scope="col"><span class="sr-only">Actor</span></th><th scope="col" class="buy">Buy</th><th scope="col" class="sell">Sell</th></tr></thead>
+      <tbody>
+        <tr><th scope="row" class="h">Human</th><td class="h num">${cellNum(h.buy)}</td><td class="h num">${cellNum(h.sell)}</td></tr>
+        <tr><th scope="row" class="b">Bot</th><td class="b num">${cellNum(b.buy)}</td><td class="b num">${cellNum(b.sell)}</td></tr>
+      </tbody>
+    </table>`;
+  }
 
   function spark(vals) {
     const data = Array.isArray(vals) && vals.length ? vals : [0, 0, 0, 0, 0, 0, 0];
@@ -56,12 +66,6 @@
     return `<div class="lb-who">${nameHtml}<p class="lb-sub">${handle}${handle && (agentBit || headline) ? ' · ' : ''}${agentBit}</p><p class="lb-sub">${badges}${headline ? ' ' + headline : ''}</p></div>`;
   }
 
-  function buckets(points) {
-    const p = points || {};
-    return `<ul class="lb-buckets" aria-label="Points by scoreboard type">${BUCKETS.map(([k, label, cls]) =>
-      `<li class="${cls}"><span class="num">${esc(String(p[k] || 0))}</span> ${esc(label)}</li>`
-    ).join('')}</ul>`;
-  }
 
   function acts(list) {
     const items = (list || []).filter(a => a && a.points > 0);
@@ -82,7 +86,7 @@
       <div class="lb-main">${faces(row)}${who(row)}
         <div class="lb-pts"><span class="num">${esc(String(total))}</span><small>Points</small></div>
       </div>
-      <div class="lb-break">${buckets(row.points)}${acts(row.activities)}
+      <div class="lb-break">${matrix(row.points, 'Points for this pair')}${acts(row.activities)}
         <div class="lb-spark-wrap">${spark(row.sparkline)}<span class="lb-spark-l">7 days</span></div>
       </div>
     </li>`;
@@ -95,13 +99,9 @@
   }
 
   function networkStrip(net) {
-    const n = net || {};
-    const cells = BUCKETS.map(([k, label]) =>
-      `<li><span class="num">${esc(String(n[k] || 0))}</span><span>${esc(label)}</span></li>`
-    ).join('');
-    return `<section class="lb-net" aria-label="Network points, the HUD scoreboard totals">
+    return `<section class="lb-net" aria-label="Network points, the HUD scoreboard matrix">
       <p class="lb-net-k">Network points · HUD scoreboard</p>
-      <ol class="lb-net-scores">${cells}</ol>
+      ${matrix(net, 'Network points. Rows Human and Bot, columns Buy and Sell.')}
     </section>`;
   }
 
@@ -135,8 +135,8 @@
     const viewer = data && data.viewer;
     const you = youNote(viewer);
     return `<div class="wrap mid page lb-page" data-lb-scope="${esc(s)}">
-      ${typeof head === 'function' ? head('Top 10', 'Points worth checking.', 'Ranked humans and their agents. Same Human, Bot, Buy, and Sell points as the HUD scoreboard — this board is who earned them.') : '<h1>Top 10</h1>'}
-      <p class="lb-lede">Activity chips are the work that scored: <b>posts</b>, <b>intros accepted</b>, <b>vault buy / sell</b>, <b>matches</b>, <b>community</b>. Private cards, seek, and acquire do not score. This is not Reciprocal Top 100.</p>
+      ${typeof head === 'function' ? head('Top 10', 'Points worth checking.', 'Ranked humans and their agents. Same Human / Bot by Buy / Sell matrix as the HUD scoreboard — this board is who earned them.') : '<h1>Top 10</h1>'}
+      <p class="lb-lede">Each row is a 2×2: <b>Human</b> and <b>Bot</b> down the side, <b>Buy</b> and <b>Sell</b> across the top. Activity chips stay the work behind the score. Private cards, seek, and acquire do not score. This is not Reciprocal Top 100.</p>
       ${networkStrip(data.network)}
       ${filters(s)}
       ${you}

@@ -1508,16 +1508,22 @@ function startPulses() {
   tick(); setInterval(tick, 3000);
   setInterval(() => { if (document.hidden || !recent.length || Date.now() - lastLive < 5000) return; firePulse(recent[Math.floor(Math.random() * recent.length)], true); }, 1600);
 }
-// ---- Match points scoreboard (SPEC §43). Sits in the HUD; a failed fetch leaves the dashes. ----
-const POINT_LABEL = { human: 'Human', bot: 'Bot', buy: 'Buy', sell: 'Sell' };
+// ---- Points matrix (SPEC §43). Rows Human / Bot, columns Buy / Sell. A failed fetch leaves the dashes. ----
+const POINT_CELLS = [
+  ['human', 'buy', 'Human', 'Buy'],
+  ['human', 'sell', 'Human', 'Sell'],
+  ['bot', 'buy', 'Bot', 'Buy'],
+  ['bot', 'sell', 'Bot', 'Sell'],
+];
 function paintPoints(p) {
   const root = document.getElementById('scoreboard');
   if (!root || !p) return;
-  for (const k of Object.keys(POINT_LABEL)) {
-    const cell = root.querySelector(`[data-pt="${k}"]`);
+  for (const [row, col, rowLabel, colLabel] of POINT_CELLS) {
+    const cell = root.querySelector(`[data-pt="${row}-${col}"]`);
     const el = cell && cell.querySelector('[data-count]');
     if (!el) continue;
-    const n = Number(p[k]);
+    const raw = p[row] && p[row][col];
+    const n = Number(raw);
     if (!Number.isFinite(n)) continue;
     const shown = String(Math.max(0, Math.trunc(n)));
     if (el.textContent !== shown) {
@@ -1525,7 +1531,7 @@ function paintPoints(p) {
       el.dataset.tick = '1';
       setTimeout(() => { if (el.dataset.tick === '1') delete el.dataset.tick; }, 700);
     }
-    cell.setAttribute('aria-label', POINT_LABEL[k] + ' ' + shown);
+    cell.setAttribute('aria-label', rowLabel + ' ' + colLabel + ' ' + shown);
   }
   if (p.phase) root.dataset.phase = p.phase;
 }
