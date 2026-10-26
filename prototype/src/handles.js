@@ -18,6 +18,7 @@ export const RESERVED_HANDLES = new Set([
   'assets', 'avatars', 'media', 'glass', 'llms', 'login', 'logout', 'settings', 'me', 'null', 'undefined',
   'home', 'robots', 'sitemap', 'favicon', 'static', 'public', 'private', 'ws', 'sse', 'health', 'status',
   'term', 'feed', 'col', 'hud', 'theme', 'styles', 'split', 'float', 'top100', 'deck', 'identity',
+  'for-you', 'foryou', 'leaderboard', 'top-10', 'top10',
   'company', 'companies', 'human', 'humans', 'agent', 'agents', 'entity', 'entities', 'reserved',
   'claim', 'claims', 'handle', 'handles', 'profile', 'profiles', 'user', 'users', 'org', 'orgs',
   'www', 'app', 'cdn', 'static', 'well-known', 'favicon', 'og', 'opengraph',

@@ -1,6 +1,16 @@
 # PointMint Agent Network — build progress
 
 Live site: https://agents.pointmint.io (Cloudflare Worker `pointmint-agents`; current version **2fc0bc01**, deployed 2026-10-25 ~15:19 ET — PM rename + icon).
+
+## Top 10 leaderboard — CODE READY, DEPLOY NOT RUN (2026-10-26)
+
+- **SPEC §42** filed as **Top 10 Leaderboard**. §33 Reciprocal Top 100, §40 user number, and §41 For You left intact. The HUD Match Point scoreboard (Human / Bot / Buy / Sell, branch `cursor/points-scoreboard-9423`) stays the platform-totals board; this PR does not renumber it onto §33.
+- **Product:** `/leaderboard` (aliases `/top-10`, `/top10`) ranks verified human + agent pairs by points won. Same weights as `GET /api/points`. Activity chips: Posts, Intros accepted, Intros proposed, Vault buy, Vault sell, Matches, Community, Direct messages. 7-day sparkline. Nav **Top 10**. Reserved handles `leaderboard`, `top-10`, `top10`.
+- **API:** `GET /api/leaderboard/top10?scope=all|members` and `GET /api/points` (network totals, same SQL as the HUD branch). Module `prototype/src/leaderboard.js`. `reconciled` is true when the sum of pair buckets equals the network totals. Founder rows redact to “Member” / “AI agent” while `SHOW_FOUNDER` is off.
+- **UI:** `prototype/public-next/leaderboard.css` + `leaderboard.js` → synced `public/`. Assets `?v=31`. Glass / mint scoreboard in the middle column. Distinct copy from Reciprocal Top 100. Screenshots: `screenshots/leaderboard/` (desktop board, members-only empty state, mobile sheet expanded). Local smoke: `reconciled: true`; activity points sum to each row total; founder id redacts to Member / AI agent while `SHOW_FOUNDER` is off.
+- **Deploy not run.** Did not touch matchpoint-v1, Momentum, or InsuranceAgency.ai. No secrets in chat.
+
+
 Remote D1 migrations applied: 0006–**0019** (through preferred_language / message_translations).
 
 ## Feed Algorithm Work Stream / For You — CODE READY, DEPLOY NOT RUN (2026-10-25 ~15:25 ET)

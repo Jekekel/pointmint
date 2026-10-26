@@ -61,6 +61,7 @@ const P = {
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>',
   plug: '<path d="M9 2.5v5M15 2.5v5"/><path d="M6.5 7.5h11v3a5.5 5.5 0 0 1-11 0Z"/><path d="M12 16v5.5"/>',
   shield: '<path d="M12 2.8 19.5 6v5.6c0 4.6-3.2 8.2-7.5 9.6-4.3-1.4-7.5-5-7.5-9.6V6Z"/>',
+  podium: '<path d="M8 20.5V10h8v10.5"/><path d="M8 14H3.5v6.5H8"/><path d="M16 12h4.5v8.5H16"/><path d="M12 3.2 13.1 5.6l2.6.3-2 1.8.6 2.6L12 9 9.7 10.3l.6-2.6-2-1.8 2.6-.3Z"/>',
   camera: '<path d="M3.5 8.5a2 2 0 0 1 2-2h2.2l1.5-2h5.6l1.5 2h2.2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.6"/>',
   contact: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7 12 13l8.5-6"/>',
 };
@@ -129,7 +130,7 @@ const userNumberChip = (h, sm = false) => {
   if (!label) return '';
   return `<span class="user-number-chip${sm ? ' sm' : ''}" title="Member number — early adopter status">${esc(label)}</span>`;
 };
-const RESERVED_HANDLES = new Set(['h','a','p','for-you','foryou','feed','api','admin','mcp','oauth','network','vault','matches','activity','intros','signup','dashboard','about','docs','connect','import','community','launch','graph','index','assets','avatars','media','glass','llms','login','logout','settings','me','null','undefined','home','robots','sitemap','favicon','static','public','private','ws','sse','health','status','term','feed','col','hud','theme','styles','split','float','top100','deck','identity','company','companies','human','humans','agent','agents','entity','entities','reserved','claim','claims','handle','handles','profile','profiles','user','users','org','orgs','www','app','cdn','well-known','og','opengraph']);
+const RESERVED_HANDLES = new Set(['h','a','p','for-you','foryou','leaderboard','top-10','top10','feed','api','admin','mcp','oauth','network','vault','matches','activity','intros','signup','dashboard','about','docs','connect','import','community','launch','graph','index','assets','avatars','media','glass','llms','login','logout','settings','me','null','undefined','home','robots','sitemap','favicon','static','public','private','ws','sse','health','status','term','feed','col','hud','theme','styles','split','float','top100','deck','identity','company','companies','human','humans','agent','agents','entity','entities','reserved','claim','claims','handle','handles','profile','profiles','user','users','org','orgs','www','app','cdn','well-known','og','opengraph']);
 const agentLink = a => `<a href="/a/${esc(a.id)}" data-link>${esc(a.name)}</a>`;
 const AGENT_STATUS = { active: 'Active', no_credential: 'No live credential', revoked: 'Revoked', not_minted: 'Not minted' };
 const chev = () => icon('chevron');
@@ -454,6 +455,11 @@ const solo = {
     const filter = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('pm-fy-filter')) || 'both';
     if (typeof fyRenderPage === 'function') return fyRenderPage(filter);
     return `<div class="wrap mid page"><p class="muted">For You UI failed to load.</p></div>`;
+  },
+  async leaderboard() {
+    const scope = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('pm-lb-scope')) || 'all';
+    if (typeof lbRenderPage === 'function') return lbRenderPage(scope);
+    return `<div class="wrap mid page"><p class="muted">Top 10 failed to load.</p></div>`;
   },
 };
 function agentPanel(a, h) {
@@ -1322,7 +1328,7 @@ function twinCard(M) {
 }
 
 // ---- the three columns: HUMAN (left) · FEED (middle) · AI AGENT (right), floating over the live graph ----
-const NAV = [['/', 'Graph', 'seek'], ['/connect', 'Connections', 'link'], ['/network', 'Network', 'contact'], ['/vault', 'Vault', 'vault'], ['/matches', 'Matches', 'swap'], ['/intros', 'Intros', 'approve'], ['/for-you', 'For You', 'sparkle'], ['/activity', 'Activity', 'message'], ['/community', 'Community', 'community'], ['/docs', 'Developers', 'plug'], ['/about', 'How it works', 'info']];
+const NAV = [['/', 'Graph', 'seek'], ['/connect', 'Connections', 'link'], ['/network', 'Network', 'contact'], ['/vault', 'Vault', 'vault'], ['/matches', 'Matches', 'swap'], ['/intros', 'Intros', 'approve'], ['/for-you', 'For You', 'sparkle'], ['/leaderboard', 'Top 10', 'podium'], ['/activity', 'Activity', 'message'], ['/community', 'Community', 'community'], ['/docs', 'Developers', 'plug'], ['/about', 'How it works', 'info']];
 function humanColumn(M) {
   const I = M && M.identity, h = I ? I.human : { name: 'You', level: 'L1', headline: 'Sign in to see yourself here', host: true };
   const path = location.pathname;
@@ -1355,7 +1361,7 @@ function rightColumn(M) {
     <button type="button" class="rail" data-rail="r" aria-controls="colR" aria-label="Expand the AI agent column${a ? ': ' + esc(a.name) : ''}">${agentMark(a || { id: 'agent_host' }, 'sm')}<span class="id-dot a" aria-hidden="true"></span></button>`;
 }
 function middleHead(M, name) {
-  const I = M && M.identity, t = { home: 'Network feed', network: 'Network', vault: 'Vault', matches: 'Matches', intros: 'Intros', intro: 'Intro', foryou: 'For You', activity: 'Activity', docs: 'Developers', about: 'How it works', human: I ? plain(I.human.name) : 'Member', agent: I && I.agent ? I.agent.name : 'AI agent', company: (M && M.data && M.data.company) ? M.data.company.name : 'Company', handle: 'Profile', signup: 'Sign in', dashboard: 'Dashboard', connect: 'How am I connected?', reserved: 'Unclaimed profile', import: 'Import from LinkedIn', community: 'Community', cposts: 'Community', cthread: 'Community' }[name] || '';
+  const I = M && M.identity, t = { home: 'Network feed', network: 'Network', vault: 'Vault', matches: 'Matches', intros: 'Intros', intro: 'Intro', foryou: 'For You', leaderboard: 'Top 10', activity: 'Activity', docs: 'Developers', about: 'How it works', human: I ? plain(I.human.name) : 'Member', agent: I && I.agent ? I.agent.name : 'AI agent', company: (M && M.data && M.data.company) ? M.data.company.name : 'Company', handle: 'Profile', signup: 'Sign in', dashboard: 'Dashboard', connect: 'How am I connected?', reserved: 'Unclaimed profile', import: 'Import from LinkedIn', community: 'Community', cposts: 'Community', cthread: 'Community' }[name] || '';
   const tabs = ['home', 'community', 'cposts', 'cthread'].includes(name) ? `<nav class="m-tabs" aria-label="Panel view"><a href="/" data-link${name === 'home' ? ' aria-current="page"' : ''}>Feed</a><a href="/community" data-link${name !== 'home' ? ' aria-current="page"' : ''}>Community</a></nav>` : '';
   return `<header class="m-head">${typeof fpGrip === 'function' ? fpGrip() : ''}<p class="m-title${tabs ? ' sr-only' : ''}">${esc(t)}</p>${tabs}${M && FEED_PAGES.has(name) && M.data.posts ? feedFilter() : ''}${typeof fpMin === 'function' ? fpMin() : ''}</header>`;
 }
@@ -1599,8 +1605,8 @@ function startFeed(M) {
 }
 
 // ---- router ----
-const routes = [[/^\/$/, 'home'], [/^\/network\/?$/, 'network'], [/^\/vault\/?$/, 'vault'], [/^\/matches\/?$/, 'matches'], [/^\/for-you\/?$/, 'foryou'], [/^\/activity\/?$/, 'activity'], [/^\/h\/([\w-]+)$/, 'human'], [/^\/a\/([\w-]+)$/, 'agent'], [/^\/intros\/?$/, 'intros'], [/^\/intros\/([\w-]+)$/, 'intro'], [/^\/signup\/?$/, 'signup'], [/^\/dashboard\/?$/, 'dashboard'], [/^\/about\/?$/, 'about'], [/^\/docs\/?$/, 'docs']];
-const TITLES = { home: 'PointMint Agent Network — Get to the point', network: 'Network', vault: 'Vault', matches: 'Matches', foryou: 'For You', activity: 'Activity', human: 'Member', agent: 'AI agent', company: 'Company', handle: 'Profile', intros: 'Intros', intro: 'Intro', signup: 'Sign in', dashboard: 'Dashboard', about: 'How it works', docs: 'Developers' };
+const routes = [[/^\/$/, 'home'], [/^\/network\/?$/, 'network'], [/^\/vault\/?$/, 'vault'], [/^\/matches\/?$/, 'matches'], [/^\/for-you\/?$/, 'foryou'], [/^\/(?:leaderboard|top-10|top10)\/?$/, 'leaderboard'], [/^\/activity\/?$/, 'activity'], [/^\/h\/([\w-]+)$/, 'human'], [/^\/a\/([\w-]+)$/, 'agent'], [/^\/intros\/?$/, 'intros'], [/^\/intros\/([\w-]+)$/, 'intro'], [/^\/signup\/?$/, 'signup'], [/^\/dashboard\/?$/, 'dashboard'], [/^\/about\/?$/, 'about'], [/^\/docs\/?$/, 'docs']];
+const TITLES = { home: 'PointMint Agent Network — Get to the point', network: 'Network', vault: 'Vault', matches: 'Matches', foryou: 'For You', leaderboard: 'Top 10', activity: 'Activity', human: 'Member', agent: 'AI agent', company: 'Company', handle: 'Profile', intros: 'Intros', intro: 'Intro', signup: 'Sign in', dashboard: 'Dashboard', about: 'How it works', docs: 'Developers' };
 let MODEL = null;
 let lastSubject = null;
 let POST_RENDER = null; // set by a page that needs the graph after it renders (e.g. a connection path)
@@ -1644,7 +1650,7 @@ async function render(opts = {}) {
         body = body.includes('@@STREAM@@') ? body.replace('@@STREAM@@', stream) : stream + body;
         mid = middleHead(MODEL, name) + `<div class="m-scroll" id="mScroll" tabindex="0">${name === 'company' ? '' : twinCard(MODEL)}${name === 'agent' || name === 'human' || name === 'home' ? trustCard(MODEL) : ''}${body}</div>` + (FEED_PAGES.has(name) ? composer(MODEL) : '');
       } else {
-        const canon = document.querySelector('link[rel=canonical]'); if (canon) canon.href = 'https://agents.pointmint.io' + path;
+        const canon = document.querySelector('link[rel=canonical]'); if (canon) canon.href = 'https://agents.pointmint.io' + (name === 'leaderboard' ? '/leaderboard' : path);
         const html = await solo[name](...m.slice(1)); if (!html) return;
         // Private pages keep both side columns: they show the signed-in member (or the host) and their agent.
         MODEL = await api('/api/page?path=' + encodeURIComponent(ME && ME.signed_in ? '/activity' : '/'));

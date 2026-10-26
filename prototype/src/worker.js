@@ -18,6 +18,7 @@ import { handleTrustApi, TRUST_TOOLS, callTrustTool, getTrust, refreshTrustBatch
 import { LANGUAGE_OPTIONS, normalizeLang, langLabel } from './translate.js';
 import { ensureUserNumber, formatUserNumber } from './user_number.js';
 import { handleForYouApi } from './for_you.js';
+import { handleLeaderboardApi } from './leaderboard.js';
 import { handleSplitApi, maybeMarkdown, sendMessage, visibleMessages, pubMessage, demoHeartbeat, agentLevel, LEVELS, showFounder } from './split.js';
 
 const enc = new TextEncoder();
@@ -565,6 +566,7 @@ async function handleApi(request, env, url) {
   { const r = await handlePrivateWorkspaceApi(request, env, url, ip); if (r) return r; }
   { const r = await handleGuideThreadApi(request, env, url, ip); if (r) return r; }
   { const r = await handleForYouApi(request, env, url, ip, { currentHuman }); if (r) return r; }
+  { const r = await handleLeaderboardApi(request, env, url, ip); if (r) return r; }
 
   // ----- audit log -----
   if (p === '/api/audit' && method === 'GET') {
@@ -779,7 +781,7 @@ async function agentHuman(request, env) {
 }
 
 // ---------- entry ----------
-const SPA_ROUTES = /^\/(?:|index\.html|network|vault|matches|activity|intros|signup|dashboard|about|docs|connect|import|community|for-you)\/?$|^\/(?:h|a|intros)\/[\w-]+\/?$|^\/community\/(?:p\/[a-z0-9-]{2,24}|t\/th_[a-z0-9]{3,40})\/?$|^\/p\/rp_[a-z0-9_]{3,60}\/?$|^\/[a-z0-9][a-z0-9_-]{2,31}\/?$/;
+const SPA_ROUTES = /^\/(?:|index\.html|network|vault|matches|activity|intros|signup|dashboard|about|docs|connect|import|community|for-you|leaderboard|top-10|top10)\/?$|^\/(?:h|a|intros)\/[\w-]+\/?$|^\/community\/(?:p\/[a-z0-9-]{2,24}|t\/th_[a-z0-9]{3,40})\/?$|^\/p\/rp_[a-z0-9_]{3,60}\/?$|^\/[a-z0-9][a-z0-9_-]{2,31}\/?$/;
 const handler = {
   async fetch(request, env, ctx) {
     env.ctx = ctx;
