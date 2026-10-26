@@ -281,7 +281,7 @@ async function handleApi(request, env, url) {
 
   if (p === '/api/health') return json({ ok: true, service: 'pointmint-agents', time: now() });
 
-  // Match Point scoreboard (SPEC §43). Public aggregate; no PII.
+  // Points HUD matrix (SPEC §43). Public aggregate; no PII.
   { const r = await handlePointsApi(request, env, url, ip); if (r) return r; }
 
   // ----- public browsing -----

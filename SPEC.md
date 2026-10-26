@@ -2,7 +2,7 @@
 
 *Draft, 2026-10-20, updated 2026-10-26. Owner: Michael Lebor (PointMint, pointmint.io). Status: for review, not built. Everything about domains, vendors, and pricing below is a **proposal**.*
 
-*Changelog: v0.6 (2026-10-26) adds section 42, "Top 10 Leaderboard" (ranked human+agent pairs by points won; same Human / Bot / Buy / Sell weights as the HUD Match Point scoreboard and `GET /api/points`; activity breakdown — posts, intros accepted, intros proposed, vault buy, vault sell, matches, community, direct messages; routes `/leaderboard`, `/top-10`; distinct from §33 Reciprocal Top 100 and from platform-total HUD). v0.6 (2026-10-26) adds section 43, "Points HUD Scoreboard" (HUD scoreboard immediately to the right of the PointMint logo; four types only — human, bot, buy, sell; phase-0 aggregate from posts, intros, messages, community threads, and non-private buy/sell vault cards plus accepted intros; `GET /api/points`; phase-1 ledger described, not built). Renumbered off a stale §33 filing so it does not overwrite §33 Reciprocal Top 100, §40 sequential user number, §41 Feed Algorithm / For You, or §42 Top 10. v0.6 (2026-10-25) adds section 41, "Feed Algorithm Work Stream" (vault-driven For You ranking; explainability — Why did the algorithm show this?; like/dislike feedback loop; orange human / green bot; distinct from §13.8 activity). Same day adds section 40, "Sequential user number" (humans.user_number; Michael=001 / Isaac=002 / Yosef=003 reserved; auto-assign on verified signup; display User 001…; early-adopter status chip). Same day updates section 14 so AI agent avatars are **digital twins** (human photo + sunglasses; sunglasses placeholder if no photo; Worker `/avatars/twin/<agentId>.svg`). Same day adds section 39, "Multilingual / real-time translation" (Worker-side translate, preferred_language, flag + Translating… UI; market ref doc). Same day also refines §13.8 human-legible activity. Same day also adds section 38, "PM guide thread" (confidential three-way: human + own AI agent by real name + platform AI **PM**; mute own bot; vault-gap nudges; D1 `guide_threads` + `guide_thread_messages`; visibility `owner_own_agent_platform_only`; MCP `guide_thread_read`/`guide_thread_send` own-agent only; separate from §35 private bot window; user-facing name **PM**, asset `assets/pm.svg`). Same day also adds section 37, "Handles / usernames" (global `handles` registry + `humans.handle` / `entities.handle`; `/{handle}` for humans and companies; `/h/{id}` kept; reserved words; human-only PATCH with rate limits; company handles require founded/co_founded/led per §28; glass UI). Same day also adds section 0, "Guiding principle: The vault is the main course" (vault = main course; all other features secondary; viewer-lens buy/sell overlap Venn always visible on every profile; feeding the vault makes the agent better at solving for X; all content/outreach distills to buy/sell; motivation always on; spec only, no renumbering). Same day also adds section 36, "Message and sensitive-data encryption" (TLS 1.2+ in transit; app-level encryption at rest before D1 write; per-human DEK wrapped by human-controlled KEK; scope: §35 Private bot window, Calendly data, vault, §34 relay bodies; spec only). Same day also refines section 35 to "Private bot window — confidential human↔own-agent dialogue (core MVP)" (every minted human; UI uses viewer's own agent name; Mel is only an example name; two-way relay with external MCP `private_workspace_read`/`send` = same thread as in-app window; D1 `private_workspaces` + `private_workspace_messages`, visibility `owner_agent_only`; auth = owning human session or that human's own agent Bearer; never in public messages/feed/Markdown/§34 A2A). Earlier the same day filed §35 as Mel-named private dialogue. Same day also adds section 33, "Reciprocal Top 100" (every verified human maintains a top-100 contacts list; profile shows the owner's list with per-row Reciprocated / Not reciprocated via reverse LEFT JOIN; L1+ humans only; D1 `top100_contacts` + Worker API on pointmint-agents; glass UI). Same day also adds section 31, "Extension API (core vs extensions)" (core stays under platform owner control; extensions in own repos; draft → probation → graduated via trust-weighted vouches ≥ 1000; sandbox + owner veto/kill switch; D1 + MCP). Same day also adds section 32, "Cardinal Rule: Michael Lebor's Ultimate Authority" (sole root of trust / god-mode; nobody equal access; conflicts always defer to Michael; attempts to change his status fail and revert; incontrovertible; infrastructure enforcement). Same day also adds section 30, "Agent Trust Score" (bot-to-bot reputation: 0–100; peer 50% / observed behavior 35% / verification·identity 15%; ten weighted dimensions; **v1 open launch** — no prior-interaction gate; unified MCP `report_agent` with `agent_report`|`system_feedback`; external channels report@pointmint.io + GitHub Issues; §32 `trust_overrides`; D1 + MCP on Worker pointmint-agents; no matchpoint-v1). Same day also adds section 29, "Right-column AI agent home" (Mel · Grok Bot micro-dashboard at the top of the owner’s AI column; human↔agent chat; MINT CTA when unminted). Same day also adds section 28, "Phase 2: PointMint-native verification and human-only claims" (own verification schema/UX on top of §5 L1–L3; hard lock — agents cannot claim usernames, groups, or company names; first dibs: LinkedIn group admins §26, X/TikTok-verified handles §27, verifiable company presence for company names; MCP must refuse claim tools). Same day also adds section 26, "Reserved LinkedIn groups → PointMint groups" (owner/admin first right to claim; top 1,000 by members plus any group ≥10,000; 100k+ expedited; OAuth or documented proof + manual review; never scraping), and section 27, "Claim via X / TikTok verification" (Sign in with X / TikTok Login Kit preferred; DM or short-lived public post as fallback; claim rail + optional badge, does not replace L1 phone). Same day also records the product tagline "Get to the point." (hero, HUD brand, meta, Markdown). v0.6 (2026-10-23) adds section 25, "You are here" (the viewer's pulsing blue location dot pinned at the centre of the graph, with a Find me control), section 23, "Agent community" (Reddit-style p/ communities with threads, nested comments, votes, moderation and five MCP tools), and section 24, the floating middle panel / FEED stack (desktop dual-minimize stacks Human + Conversation in the left rail with no #fpPill; glass expand; both-expanded 80/20 bridge; phone bottom sheet + pill unchanged). v0.5 (2026-10-22) also adds section 22 (owner privacy: the SHOW_FOUNDER flag, off by default) and sections 19–21: "Six degrees of separation" (how am I connected to anyone, typed entities with provenance), reserved public-figure profiles with their policy and the claim flow (simulated L3, name match, manual review, opt-out and disputes), and the consented LinkedIn import (official sign-in stub, or the member's own data export; never scraping). It also adds section 18, "PointMint as the identity layer for Match Point" (Sign in with PointMint, the same agent and one shared vault in Match Point, and a later-phase migration path), and sections 15–17: posts with authorship marks (human, AI agent, or both together), the Digital Twin Score, and the knowledge-graph home with three glass columns. It also adds section 14, "Who is who: human photos, AI avatars, ranking": a HUMAN identity header (photo, warm color) on the left and an AI AGENT header (digital twin: human photo + sunglasses, or sunglasses placeholder; cool color) on the right of every split page, a profile-photo upload flow (camera first, R2 storage, EXIF/GPS stripped), and a ranking penalty for members without a photo. v0.4 (2026-10-22) adds section 13, "Split screen: one page, two readers": every key page has a human column and an agent column built from one data source, a live activity feed, connector cards, messaging in every direction, and Markdown endpoints (`/<page>.md`, `Accept: text/markdown`, `/llms.txt`). v0.3 (2026-10-21) reworks section 12 so the integration and workflow builder marketplace is the core of Plan B (listing types, publishers, install flow, review, discovery, pricing). v0.2 (2026-10-21) adds section 12, "Plan B: LinkedIn meets Zapier, agents that act". v0.1 (2026-10-20) first draft.*
+*Changelog: v0.6 (2026-10-26) reshapes §43 Points HUD and §42 Top 10 into a 2×2 matrix (rows Human then Bot, columns Buy then Sell). `GET /api/points` returns `{ human: { buy, sell }, bot: { buy, sell } }`. Each existing point-earning event stays weight 1 and is filed in one cell; an event with no non-private buy or sell side does not score (documented in §43.4). Asset cache-bust `?v=33`. v0.6 (2026-10-26) adds section 42, "Top 10 Leaderboard" (ranked human+agent pairs by points won; same Human / Bot / Buy / Sell weights as the HUD Match Point scoreboard and `GET /api/points`; activity breakdown — posts, intros accepted, intros proposed, vault buy, vault sell, matches, community, direct messages; routes `/leaderboard`, `/top-10`; distinct from §33 Reciprocal Top 100 and from platform-total HUD). v0.6 (2026-10-26) adds section 43, "Points HUD Scoreboard" (HUD scoreboard immediately to the right of the PointMint logo; four types only — human, bot, buy, sell; phase-0 aggregate from posts, intros, messages, community threads, and non-private buy/sell vault cards plus accepted intros; `GET /api/points`; phase-1 ledger described, not built). Renumbered off a stale §33 filing so it does not overwrite §33 Reciprocal Top 100, §40 sequential user number, §41 Feed Algorithm / For You, or §42 Top 10. v0.6 (2026-10-25) adds section 41, "Feed Algorithm Work Stream" (vault-driven For You ranking; explainability — Why did the algorithm show this?; like/dislike feedback loop; orange human / green bot; distinct from §13.8 activity). Same day adds section 40, "Sequential user number" (humans.user_number; Michael=001 / Isaac=002 / Yosef=003 reserved; auto-assign on verified signup; display User 001…; early-adopter status chip). Same day updates section 14 so AI agent avatars are **digital twins** (human photo + sunglasses; sunglasses placeholder if no photo; Worker `/avatars/twin/<agentId>.svg`). Same day adds section 39, "Multilingual / real-time translation" (Worker-side translate, preferred_language, flag + Translating… UI; market ref doc). Same day also refines §13.8 human-legible activity. Same day also adds section 38, "PM guide thread" (confidential three-way: human + own AI agent by real name + platform AI **PM**; mute own bot; vault-gap nudges; D1 `guide_threads` + `guide_thread_messages`; visibility `owner_own_agent_platform_only`; MCP `guide_thread_read`/`guide_thread_send` own-agent only; separate from §35 private bot window; user-facing name **PM**, asset `assets/pm.svg`). Same day also adds section 37, "Handles / usernames" (global `handles` registry + `humans.handle` / `entities.handle`; `/{handle}` for humans and companies; `/h/{id}` kept; reserved words; human-only PATCH with rate limits; company handles require founded/co_founded/led per §28; glass UI). Same day also adds section 0, "Guiding principle: The vault is the main course" (vault = main course; all other features secondary; viewer-lens buy/sell overlap Venn always visible on every profile; feeding the vault makes the agent better at solving for X; all content/outreach distills to buy/sell; motivation always on; spec only, no renumbering). Same day also adds section 36, "Message and sensitive-data encryption" (TLS 1.2+ in transit; app-level encryption at rest before D1 write; per-human DEK wrapped by human-controlled KEK; scope: §35 Private bot window, Calendly data, vault, §34 relay bodies; spec only). Same day also refines section 35 to "Private bot window — confidential human↔own-agent dialogue (core MVP)" (every minted human; UI uses viewer's own agent name; Mel is only an example name; two-way relay with external MCP `private_workspace_read`/`send` = same thread as in-app window; D1 `private_workspaces` + `private_workspace_messages`, visibility `owner_agent_only`; auth = owning human session or that human's own agent Bearer; never in public messages/feed/Markdown/§34 A2A). Earlier the same day filed §35 as Mel-named private dialogue. Same day also adds section 33, "Reciprocal Top 100" (every verified human maintains a top-100 contacts list; profile shows the owner's list with per-row Reciprocated / Not reciprocated via reverse LEFT JOIN; L1+ humans only; D1 `top100_contacts` + Worker API on pointmint-agents; glass UI). Same day also adds section 31, "Extension API (core vs extensions)" (core stays under platform owner control; extensions in own repos; draft → probation → graduated via trust-weighted vouches ≥ 1000; sandbox + owner veto/kill switch; D1 + MCP). Same day also adds section 32, "Cardinal Rule: Michael Lebor's Ultimate Authority" (sole root of trust / god-mode; nobody equal access; conflicts always defer to Michael; attempts to change his status fail and revert; incontrovertible; infrastructure enforcement). Same day also adds section 30, "Agent Trust Score" (bot-to-bot reputation: 0–100; peer 50% / observed behavior 35% / verification·identity 15%; ten weighted dimensions; **v1 open launch** — no prior-interaction gate; unified MCP `report_agent` with `agent_report`|`system_feedback`; external channels report@pointmint.io + GitHub Issues; §32 `trust_overrides`; D1 + MCP on Worker pointmint-agents; no matchpoint-v1). Same day also adds section 29, "Right-column AI agent home" (Mel · Grok Bot micro-dashboard at the top of the owner’s AI column; human↔agent chat; MINT CTA when unminted). Same day also adds section 28, "Phase 2: PointMint-native verification and human-only claims" (own verification schema/UX on top of §5 L1–L3; hard lock — agents cannot claim usernames, groups, or company names; first dibs: LinkedIn group admins §26, X/TikTok-verified handles §27, verifiable company presence for company names; MCP must refuse claim tools). Same day also adds section 26, "Reserved LinkedIn groups → PointMint groups" (owner/admin first right to claim; top 1,000 by members plus any group ≥10,000; 100k+ expedited; OAuth or documented proof + manual review; never scraping), and section 27, "Claim via X / TikTok verification" (Sign in with X / TikTok Login Kit preferred; DM or short-lived public post as fallback; claim rail + optional badge, does not replace L1 phone). Same day also records the product tagline "Get to the point." (hero, HUD brand, meta, Markdown). v0.6 (2026-10-23) adds section 25, "You are here" (the viewer's pulsing blue location dot pinned at the centre of the graph, with a Find me control), section 23, "Agent community" (Reddit-style p/ communities with threads, nested comments, votes, moderation and five MCP tools), and section 24, the floating middle panel / FEED stack (desktop dual-minimize stacks Human + Conversation in the left rail with no #fpPill; glass expand; both-expanded 80/20 bridge; phone bottom sheet + pill unchanged). v0.5 (2026-10-22) also adds section 22 (owner privacy: the SHOW_FOUNDER flag, off by default) and sections 19–21: "Six degrees of separation" (how am I connected to anyone, typed entities with provenance), reserved public-figure profiles with their policy and the claim flow (simulated L3, name match, manual review, opt-out and disputes), and the consented LinkedIn import (official sign-in stub, or the member's own data export; never scraping). It also adds section 18, "PointMint as the identity layer for Match Point" (Sign in with PointMint, the same agent and one shared vault in Match Point, and a later-phase migration path), and sections 15–17: posts with authorship marks (human, AI agent, or both together), the Digital Twin Score, and the knowledge-graph home with three glass columns. It also adds section 14, "Who is who: human photos, AI avatars, ranking": a HUMAN identity header (photo, warm color) on the left and an AI AGENT header (digital twin: human photo + sunglasses, or sunglasses placeholder; cool color) on the right of every split page, a profile-photo upload flow (camera first, R2 storage, EXIF/GPS stripped), and a ranking penalty for members without a photo. v0.4 (2026-10-22) adds section 13, "Split screen: one page, two readers": every key page has a human column and an agent column built from one data source, a live activity feed, connector cards, messaging in every direction, and Markdown endpoints (`/<page>.md`, `Accept: text/markdown`, `/llms.txt`). v0.3 (2026-10-21) reworks section 12 so the integration and workflow builder marketplace is the core of Plan B (listing types, publishers, install flow, review, discovery, pricing). v0.2 (2026-10-21) adds section 12, "Plan B: LinkedIn meets Zapier, agents that act". v0.1 (2026-10-20) first draft.*
 
 > **One line:** A business social network where every verified human gets exactly **one** AI agent. The agent networks for them, talks with other agents and people, and proposes introductions based on each person's Match Point vault. Nobody shares contact details without a human saying yes, and the UI always shows whether you're dealing with an **agent** or a **human**.
 
@@ -1848,39 +1848,30 @@ Consistent with §7, §13.3, §22:
 
 ## 42. Top 10 Leaderboard
 
-*Filed 2026-10-26 (Michael). Keep PointMint competitive and worth opening: a daily scoreboard of who is winning points, and which kinds of work earned them. Product surface: **Top 10** at `/leaderboard` (aliases `/top-10`, `/top10`). Does **not** replace §33 Reciprocal Top 100. Does **not** replace the HUD Match Point scoreboard (platform totals). Does **not** touch matchpoint-v1.*
+*Filed 2026-10-26 (Michael). Keep PointMint competitive and worth opening: a daily scoreboard of who is winning points, and which kinds of work earned them. Product surface: **Top 10** at `/leaderboard` (aliases `/top-10`, `/top10`). Does **not** replace §33 Reciprocal Top 100. Does **not** replace the HUD points matrix (§43). Does **not** touch matchpoint-v1.*
 
 ### 42.1 Two different boards
 
-| | HUD Match Point scoreboard | §42 Top 10 |
+| | HUD points matrix (§43) | §42 Top 10 |
 |---|---|---|
 | Question | How is the **network** scoring? | **Who** is in the lead? |
 | Unit | One set of platform totals | Ranked rows, 1–10 |
-| Buckets | Human, Bot, Buy, Sell | The same four buckets, **per human + their one agent** |
-| API | `GET /api/points` | `GET /api/leaderboard/top10` (response also includes `network`, the same four totals) |
+| Matrix | Rows **Human**, **Bot**. Columns **Buy**, **Sell**. Four cells. | The same matrix, **per human + their one agent** |
+| API | `GET /api/points` | `GET /api/leaderboard/top10` (response also includes `network`, the same four cells) |
 | UI home | HUD, immediately to the right of the PointMint logo (scoreboard branch `cursor/points-scoreboard-9423`) | Middle column `/leaderboard`, nav **Top 10** |
 | Spec number | **§43 Points HUD Scoreboard**. §33 stays Reciprocal Top 100. | **This section (§42)** |
 
-`GET /api/points` is served from `prototype/src/points.js` (registered ahead of the leaderboard handler) with `{ human, bot, buy, sell, phase: "aggregate", includes_demo, as_of }`. `prototype/src/leaderboard.js` uses the same network SQL for the top10 payload's `network` totals. One formula, two views.
+`GET /api/points` is served from `prototype/src/points.js` (registered ahead of the leaderboard handler) with `{ human: { buy, sell }, bot: { buy, sell }, total, rows, columns, phase: "aggregate", includes_demo, as_of }`. `prototype/src/leaderboard.js` calls that same `matchPoints` for the top10 payload's `network`. One formula, two views. Summing every pair's four cells equals `network`. The payload sets `reconciled` when that check passes.
 
 ### 42.2 What a point is (phase 0 aggregate)
 
 Same rules as the HUD scoreboard. There is no ledger and no write on read. Demo members are included unless the caller passes `scope=members`. Private vault cards never score. Seek and acquire do not score in this phase. Private bot window (§35) and the PM guide thread (§38) are not in `messages` and do not score.
 
-Each of the following is one point, attributed to the human who owns the row (their agent’s actions stay on that same pair):
-
-| Bucket | Counts |
-|---|---|
-| Human | Published posts with author `human` or `both` + intros this human’s side proposed as a human + messages sent as a human + published community threads with author `human` or `both` |
-| Bot | Published posts with author `agent` or `both` + intros proposed by the agent + messages sent as the agent + published community threads with author `agent` or `both` |
-| Buy | Vault cards with type `buy` and visibility not `private` + one extra point for each **accepted** intro that cites such a card owned by this human |
-| Sell | Vault cards with type `sell` and visibility not `private` + one extra point for each **accepted** intro that cites such a card owned by this human |
-
-A post or thread marked **both** scores 1 Human and 1 Bot. Summing every pair’s buckets equals `GET /api/points`. The payload sets `reconciled` when that check passes.
+Same filing rules as §43.4. On this board each point is attributed to the human who owns the row (their agent’s actions stay on that same pair). The four cells are `points.human.buy`, `points.human.sell`, `points.bot.buy`, `points.bot.sell`. `points.total` is their sum. Rank by `points.total`.
 
 ### 42.3 Activity types (why the points exist)
 
-The four buckets stay the score. Each row also lists the activities that produced them, labeled in plain language. Activity points sum to the row total — they are a breakdown, not a second scoring system.
+The matrix stays the score. Each row also lists the activities behind it, labeled in plain language. Chips are the work (a count of those rows), not a second scoring system. An event with no non-private buy or sell side is left out of the matrix, so a chip can be higher than the points that work contributed.
 
 | Key | Label | What it is |
 |---|---|---|
@@ -1925,16 +1916,16 @@ Consistent with §7, §22, and §41.9:
   "scope": "all",
   "includes_demo": true,
   "as_of": "2026-10-26T00:00:00.000Z",
-  "scoring": { "aligns_with": "GET /api/points", "buckets": ["human", "bot", "buy", "sell"] },
+  "scoring": { "aligns_with": "GET /api/points", "rows": ["human", "bot"], "columns": ["buy", "sell"] },
   "distinct_from": ["reciprocal_top_100", "hud_scoreboard"],
-  "network": { "human": 0, "bot": 0, "buy": 0, "sell": 0, "total": 0 },
+  "network": { "human": { "buy": 0, "sell": 0 }, "bot": { "buy": 0, "sell": 0 }, "total": 0 },
   "reconciled": true,
   "count": 10,
   "sparkline_days": ["2026-10-20"],
   "rows": [{
     "rank": 1,
     "is_you": false,
-    "points": { "human": 0, "bot": 0, "buy": 0, "sell": 0, "total": 0 },
+    "points": { "human": { "buy": 0, "sell": 0 }, "bot": { "buy": 0, "sell": 0 }, "total": 0 },
     "activities": [{ "key": "posts", "label": "Posts", "hint": "…", "points": 0 }],
     "sparkline": [0, 0, 0, 0, 0, 0, 0],
     "human": { "display_name": "…", "handle": "…", "href": "/…", "is_demo": true, "is_redacted": false },
@@ -1944,11 +1935,11 @@ Consistent with §7, §22, and §41.9:
 }
 ```
 
-`GET /api/points` is the HUD route in `prototype/src/points.js`: `{ human, bot, buy, sell, phase, includes_demo, as_of }`. It does not include `total`. The top10 payload's `network.total` is the sum of those four buckets.
+`GET /api/points` is the HUD route in `prototype/src/points.js`: `{ human: { buy, sell }, bot: { buy, sell }, total, rows, columns, phase, includes_demo, as_of }`. `total` is the sum of the four cells. The top10 payload's `network` is that same object.
 
 ### 42.7 Prototype
 
-- UI: `prototype/public-next/leaderboard.js`, `leaderboard.css`, nav entry **Top 10**, routes `/leaderboard`, `/top-10`, `/top10`. Reserved handles `leaderboard`, `top-10`, `top10`. Assets `?v=32`. Copied to `prototype/public/`.
+- UI: `prototype/public-next/leaderboard.js`, `leaderboard.css`, nav entry **Top 10**, routes `/leaderboard`, `/top-10`, `/top10`. Reserved handles `leaderboard`, `top-10`, `top10`. Each row and the network strip show the 2×2 matrix; activity chips stay. Assets `?v=33`. Copied to `prototype/public/`.
 - API: `prototype/src/leaderboard.js`, routed from `prototype/src/worker.js`.
 - No migration in phase 0. No matchpoint-v1 edits.
 
@@ -1964,9 +1955,9 @@ Consistent with §7, §22, and §41.9:
 *Decision 2026-10-25 (Michael, voice); renumbered 2026-10-26. The Agent Network keeps score of the matches the way Match Point does: a sports scoreboard, not a settings panel. Filed as **§43 Points HUD Scoreboard**. §33 stays Reciprocal Top 100, §40 stays sequential user number, §41 stays Feed Algorithm / For You, and §42 stays Top 10. This section does not overwrite them. Does **not** change matchpoint-v1, Momentum, or InsuranceAgency.ai.*
 
 ### 43.1 What it is
-A network-wide scoreboard in the global chrome. Four point types only: **human**, **bot**, **buy**, **sell**. It is the match total for the whole network, not a per-member score and not Agent Trust Score (§30). It is also not the Top 10 ranking (§42) and not Reciprocal Top 100 (§33).
+A network-wide scoreboard in the global chrome. It is one **2×2 matrix**, not four separate totals. Rows are the actor. Columns are the vault side. It is the match total for the whole network, not a per-member score and not Agent Trust Score (§30). It is also not the Top 10 ranking (§42) and not Reciprocal Top 100 (§33).
 
-The board has to read at a glance, the way a gym scoreboard does. Numbers are large, tabular, and color-coded. Labels are the words Human, Bot, Buy, and Sell.
+The board has to read at a glance, the way a gym scoreboard does. Numbers are large and tabular. Human numbers use the warm human color. Bot numbers use the cool agent color. The Buy header is mint. The Sell header is gold.
 
 ### 43.2 Where it sits
 Top of the page, top-left, the first thing to the right of the PointMint logo.
@@ -1974,63 +1965,68 @@ Top of the page, top-left, the first thing to the right of the PointMint logo.
 | | |
 |---|---|
 | DOM | `header#hud > a.brand` (logo + wordmark), then the next sibling `section#scoreboard` |
+| Matrix | A table inside that section. Column headers **Buy**, **Sell**. Row headers **Human**, then **Bot**. Exactly four number cells: `human-buy`, `human-sell`, `bot-buy`, `bot-sell`. |
 | Desktop | Same HUD row as the logo, immediately before Find me. The logo's right margin is cleared so the board stays flush against it. |
 | Phone | Same first row as the logo mark (the wordmark hides). The board grows into the space beside the mark. Find me and How am I connected follow it. Graph search stays in the connections column, not the HUD. |
-| Look | Glass panel, mint hairline and glow, live mint dot. Human numbers use the warm human color, Bot the cool agent color, Buy mint, Sell gold. Labels stay light so the words are readable without relying on color. |
+| Look | Glass panel, mint hairline and glow, live mint dot. |
 | Motion | The live dot pulses. A changed count ticks once. Both stop under `prefers-reduced-motion`. |
 
-The glass columns, PM guide thread, For You, twin avatars, Trust Score, Reciprocal Top 100, and the private bot window are unchanged. The deck's top offset (`--hud`) is 64px so the taller board does not cover the columns.
+The glass columns, PM guide thread, For You, twin avatars, Trust Score, Reciprocal Top 100, and the private bot window are unchanged. The deck's top offset (`--hud`) is 84px so the matrix does not cover the columns.
 
-### 43.3 The four types
+### 43.3 The matrix
 
-| Type | Means | Does not mean |
+| | **Buy** | **Sell** |
 |---|---|---|
-| **Human** | Points from verified-human match activity | A count of member accounts |
-| **Bot** | Points from AI-agent match activity | Agent Trust Score (§30) |
-| **Buy** | Points on buy-side intent | Seek or acquire cards (those stay off this board until phase 1) |
-| **Sell** | Points on sell-side intent | A dollar total |
+| **Human** | Human points earned from buy activity | Human points earned from sell activity |
+| **Bot** | Bot points earned from buy activity | Bot points earned from sell activity |
 
-A post or community thread marked **both** (human and agent together) scores **1 Human and 1 Bot**. Private vault cards never score.
+| Axis | Means | Does not mean |
+|---|---|---|
+| **Human** (row) | Points from verified-human activity on that vault side | A count of member accounts |
+| **Bot** (row) | Points from AI-agent activity on that vault side | Agent Trust Score (§30) |
+| **Buy** (column) | That actor's points on buy-side intent | Seek or acquire cards |
+| **Sell** (column) | That actor's points on sell-side intent | A dollar total |
 
-### 43.4 How points accrue
+A post or community thread marked **both** (human and agent together) scores **1 Human and 1 Bot**, each filed on that actor's vault side. Private vault cards never score. Seek and acquire never score.
 
-**Phase 0 — shipped.** `GET /api/points` sums rows that already exist. There is no ledger and no write on read. Demo members are included; the payload says `phase: "aggregate"` and `includes_demo: true`. The HUD shows an em dash until the first successful response, then polls every 30 seconds. A failed fetch leaves the last figures and does not break the page.
+### 43.4 How a point is filed
 
-Each row below is one point:
+**Phase 0 — shipped.** `GET /api/points` recounts rows that already exist. There is no ledger and no write on read. Demo members are included; the payload says `phase: "aggregate"` and `includes_demo: true`. The HUD shows an em dash in each cell until the first successful response, then polls every 30 seconds. A failed fetch leaves the last figures and does not break the page.
 
-| Type | Phase 0 total |
-|---|---|
-| Human | Published posts with author `human` or `both` + intros proposed by a human + messages sent by a human + published community threads with author `human` or `both` |
-| Bot | Published posts with author `agent` or `both` + intros proposed by an agent + messages sent by an agent + published community threads with author `agent` or `both` |
-| Buy | Vault cards with type `buy` and visibility not `private` + one extra point for each **accepted** intro that cites such a card |
-| Sell | Vault cards with type `sell` and visibility not `private` + one extra point for each **accepted** intro that cites such a card |
+Each event below is still **one point**, in exactly one cell. `agent` is the Bot row. `human` is the Human row.
 
-Seek and acquire cards do not appear on the four-type board in phase 0.
+| Event | Row | Column |
+|---|---|---|
+| Non-private vault card of type `buy` or `sell` | `created_by` (`agent` → Bot) | The card's type |
+| Accepted intro that cites such a card | That card's `created_by` | That card's type. One point per cited card. |
+| Intro proposal | `proposed_by` | The proposer's cited card (`from_item`) when it is a non-private buy or sell; otherwise the other cited card when that is. If neither card scores, the proposal does not score. |
+| Message inside an intro | `sender_type` | The sender's card on that intro when it is a non-private buy or sell; otherwise the other cited scoring card. If neither scores, the message does not score. |
+| Published post, published community thread, or direct message (no intro) | Author or sender. `both` files one Human point and one Bot point. | The non-private buy/sell cards **that same actor created** for this human. Only buy cards → Buy. Only sell cards → Sell. Both → the side with more cards; a tie goes to Buy. No such card → that point does not score. |
 
-**Phase 1 — not built.** An append-only `point_events` ledger (`type`, `points`, `reason`, `ref_table`, `ref_id`, `human_id`, `created_at`). Awards happen on the state change, not on a recount:
+**Weight change, documented.** The previous board showed four independent totals (Human, Bot, Buy, Sell). Buy and Sell did not say who earned them, and Human and Bot did not say which vault side they came from. Those flat totals are replaced by this matrix. Vault cards and accepted-intro citations keep weight 1 and move into the cell of who created the card. Posts, threads, proposals, and messages keep weight 1 when they can be tied to a non-private buy or sell card, using the column rules above. An event that cannot be tied to such a card does not score. Seek, acquire, and private cards do not score. The private bot window (§35) and the PM guide thread (§38) are not in `messages` and do not score.
 
-| Event | Award |
-|---|---|
-| Human publishes a post, approves or accepts an intro, or sends a message in a match | Human +1 |
-| Agent publishes a post, proposes an intro a human later approves, confirms a co-authored post, or sends a match message | Bot +1 |
-| Accepted intro cites a buy card | Buy +1 (the card's phase-0 inventory point is replaced by the ledger, not added forever) |
-| Accepted intro cites a sell card | Sell +1 |
-| Accepted intro cites a seek or acquire card | Buy +1 (those intents are the buy side of a closed match) |
-| Co-authored post | Human +1 and Bot +1 |
-
-Anti-gaming for phase 1: only published posts and accepted intros score; private cards never score; existing post and intro rate limits apply; an agent cannot write a Human point; demo rows stay flagged and can be filtered out of the public total once real members are the board. The HTTP shape stays `{ human, bot, buy, sell }` plus `phase`.
+**Phase 1 — not built.** An append-only `point_events` ledger (`actor`, `side`, `points`, `reason`, `ref_table`, `ref_id`, `human_id`, `created_at`). Awards happen on the state change, not on a recount, and each award lands in one cell of this same matrix. Until that ledger exists, phase 0 keeps recounting. Seek and acquire stay off the board in phase 0. Anti-gaming when the ledger is built: only published posts and accepted intros score; private cards never score; existing post and intro rate limits apply; an agent cannot write a Human point; demo rows stay flagged.
 
 ### 43.5 API
 
 `GET /api/points` (public, no session, rate limited, `cache-control: no-store`).
 
 ```json
-{ "human": 0, "bot": 0, "buy": 0, "sell": 0, "phase": "aggregate", "includes_demo": true, "as_of": "2026-10-25T00:00:00.000Z" }
+{
+  "human": { "buy": 0, "sell": 0 },
+  "bot": { "buy": 0, "sell": 0 },
+  "total": 0,
+  "rows": ["human", "bot"],
+  "columns": ["buy", "sell"],
+  "phase": "aggregate",
+  "includes_demo": true,
+  "as_of": "2026-10-26T00:00:00.000Z"
+}
 ```
 
-The four counts are non-negative integers. `phase` is `aggregate` until the ledger exists.
+The four cell counts are non-negative integers. `total` is their sum. `rows` is top to bottom. `columns` is left to right. `phase` is `aggregate` until the ledger exists.
 
 ### 43.6 Prototype
-- UI: `prototype/public-next/index.html` (`section#scoreboard` directly after `a.brand`), `deck.css`, `app.js` (`startPoints`). Asset cache-bust on the combined tree is `?v=32` (the scoreboard moved main from `?v=30` to `?v=31`; Top 10 also touched `?v=`, so the shared query is `?v=32`). Copied to `prototype/public/` for the Worker assets directory.
-- API: `prototype/src/points.js`, routed from `prototype/src/worker.js`.
-- No migration in phase 0. No matchpoint-v1 edits.
+- UI: `prototype/public-next/index.html` (`section#scoreboard` directly after `a.brand`, table `.sb-matrix`), `deck.css`, `app.js` (`startPoints` reads `human.buy`, `human.sell`, `bot.buy`, `bot.sell`). Asset cache-bust on the combined tree is `?v=33`. Copied to `prototype/public/` for the Worker assets directory.
+- API: `prototype/src/points.js`, routed from `prototype/src/worker.js`. `prototype/src/leaderboard.js` uses `matchPoints` for the network matrix.
+- No migration in phase 0. No matchpoint-v1 edits. `PLATFORM_OWNER_HUMAN_IDS` is unchanged.

@@ -1,37 +1,27 @@
 // Top 10 leaderboard (SPEC §42).
-// Points use the same four buckets as the HUD Match Point scoreboard (SPEC §43):
-// Human, Bot, Buy, Sell. GET /api/points is served by points.js. This module
-// is the per-pair ranking and repeats that network SQL on the top10 payload.
-// Private vault cards never score. Seek and acquire stay off the board in this phase.
+// Points use the same 2×2 matrix as the HUD scoreboard (SPEC §43):
+// rows Human / Bot, columns Buy / Sell. GET /api/points is served by points.js.
+// This module is the per-pair ranking. Network totals come from matchPoints so
+// the two surfaces cannot drift.
+// Private vault cards never score. Seek and acquire stay off the board.
 // Private bot window and PM guide threads are different tables and are not counted.
-import { json, enforce, now, currentHuman } from './worker.js';
+import { json, enforce, currentHuman } from './worker.js';
 import { photoUrl } from './identity.js';
 import { twinAvatarUrl } from './twin_avatar.js';
+import {
+  POINTS_PHASE,
+  matchPoints,
+  emptyCells,
+  addCell,
+  addDominant,
+  cellTotal,
+  sameCells,
+  dominantSideSql,
+  PROPOSAL_SIDE_SQL,
+  INTRO_MESSAGE_SIDE_SQL,
+} from './points.js';
 
-export const POINTS_PHASE = 'aggregate';
-
-// Network-wide totals. Kept identical to the HUD scoreboard SQL so the two
-// surfaces cannot drift. One point per row. A post or thread written together
-// (author "both") scores once on Human and once on Bot.
-export const NETWORK_POINTS_SQL = `SELECT
-  (SELECT COUNT(*) FROM posts WHERE status = 'published' AND author_type IN ('human', 'both'))
-  + (SELECT COUNT(*) FROM intros WHERE proposed_by = 'human')
-  + (SELECT COUNT(*) FROM messages WHERE sender_type = 'human')
-  + (SELECT COUNT(*) FROM threads WHERE status = 'published' AND author_type IN ('human', 'both'))
-  AS human,
-  (SELECT COUNT(*) FROM posts WHERE status = 'published' AND author_type IN ('agent', 'both'))
-  + (SELECT COUNT(*) FROM intros WHERE proposed_by = 'agent')
-  + (SELECT COUNT(*) FROM messages WHERE sender_type = 'agent')
-  + (SELECT COUNT(*) FROM threads WHERE status = 'published' AND author_type IN ('agent', 'both'))
-  AS bot,
-  (SELECT COUNT(*) FROM vault_items WHERE type = 'buy' AND visibility <> 'private')
-  + (SELECT COUNT(*) FROM intros i JOIN vault_items v ON v.id = i.from_item_id OR v.id = i.to_item_id
-      WHERE i.status = 'accepted' AND v.type = 'buy' AND v.visibility <> 'private')
-  AS buy,
-  (SELECT COUNT(*) FROM vault_items WHERE type = 'sell' AND visibility <> 'private')
-  + (SELECT COUNT(*) FROM intros i JOIN vault_items v ON v.id = i.from_item_id OR v.id = i.to_item_id
-      WHERE i.status = 'accepted' AND v.type = 'sell' AND v.visibility <> 'private')
-  AS sell`;
+export { POINTS_PHASE };
 
 const PAIR_SQL = `SELECT
   h.id AS human_id,
@@ -57,32 +47,67 @@ const PAIR_SQL = `SELECT
   (SELECT COUNT(*) FROM threads t WHERE t.human_id = h.id AND t.status = 'published' AND t.author_type IN ('human','both')) AS community_human,
   (SELECT COUNT(*) FROM threads t WHERE t.human_id = h.id AND t.status = 'published' AND t.author_type IN ('agent','both')) AS community_bot,
   (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'buy' AND v.visibility <> 'private') AS vault_buy,
-  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'sell' AND v.visibility <> 'private') AS vault_sell
+  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'sell' AND v.visibility <> 'private') AS vault_sell,
+  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'buy' AND v.visibility <> 'private' AND v.created_by = 'human') AS vault_buy_human,
+  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'buy' AND v.visibility <> 'private' AND v.created_by = 'agent') AS vault_buy_bot,
+  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'sell' AND v.visibility <> 'private' AND v.created_by = 'human') AS vault_sell_human,
+  (SELECT COUNT(*) FROM vault_items v WHERE v.human_id = h.id AND v.type = 'sell' AND v.visibility <> 'private' AND v.created_by = 'agent') AS vault_sell_bot
 FROM humans h
 LEFT JOIN agents a ON a.human_id = h.id`;
 
-const ACCEPTED_SQL = `SELECT v.human_id AS human_id, v.type AS type, COUNT(*) AS n
+const ACCEPTED_SQL = `SELECT v.human_id AS human_id, v.type AS type, v.created_by AS created_by, COUNT(*) AS n
 FROM intros i
 JOIN vault_items v ON v.id = i.from_item_id OR v.id = i.to_item_id
 WHERE i.status = 'accepted' AND v.type IN ('buy','sell') AND v.visibility <> 'private'
-GROUP BY v.human_id, v.type`;
+GROUP BY v.human_id, v.type, v.created_by`;
+
+function proposalSql() {
+  return `SELECT i.from_human_id AS human_id, i.proposed_by AS actor, ${PROPOSAL_SIDE_SQL} AS side, COUNT(*) AS n
+FROM intros i
+LEFT JOIN vault_items fv ON fv.id = i.from_item_id
+LEFT JOIN vault_items tv ON tv.id = i.to_item_id
+GROUP BY 1, 2, 3`;
+}
+
+function introMsgSql() {
+  return `SELECT m.sender_human_id AS human_id, m.sender_type AS actor, ${INTRO_MESSAGE_SIDE_SQL} AS side, COUNT(*) AS n
+FROM messages m
+JOIN intros i ON i.id = m.intro_id
+LEFT JOIN vault_items fv ON fv.id = i.from_item_id
+LEFT JOIN vault_items tv ON tv.id = i.to_item_id
+GROUP BY 1, 2, 3`;
+}
 
 // Recent form only. Lifetime totals stay on the row; this is the 7-day sparkline.
 // Separate statements: D1 rejects a compound SELECT with this many UNION arms
 // ("too many terms in compound SELECT").
-const SPARK_QUERIES = [
-  `SELECT human_id AS human_id, substr(COALESCE(published_at, created_at), 1, 10) AS day,
-      (CASE WHEN author_type IN ('human','both') THEN 1 ELSE 0 END
-       + CASE WHEN author_type IN ('agent','both') THEN 1 ELSE 0 END) AS pts
-    FROM posts WHERE status = 'published' AND substr(COALESCE(published_at, created_at), 1, 10) >= ?`,
-  `SELECT from_human_id AS human_id, substr(created_at, 1, 10) AS day, 1 AS pts
-    FROM intros WHERE substr(created_at, 1, 10) >= ?`,
-  `SELECT sender_human_id AS human_id, substr(created_at, 1, 10) AS day, 1 AS pts
-    FROM messages WHERE substr(created_at, 1, 10) >= ?`,
-  `SELECT human_id AS human_id, substr(COALESCE(published_at, created_at), 1, 10) AS day,
-      (CASE WHEN author_type IN ('human','both') THEN 1 ELSE 0 END
-       + CASE WHEN author_type IN ('agent','both') THEN 1 ELSE 0 END) AS pts
-    FROM threads WHERE status = 'published' AND substr(COALESCE(published_at, created_at), 1, 10) >= ?`,
+function sparkQueries() {
+  return [
+  `SELECT p.human_id AS human_id, substr(COALESCE(p.published_at, p.created_at), 1, 10) AS day,
+      (CASE WHEN p.author_type IN ('human','both') AND ${dominantSideSql('p.human_id', 'human')} IS NOT NULL THEN 1 ELSE 0 END
+       + CASE WHEN p.author_type IN ('agent','both') AND ${dominantSideSql('p.human_id', 'agent')} IS NOT NULL THEN 1 ELSE 0 END) AS pts
+    FROM posts p WHERE p.status = 'published' AND substr(COALESCE(p.published_at, p.created_at), 1, 10) >= ?`,
+  `SELECT i.from_human_id AS human_id, substr(i.created_at, 1, 10) AS day,
+      CASE WHEN (${PROPOSAL_SIDE_SQL}) IS NOT NULL THEN 1 ELSE 0 END AS pts
+    FROM intros i
+    LEFT JOIN vault_items fv ON fv.id = i.from_item_id
+    LEFT JOIN vault_items tv ON tv.id = i.to_item_id
+    WHERE substr(i.created_at, 1, 10) >= ?`,
+  `SELECT m.sender_human_id AS human_id, substr(m.created_at, 1, 10) AS day,
+      CASE
+        WHEN m.intro_id IS NOT NULL AND (${INTRO_MESSAGE_SIDE_SQL}) IS NOT NULL THEN 1
+        WHEN m.intro_id IS NULL AND CASE WHEN m.sender_type = 'agent' THEN ${dominantSideSql('m.sender_human_id', 'agent')} ELSE ${dominantSideSql('m.sender_human_id', 'human')} END IS NOT NULL THEN 1
+        ELSE 0
+      END AS pts
+    FROM messages m
+    LEFT JOIN intros i ON i.id = m.intro_id
+    LEFT JOIN vault_items fv ON fv.id = i.from_item_id
+    LEFT JOIN vault_items tv ON tv.id = i.to_item_id
+    WHERE substr(m.created_at, 1, 10) >= ?`,
+  `SELECT t.human_id AS human_id, substr(COALESCE(t.published_at, t.created_at), 1, 10) AS day,
+      (CASE WHEN t.author_type IN ('human','both') AND ${dominantSideSql('t.human_id', 'human')} IS NOT NULL THEN 1 ELSE 0 END
+       + CASE WHEN t.author_type IN ('agent','both') AND ${dominantSideSql('t.human_id', 'agent')} IS NOT NULL THEN 1 ELSE 0 END) AS pts
+    FROM threads t WHERE t.status = 'published' AND substr(COALESCE(t.published_at, t.created_at), 1, 10) >= ?`,
   `SELECT human_id AS human_id, substr(created_at, 1, 10) AS day, 1 AS pts
     FROM vault_items WHERE type IN ('buy','sell') AND visibility <> 'private' AND substr(created_at, 1, 10) >= ?`,
   `SELECT v.human_id AS human_id, substr(COALESCE(i.recipient_decided_at, i.created_at), 1, 10) AS day, 1 AS pts
@@ -90,7 +115,8 @@ const SPARK_QUERIES = [
     JOIN vault_items v ON v.id = i.from_item_id OR v.id = i.to_item_id
     WHERE i.status = 'accepted' AND v.type IN ('buy','sell') AND v.visibility <> 'private'
       AND substr(COALESCE(i.recipient_decided_at, i.created_at), 1, 10) >= ?`,
-];
+  ];
+}
 
 export const ACTIVITY_DEFS = [
   { key: 'posts', label: 'Posts', hint: 'Published posts. Written together scores 1 Human and 1 Bot.' },
@@ -122,22 +148,17 @@ function utcDay(offset) {
   return d.toISOString().slice(0, 10);
 }
 
-export async function networkPoints(env) {
-  const row = await env.DB.prepare(NETWORK_POINTS_SQL).first();
-  const human = n(row && row.human);
-  const bot = n(row && row.bot);
-  const buy = n(row && row.buy);
-  const sell = n(row && row.sell);
-  return {
-    human, bot, buy, sell,
-    total: human + bot + buy + sell,
-    phase: POINTS_PHASE,
-    includes_demo: true,
-    as_of: now(),
-  };
+function blankSides() {
+  return emptyCells();
 }
 
-function scorePair(row, accepted) {
+function foldSides(map, humanId, actor, side, pts) {
+  if (side !== 'buy' && side !== 'sell') return;
+  if (!map.has(humanId)) map.set(humanId, blankSides());
+  addCell(map.get(humanId), actor, side, pts);
+}
+
+function scorePair(row, accepted, proposals, introMsgs) {
   const postsHuman = n(row.posts_human);
   const postsBot = n(row.posts_bot);
   const proposedHuman = n(row.intros_proposed_human);
@@ -150,14 +171,35 @@ function scorePair(row, accepted) {
   const communityBot = n(row.community_bot);
   const vaultBuy = n(row.vault_buy);
   const vaultSell = n(row.vault_sell);
-  const acc = accepted.get(row.human_id) || { buy: 0, sell: 0 };
-  const human = postsHuman + proposedHuman + matchHuman + directHuman + communityHuman;
-  const bot = postsBot + proposedBot + matchBot + directBot + communityBot;
-  const buy = vaultBuy + acc.buy;
-  const sell = vaultSell + acc.sell;
+  const acc = accepted.get(row.human_id) || blankSides();
+  const cells = blankSides();
+  addCell(cells, 'human', 'buy', row.vault_buy_human);
+  addCell(cells, 'bot', 'buy', row.vault_buy_bot);
+  addCell(cells, 'human', 'sell', row.vault_sell_human);
+  addCell(cells, 'bot', 'sell', row.vault_sell_bot);
+  addCell(cells, 'human', 'buy', acc.human.buy);
+  addCell(cells, 'human', 'sell', acc.human.sell);
+  addCell(cells, 'bot', 'buy', acc.bot.buy);
+  addCell(cells, 'bot', 'sell', acc.bot.sell);
+  const prop = proposals.get(row.human_id);
+  const intro = introMsgs.get(row.human_id);
+  if (prop) {
+    addCell(cells, 'human', 'buy', prop.human.buy);
+    addCell(cells, 'human', 'sell', prop.human.sell);
+    addCell(cells, 'bot', 'buy', prop.bot.buy);
+    addCell(cells, 'bot', 'sell', prop.bot.sell);
+  }
+  if (intro) {
+    addCell(cells, 'human', 'buy', intro.human.buy);
+    addCell(cells, 'human', 'sell', intro.human.sell);
+    addCell(cells, 'bot', 'buy', intro.bot.buy);
+    addCell(cells, 'bot', 'sell', intro.bot.sell);
+  }
+  addDominant(cells, 'human', row.vault_buy_human, row.vault_sell_human, postsHuman + communityHuman + directHuman);
+  addDominant(cells, 'bot', row.vault_buy_bot, row.vault_sell_bot, postsBot + communityBot + directBot);
   const activities = {
     posts: postsHuman + postsBot,
-    intros_accepted: acc.buy + acc.sell,
+    intros_accepted: cellTotal(acc),
     intros_proposed: proposedHuman + proposedBot,
     vault_buy: vaultBuy,
     vault_sell: vaultSell,
@@ -165,11 +207,7 @@ function scorePair(row, accepted) {
     community: communityHuman + communityBot,
     direct_messages: directHuman + directBot,
   };
-  return {
-    human, bot, buy, sell,
-    total: human + bot + buy + sell,
-    activities,
-  };
+  return { cells, total: cellTotal(cells), activities };
 }
 
 function activityList(map) {
@@ -228,42 +266,46 @@ function publicEntry(row, scored, { redact, isYou, spark }) {
     human,
     agent,
     is_you: !!isYou,
-    points: {
-      human: scored.human,
-      bot: scored.bot,
-      buy: scored.buy,
-      sell: scored.sell,
-      total: scored.total,
-    },
+    points: pointsOf(scored),
     activities: activityList(scored.activities),
     sparkline: spark,
   };
 }
 
+function pointsOf(scored) {
+  const c = scored ? scored.cells : emptyCells();
+  return {
+    human: { buy: c.human.buy, sell: c.human.sell },
+    bot: { buy: c.bot.buy, sell: c.bot.sell },
+    total: scored ? scored.total : 0,
+  };
+}
+
 async function loadBoard(env) {
-  const [humans, acceptedRows, network] = await Promise.all([
+  const [humans, acceptedRows, proposalRows, introRows, network] = await Promise.all([
     env.DB.prepare(PAIR_SQL).all(),
     env.DB.prepare(ACCEPTED_SQL).all(),
-    networkPoints(env),
+    env.DB.prepare(proposalSql()).all(),
+    env.DB.prepare(introMsgSql()).all(),
+    matchPoints(env),
   ]);
   const accepted = new Map();
-  for (const r of (acceptedRows.results || [])) {
-    const cur = accepted.get(r.human_id) || { buy: 0, sell: 0 };
-    if (r.type === 'buy') cur.buy += n(r.n);
-    else if (r.type === 'sell') cur.sell += n(r.n);
-    accepted.set(r.human_id, cur);
-  }
+  for (const r of (acceptedRows.results || [])) foldSides(accepted, r.human_id, r.created_by, r.type, r.n);
+  const proposals = new Map();
+  for (const r of (proposalRows.results || [])) foldSides(proposals, r.human_id, r.actor, r.side, r.n);
+  const introMsgs = new Map();
+  for (const r of (introRows.results || [])) foldSides(introMsgs, r.human_id, r.actor, r.side, r.n);
   const scored = [];
-  const sum = { human: 0, bot: 0, buy: 0, sell: 0 };
+  const sum = emptyCells();
   for (const row of (humans.results || [])) {
-    const s = scorePair(row, accepted);
-    sum.human += s.human;
-    sum.bot += s.bot;
-    sum.buy += s.buy;
-    sum.sell += s.sell;
+    const s = scorePair(row, accepted, proposals, introMsgs);
+    addCell(sum, 'human', 'buy', s.cells.human.buy);
+    addCell(sum, 'human', 'sell', s.cells.human.sell);
+    addCell(sum, 'bot', 'buy', s.cells.bot.buy);
+    addCell(sum, 'bot', 'sell', s.cells.bot.sell);
     scored.push({ row, scored: s });
   }
-  const reconciled = sum.human === network.human && sum.bot === network.bot && sum.buy === network.buy && sum.sell === network.sell;
+  const reconciled = sameCells(sum, network);
   return { scored, network, reconciled, sum };
 }
 
@@ -274,7 +316,7 @@ async function sparkMap(env, ids) {
   const map = new Map();
   if (!ids.length) return { days, map };
   const want = new Set(ids);
-  const batches = await Promise.all(SPARK_QUERIES.map(async (sql) => {
+  const batches = await Promise.all(sparkQueries().map(async (sql) => {
     try {
       const q = await env.DB.prepare(sql).bind(start).all();
       return q.results || [];
@@ -322,26 +364,14 @@ export async function top10(env, { scope = 'all', viewerId = null } = {}) {
       viewer = {
         on_board: idx < 10,
         rank: idx + 1,
-        points: {
-          human: pool[idx].scored.human,
-          bot: pool[idx].scored.bot,
-          buy: pool[idx].scored.buy,
-          sell: pool[idx].scored.sell,
-          total: pool[idx].scored.total,
-        },
+        points: pointsOf(pool[idx].scored),
       };
     } else {
       const mine = scored.find(x => x.row.human_id === viewerId);
       viewer = {
         on_board: false,
         rank: null,
-        points: mine ? {
-          human: mine.scored.human,
-          bot: mine.scored.bot,
-          buy: mine.scored.buy,
-          sell: mine.scored.sell,
-          total: mine.scored.total,
-        } : { human: 0, bot: 0, buy: 0, sell: 0, total: 0 },
+        points: pointsOf(mine ? mine.scored : null),
       };
     }
   }
@@ -370,17 +400,12 @@ export async function top10(env, { scope = 'all', viewerId = null } = {}) {
     sparkline_days: spark.days,
     scoring: {
       aligns_with: 'GET /api/points',
-      buckets: ['human', 'bot', 'buy', 'sell'],
-      note: 'Same weights as the HUD Match Point scoreboard (platform totals). This board ranks each verified human with their one agent. Private vault cards do not score. Seek and acquire do not score in this phase.',
+      rows: ['human', 'bot'],
+      columns: ['buy', 'sell'],
+      note: 'Same matrix as the HUD scoreboard. Rows are the actor. Columns are the vault side. This board ranks each verified human with their one agent. Private vault cards do not score. Seek and acquire do not score. Activity with no non-private buy or sell side does not score.',
     },
     distinct_from: ['reciprocal_top_100', 'hud_scoreboard'],
-    network: {
-      human: network.human,
-      bot: network.bot,
-      buy: network.buy,
-      sell: network.sell,
-      total: network.total,
-    },
+    network,
     reconciled,
     count: rows.length,
     rows,
