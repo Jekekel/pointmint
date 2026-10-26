@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 40" width="128" height="40" role="img" aria-label="Sunglasses overlay">
+  <defs><linearGradient id="L" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b2430"/><stop offset="0.55" stop-color="#05070b"/><stop offset="1" stop-color="#1a3350"/></linearGradient></defs>
+  <g id="sunglasses" data-part="sunglasses">
+    <path d="M14 18 L6 14 M114 18 L122 14" stroke="#0a0d12" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M16 10 H48 L46 30 Q45 36 40 36 H24 Q18 36 17 30 Z" fill="url(#L)" stroke="#0a0d12" stroke-width="2.6" stroke-linejoin="round"/>
+    <path d="M80 10 H112 L110 30 Q109 36 104 36 H88 Q82 36 81 30 Z" fill="url(#L)" stroke="#0a0d12" stroke-width="2.6" stroke-linejoin="round"/>
+    <rect x="47" y="14" width="14" height="4" rx="2" fill="#0a0d12"/>
+  </g>
+</svg>

@@ -1,19 +1,64 @@
-// PointMint · Six degrees: "How am I connected to…?", reserved (unclaimed) public-figure profiles + the claim flow,
-// opt-out / dispute requests, and the consented LinkedIn import (data-export ZIP parsed in the browser; OIDC stubbed).
-// Classic script loaded after app.js: shares its helpers (esc, api, icon, go, solo, routes…). CSP-safe: no inline styles.
+// PointMint · Six degrees: "How am I connected to…?", reserved profiles, claim + LinkedIn import.
+// Find-me / connect UX lives in the second column (narrow filters + live graph to the right), not the HUD.
+// Classic script after app.js. CSP-safe: no inline styles.
 'use strict';
 const RESERVED_NOTICE = 'Unclaimed profile, built from public sources, not affiliated with or operated by this person';
-const ENT_LABEL = { company: 'Company', school: 'School', investor: 'Investor', industry: 'Industry', event: 'Event', deal: 'Deal', skill: 'Skill', human: 'Member', reserved: 'Unclaimed profile' };
+const ENT_LABEL = { company: 'Company', school: 'School', investor: 'Investor', industry: 'Industry', event: 'Event', deal: 'Deal', skill: 'Skill', human: 'Member', reserved: 'Unclaimed profile', agent: 'AI agent' };
 const PROV_SHORT = { pointmint: 'Verified humans', member: 'Member', member_import: 'Member import', demo: 'Demo data', public_source: 'Public source', system: 'PointMint' };
 const initialsOf = n => String(n || '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
 const hollow = (name, size = '') => `<span class="rp-glyph ${size}" aria-hidden="true">${esc(initialsOf(name))}</span>`;
 const extLink = (u, label) => /^https:\/\//.test(u || '') ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer nofollow" class="src">${esc(label || new URL(u).hostname.replace(/^www\./, ''))}</a>` : `<span class="src t-dim">${esc(u && u.startsWith('pointmint:') ? 'PointMint record' : u || '')}</span>`;
+
+// ---------- identity path: human + their agent are one ----------
+function identityHref(n) {
+  if (!n) return null;
+  if (n.type === 'entity') return (n.handle ? '/' + n.handle : null) || n.href || ('/connect?to=' + encodeURIComponent(n.id));
+  if (n.type === 'agent' && n.human_id) {
+    const hum = (window.PMGraph && PMGraph.node(n.human_id)) || null;
+    return (hum && hum.handle) ? '/' + hum.handle : (hum && hum.href) || ('/h/' + n.human_id);
+  }
+  if (n.type === 'human') return n.handle ? '/' + n.handle : (n.href || ('/h/' + (n.id || n.human_id)));
+  if (n.type === 'reserved') return n.href || '/p/' + n.id;
+  return n.href || (n.handle ? '/' + n.handle : (n.human_id ? '/h/' + n.human_id : null));
+}
+function pairFor(id) {
+  if (!window.PMGraph || !id) return null;
+  const n = PMGraph.node(id); if (!n) return null;
+  if (n.type === 'human') {
+    const a = PMGraph.G.nodes.find(x => x.type === 'agent' && x.human_id === n.id);
+    return { human: n, agent: a || null };
+  }
+  if (n.type === 'agent' && n.human_id) {
+    const h = PMGraph.node(n.human_id);
+    return { human: h || null, agent: n };
+  }
+  return { human: n.type === 'reserved' ? n : null, agent: null, other: n };
+}
+function identityChip(n) {
+  if (!n) return '';
+  if (n.type === 'human' || n.type === 'agent') {
+    const pair = pairFor(n.id) || { human: n.type === 'human' ? n : null, agent: n.type === 'agent' ? n : null };
+    const h = pair.human, a = pair.agent;
+    const href = h ? (h.handle ? '/' + h.handle : (h.href || ('/h/' + h.id))) : identityHref(n);
+    const hImg = h ? `<img class="yy-h" src="${esc(h.photo_url || '/avatars/' + encodeURIComponent(h.id) + '.svg')}" alt="" width="20" height="20">` : '<span class="id-dot h"></span>';
+    const aImg = a ? `<img src="${esc(a.avatar_url || '/avatars/' + encodeURIComponent(a.id) + '.svg')}" alt="" width="14" height="14">` : '';
+    const mark = h && a
+      ? `<span class="yy-pair" aria-hidden="true">${hImg}<span class="yy-a">${aImg}</span></span>`
+      : (n.type === 'human' ? '<span class="id-dot h" aria-hidden="true"></span>' : '<span class="id-dot a" aria-hidden="true"></span>');
+    const label = h ? plain(h.label || h.name || n.label) : plain(n.label);
+    const sub = h && a ? 'Human + AI' : (n.type === 'agent' ? 'AI agent' : 'Verified human');
+    const inner = `${mark}<span>${esc(label)}</span><span class="t-dim">${esc(sub)}</span>`;
+    return href ? `<a class="nchip id-pair" href="${esc(href)}" data-link>${inner}</a>` : `<span class="nchip id-pair">${inner}</span>`;
+  }
+  return nodeChip(n);
+}
 function nodeChip(n) {
   if (!n) return '';
+  if (n.type === 'human' || n.type === 'agent') return identityChip(n);
   const k = n.type === 'entity' ? n.kind : n.type;
-  const ic = n.type === 'human' ? '<span class="id-dot h" aria-hidden="true"></span>' : n.type === 'reserved' ? hollow(n.label, 'xs') : `<span class="ent-dot e-${esc(k)}" aria-hidden="true"></span>`;
-  const inner = `${ic}<span>${esc(plain(n.label))}</span>${n.type !== 'human' ? `<span class="t-dim">${esc(ENT_LABEL[k] || k)}</span>` : `<span class="t-dim">Verified human${n.demo ? ' · Demo' : ''}</span>`}`;
-  const href = n.type === 'human' ? `/h/${n.id}` : n.type === 'reserved' ? `/p/${n.id}` : null;
+  const ic = n.type === 'reserved' ? hollow(n.label, 'xs') : `<span class="ent-dot e-${esc(k)}" aria-hidden="true"></span>`;
+  const inner = `${ic}<span>${esc(plain(n.label))}</span><span class="t-dim">${esc(ENT_LABEL[k] || k)}</span>`;
+  const href = n.type === 'reserved' ? `/p/${n.id}` : null;
   return href ? `<a class="nchip" href="${esc(href)}" data-link>${inner}</a>` : `<span class="nchip">${inner}</span>`;
 }
 function hopHtml(h, i) {
@@ -23,35 +68,278 @@ function hopHtml(h, i) {
     <p class="hop-why"><b>${esc(e.label)}</b> · ${esc(e.why || '')}</p>
     <p class="hop-meta"><span class="pv p-${esc(e.provenance)}">${esc(PROV_SHORT[e.provenance] || e.provenance)}</span><span class="num">confidence ${esc(Math.round((e.confidence || 0) * 100))}%</span>${e.href ? `<a href="${esc(e.href)}" data-link class="src">Open intro</a>` : extLink(e.source)}</p></div></li>`;
 }
-let CX = null;
+
+// ---------- find-me / connect mode state ----------
+let CX = null;           // last single-path detail (for tabs)
+let CX_SEL = [];         // [{id,label,type,kind?}]
+let CX_RESULTS = {};     // id -> API result
+let CX_FOCUS = null;     // which selection shows hop detail
+let CX_PREV_R = null;
+let CX_OPEN_PICK = false;
+
+function parseToParam() {
+  const raw = new URLSearchParams(location.search).get('to') || '';
+  if (!raw) return [];
+  return raw.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8);
+}
+function syncToUrl() {
+  const ids = CX_SEL.map(t => t.id);
+  const next = ids.length ? '/connect?to=' + ids.map(encodeURIComponent).join(',') : '/connect';
+  if (location.pathname + location.search !== next) history.replaceState({}, '', next);
+}
+function enterCxMode() {
+  const d = document.getElementById('deck'); if (!d) return;
+  const first = d.dataset.cx !== 'on';
+  d.dataset.cx = 'on';
+  if (first && !mobileMQ.matches) {
+    CX_PREV_R = store.get('pm-rail-r', '') || railState('r');
+    store.set('pm-rail-r', 'rail');
+    applyRails();
+  } else applyRails();
+  if (typeof fpApply === 'function') fpApply();
+  if (window.PMGraph && PMGraph.relayout) setTimeout(() => PMGraph.relayout(), 420);
+}
+function exitCxMode() {
+  const d = document.getElementById('deck'); if (!d || d.dataset.cx !== 'on') return;
+  d.dataset.cx = '';
+  if (CX_PREV_R !== null) { store.set('pm-rail-r', CX_PREV_R === 'rail' ? 'rail' : 'open'); CX_PREV_R = null; }
+  applyRails();
+  CX_SEL = []; CX_RESULTS = {}; CX_FOCUS = null; CX = null;
+  if (window.PMGraph) PMGraph.showPath(null);
+}
+window.PMConnect = { enter: enterCxMode, exit: exitCxMode, identityHref, selected: () => CX_SEL.slice() };
+
+function enrichTargetsWithAgents(nodeIds) {
+  const out = [];
+  for (const id of nodeIds) {
+    out.push(id);
+    if (!window.PMGraph) continue;
+    const n = PMGraph.node(id);
+    if (n && n.type === 'human') {
+      const a = PMGraph.G.nodes.find(x => x.type === 'agent' && x.human_id === id);
+      if (a) out.push(a.id);
+    } else if (n && n.type === 'agent' && n.human_id) out.push(n.human_id);
+  }
+  return out;
+}
+function paintPathsLive() {
+  if (!window.PMGraph) return;
+  const paths = [];
+  const order = CX_FOCUS && CX_RESULTS[CX_FOCUS] ? [CX_FOCUS, ...CX_SEL.map(t => t.id).filter(id => id !== CX_FOCUS)] : CX_SEL.map(t => t.id);
+  for (const id of order) {
+    const R = CX_RESULTS[id];
+    if (!R || !R.paths || !R.paths.length) continue;
+    const idx = (CX_FOCUS === id && CX && CX.target && CX.target.id === id)
+      ? Math.max(0, [...document.querySelectorAll('.cx-tabs [role=tab]')].findIndex(t => t.getAttribute('aria-selected') === 'true'))
+      : 0;
+    const p = R.paths[Math.min(idx, R.paths.length - 1)];
+    if (p && p.nodes && p.nodes.length) paths.push(enrichTargetsWithAgents(p.nodes));
+  }
+  if (!paths.length) { PMGraph.showPath(null); return; }
+  PMGraph.showPath(paths.length === 1 ? paths[0] : paths);
+}
+
+async function fetchPathFor(id) {
+  const R = await api('/api/connect/path?to=' + encodeURIComponent(id));
+  // Resolve name → canonical id, and keep the result keyed by the canonical id (selection updates to match).
+  const t = CX_SEL.find(x => x.id === id || (R.target && x.id === R.target.id));
+  if (R.target && t) {
+    if (t.id !== R.target.id) { delete CX_RESULTS[t.id]; t.id = R.target.id; }
+    t.label = R.target.label; t.type = R.target.type || t.type; t.kind = R.target.kind;
+  }
+  const key = (t && t.id) || (R.target && R.target.id) || id;
+  CX_RESULTS[key] = R;
+  return R;
+}
+async function refreshAllPaths() {
+  const box = document.getElementById('cxResults');
+  if (!CX_SEL.length) {
+    CX_RESULTS = {}; CX = null; CX_FOCUS = null;
+    if (box) box.innerHTML = `<div class="cx-empty"><p class="small muted">Pick people or entities. Paths light up on the graph as you select them.</p>
+      <p class="cx-sugg">${['Elon Musk', 'Howard Schultz', 'Patrick Collison', 'Stanford University', 'Rowan Ashby'].map(n => `<button type="button" class="cx-sug" data-action="cx-quick" data-q="${esc(n)}">${esc(n)}</button>`).join('')}</p></div>`;
+    paintPathsLive(); syncToUrl(); return;
+  }
+  if (box) box.innerHTML = `<p class="small muted" role="status">Finding paths…</p>`;
+  try {
+    await Promise.all(CX_SEL.map(t => fetchPathFor(t.id)));
+    if (!CX_FOCUS || !CX_SEL.some(t => t.id === CX_FOCUS)) CX_FOCUS = CX_SEL[0].id;
+    CX = CX_RESULTS[CX_FOCUS] || null;
+    if (box) box.innerHTML = resultsPanelHtml();
+    paintPathsLive(); syncToUrl();
+  } catch (e) { if (box) box.innerHTML = err(e); }
+}
+
 function pathsHtml(R) {
-  if (!R.target) return `<div class="panel pad"><p>${esc(R.note || 'No match.')}</p>${(R.candidates || []).length ? `<p class="small muted">Did you mean: ${R.candidates.map(c => `<a href="/connect?to=${encodeURIComponent(c.id)}" data-link>${esc(plain(c.label))}</a>`).join(', ')}</p>` : ''}</div>`;
+  if (!R || !R.target) return `<div class="panel pad"><p>${esc((R && R.note) || 'No match.')}</p>${(R && R.candidates || []).length ? `<p class="small muted">Did you mean: ${R.candidates.map(c => `<button type="button" class="linkish" data-action="cx-quick" data-q="${esc(c.id)}">${esc(plain(c.label))}</button>`).join(', ')}</p>` : ''}</div>`;
   const t = R.target;
   const head = `<div class="cx-ends">${nodeChip(R.from)}<span class="cx-deg num">${R.paths.length ? esc(R.paths[0].hops_count) + '°' : '—'}</span>${nodeChip(t)}</div>
     ${t.unclaimed ? `<p class="rp-note" role="note">${icon('info')}<span>${esc(RESERVED_NOTICE)}. No AI agent; can’t be messaged.</span></p>` : ''}`;
   if (!R.paths.length) return head + `<div class="panel pad"><p>${esc(R.note || 'No path found.')}</p></div>`;
   const tabs = `<div class="cx-tabs" role="tablist" aria-label="Alternative paths">${R.paths.map((p, i) => `<button type="button" role="tab" id="cxt-${i}" aria-controls="cxp-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-action="cx-path" data-i="${i}"><b>Path ${p.rank}</b><span class="num">${p.hops_count} hop${p.hops_count === 1 ? '' : 's'} · ${p.strength}/100</span><span class="cx-mix">${p.verified_human_hops ? `<i class="vh">${p.verified_human_hops} verified</i>` : ''}${p.public_data_hops ? `<i class="pd">${p.public_data_hops} public</i>` : ''}</span></button>`).join('')}</div>`;
   const panels = R.paths.map((p, i) => `<div class="hops-p" role="tabpanel" id="cxp-${i}" aria-labelledby="cxt-${i}" ${i ? 'hidden' : ''}><ol class="hops">${p.hops.map(hopHtml).join('')}</ol></div>`).join('');
-  const mutual = R.mutual.length || R.shared_context.length ? `<section class="m-sec">${groupLabel('Mutual connections', 'Shared with both of you')}<ul class="mutual">${R.mutual.map(m => `<li><span class="ent-dot e-${esc(m.type)}" aria-hidden="true"></span><b>${esc(plain(m.name))}</b><span class="t-dim">${esc(ENT_LABEL[m.type] || m.type)}</span><span class="mw">You: ${esc(m.you)} · Them: ${esc(m.them)}</span></li>`).join('')}${R.shared_context.map(m => `<li class="ctx"><span class="ent-dot e-${esc(m.type)}" aria-hidden="true"></span><b>${esc(m.name)}</b><span class="t-dim">${esc(ENT_LABEL[m.type] || m.type)} · on a path</span></li>`).join('')}</ul></section>` : '';
+  const mutual = R.mutual.length || R.shared_context.length ? `<section class="m-sec">${groupLabel('Mutual', 'Shared with both')}<ul class="mutual">${R.mutual.map(m => `<li><span class="ent-dot e-${esc(m.type)}" aria-hidden="true"></span><b>${esc(plain(m.name))}</b><span class="t-dim">${esc(ENT_LABEL[m.type] || m.type)}</span><span class="mw">You: ${esc(m.you)} · Them: ${esc(m.them)}</span></li>`).join('')}${R.shared_context.map(m => `<li class="ctx"><span class="ent-dot e-${esc(m.type)}" aria-hidden="true"></span><b>${esc(m.name)}</b><span class="t-dim">${esc(ENT_LABEL[m.type] || m.type)} · on a path</span></li>`).join('')}</ul></section>` : '';
   return head + tabs + panels + mutual + `<p class="foot-note section-gap">${icon('info')}${esc(R.ranking)} <a href="/connect.md?to=${encodeURIComponent(t.id)}">.md</a> · <a href="/api/connect/path?to=${encodeURIComponent(t.id)}">JSON</a></p>`;
 }
-function connectForm(v = '') {
-  return `<form id="connectForm" class="cx-form" role="search" autocomplete="off"><label for="cxq" class="cx-label">How am I connected to…?</label>
-    <div class="cx-input">${icon('search')}<input id="cxq" name="to" type="search" value="${esc(v)}" placeholder="Try Elon Musk, Stripe, Stanford…" role="combobox" aria-expanded="false" aria-controls="cxList" aria-autocomplete="list" required maxlength="80"><button class="btn small">Find paths</button></div>
-    <ul id="cxList" role="listbox" aria-label="People and entities" hidden></ul></form>`;
+function resultsPanelHtml() {
+  const tabs = CX_SEL.length > 1 ? `<div class="cx-sel-tabs" role="tablist" aria-label="Selected targets">${CX_SEL.map(t => {
+    const R = CX_RESULTS[t.id]; const deg = R && R.paths && R.paths[0] ? R.paths[0].hops_count + '°' : '—';
+    return `<button type="button" role="tab" data-action="cx-focus" data-id="${esc(t.id)}" aria-selected="${t.id === CX_FOCUS}"><span>${esc(plain(t.label))}</span><span class="num">${esc(deg)}</span></button>`;
+  }).join('')}</div>` : '';
+  const R = CX_RESULTS[CX_FOCUS] || CX;
+  return tabs + (R ? pathsHtml(R) : `<p class="small muted">No path yet.</p>`);
 }
+
+function chipFiltersHtml() {
+  const keys = [['humans', 'h', 'Humans'], ['agents', 'a', 'Agents'], ['intros', 'i', 'Intros'], ['matches', 'm', 'Matches'], ['posts', 'p', 'Posts'], ['intents', 'v', 'Intents'], ['entities', 'e', 'Shared'], ['public', 'u', 'Unclaimed']];
+  return `<div class="chips cx-chips" role="group" aria-label="Show in the graph">
+    ${keys.map(([k, c, l]) => `<button type="button" data-chip="${k}" aria-pressed="true"><span class="cd ${c}" aria-hidden="true"></span>${l}</button>`).join('')}
+    <button type="button" data-action="graph-fit" class="fit" aria-label="Fit the whole graph">Fit</button>
+  </div>`;
+}
+function selectedChipsHtml() {
+  if (!CX_SEL.length) return `<p class="cx-sel-empty small muted">No one selected yet.</p>`;
+  return `<ul class="cx-sel" aria-label="Selected people">${CX_SEL.map(t => `<li><span class="cx-sel-chip">${esc(plain(t.label))}<button type="button" data-action="cx-remove" data-id="${esc(t.id)}" aria-label="Remove ${esc(plain(t.label))}">×</button></span></li>`).join('')}</ul>`;
+}
+function filterColumnHtml() {
+  return `<div class="cx-panel">
+    <header class="cx-panel-head">
+      <p class="eyebrow">Find me · Connections</p>
+      <h1 class="cx-h">How am I connected?</h1>
+      <p class="small muted">Human and AI agent are one identity. Paths light up on the graph to the right.</p>
+    </header>
+    <div class="gsearch cx-gsearch" role="search">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <label class="sr-only" for="gq">Find a person, agent or intent in the graph</label>
+      <input id="gq" type="search" placeholder="Find in graph" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="gqList" aria-autocomplete="list">
+      <kbd aria-hidden="true">/</kbd>
+      <ul id="gqList" role="listbox" aria-label="Matches in the graph" hidden></ul>
+    </div>
+    <div class="cx-actions">
+      <button type="button" class="btn small cx-pick-btn" data-action="cx-open-pick">${icon('link')}<span>Choose people</span></button>
+      <button type="button" class="btn small secondary" data-action="graph-findme" title="Centre on you (Y)">${icon('seek')}<span>Find me</span></button>
+    </div>
+    <section class="cx-sec" aria-labelledby="cxSelTitle"><h2 class="cx-sec-h" id="cxSelTitle">Selected <span class="num">${CX_SEL.length}</span></h2>${selectedChipsHtml()}</section>
+    <section class="cx-sec" aria-labelledby="cxFiltTitle"><h2 class="cx-sec-h" id="cxFiltTitle">Graph filters</h2>${chipFiltersHtml()}</section>
+    <div id="cxResults" class="cx-results" aria-live="polite"></div>
+    <p class="cx-from small muted">${ME && ME.signed_in ? 'Paths start from you.' : 'Viewing as demo member Dana Reyes. <a href="/signup" data-link>Sign in</a> to start from yourself.'}</p>
+  </div>`;
+}
+
+// Back-compat helper used on home before redesign; now a CTA into column mode + picker.
+function connectForm(v = '') {
+  return `<div class="cx-cta">
+    <p class="cx-label">How am I connected to…?</p>
+    <p class="small muted">Open the connections panel — pick several people; paths light up on the knowledge graph.</p>
+    <div class="cx-cta-row">
+      <a class="btn small" href="/connect${v ? '?to=' + encodeURIComponent(v) : ''}" data-link data-cx-pick="${v ? '0' : '1'}">How am I connected?</a>
+      <button type="button" class="btn small secondary" data-action="cx-open-pick">Choose people</button>
+    </div>
+  </div>`;
+}
+
 solo.connect = async () => {
-  const to = new URLSearchParams(location.search).get('to') || '';
-  CX = null; let body = '';
-  if (to) { try { CX = await api('/api/connect/path?to=' + encodeURIComponent(to)); body = pathsHtml(CX); } catch (e) { body = err(e); } }
-  else body = `<div class="cx-try"><p class="small muted">Up to 6 hops, top 3 alternatives. Every hop says WHY, with its source. Paths through verified humans rank above public-data links.</p><p class="cx-sugg">${['Elon Musk', 'Howard Schultz', 'Patrick Collison', 'Stanford University', 'Rowan Ashby'].map(n => `<a href="/connect?to=${encodeURIComponent(n)}" data-link>${esc(n)}</a>`).join('')}</p></div>`;
-  POST_RENDER = () => { if (CX && CX.paths && CX.paths[0] && window.PMGraph) PMGraph.showPath(CX.paths[0].nodes); else if (window.PMGraph) PMGraph.showPath(null); };
-  const from = CX && CX.from ? `<p class="small muted cx-from">${ME && ME.signed_in ? 'From you' : 'Viewing as demo member Dana Reyes. <a href="/signup" data-link>Sign in</a> to start from yourself.'}</p>` : '';
-  return `<div class="page cx"><h1 class="sr-only">How am I connected${to ? ' to ' + esc(to) : ''}?</h1>${connectForm(to)}${from}${body}</div>`;
+  enterCxMode();
+  const tos = parseToParam();
+  CX_SEL = []; CX_RESULTS = {}; CX_FOCUS = null; CX = null;
+  for (const raw of tos) CX_SEL.push({ id: raw, label: raw, type: 'unknown' });
+  // Picker opens only when entry set data-cx-pick (How am I connected?), not every Connections nav visit.
+  POST_RENDER = () => {
+    enterCxMode();
+    if (typeof initHud === 'function') initHud();
+    // Sync chip pressed state from the live graph filters (chips are recreated each visit).
+    if (window.PMGraph && PMGraph.G) {
+      document.querySelectorAll('.cx-chips [data-chip]').forEach(b => {
+        const on = !PMGraph.G.hidden.has(b.dataset.chip);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    }
+    const box = document.getElementById('cxResults');
+    if (CX_SEL.length) refreshAllPaths();
+    else if (box) box.innerHTML = `<div class="cx-empty"><p class="small muted">Pick people or entities. Paths light up on the graph as you select them.</p>
+      <p class="cx-sugg">${['Elon Musk', 'Howard Schultz', 'Patrick Collison', 'Stanford University', 'Rowan Ashby'].map(n => `<button type="button" class="cx-sug" data-action="cx-quick" data-q="${esc(n)}">${esc(n)}</button>`).join('')}</p></div>`;
+    const gq = document.getElementById('gq'); if (gq && !CX_OPEN_PICK) setTimeout(() => gq.focus({ preventScroll: true }), 60);
+    if (CX_OPEN_PICK) { CX_OPEN_PICK = false; openPickDialog(); }
+  };
+  return `<div class="page cx cx-mode"><h1 class="sr-only">How am I connected?</h1>${filterColumnHtml()}</div>`;
 };
+
+// ---------- multi-select popup ----------
+function openPickDialog() {
+  const dlg = document.getElementById('cxPick'); if (!dlg) return;
+  const list = document.getElementById('cxPickList');
+  const q = document.getElementById('cxPickQ');
+  if (q) q.value = '';
+  renderPickList([]);
+  if (!dlg.open) dlg.showModal();
+  if (q) setTimeout(() => q.focus(), 40);
+  // seed with current selection summary
+  syncPickSelected();
+}
+function syncPickSelected() {
+  const box = document.getElementById('cxPickSel'); if (!box) return;
+  box.innerHTML = CX_SEL.length
+    ? CX_SEL.map(t => `<span class="cx-sel-chip">${esc(plain(t.label))}<button type="button" data-action="cx-remove" data-id="${esc(t.id)}" aria-label="Remove">×</button></span>`).join('')
+    : `<span class="small muted">Select one or more people</span>`;
+}
+function renderPickList(results) {
+  const list = document.getElementById('cxPickList'); if (!list) return;
+  if (!results.length) { list.innerHTML = `<li class="cx-pick-empty small muted">Type a name — Elon Musk, Stripe, Stanford…</li>`; return; }
+  list.innerHTML = results.map((n, i) => {
+    const on = CX_SEL.some(t => t.id === n.id);
+    const k = n.type === 'entity' ? n.kind : n.type;
+    return `<li role="option" id="cxpo-${i}" data-id="${esc(n.id)}" data-label="${esc(n.label)}" data-type="${esc(n.type)}" aria-selected="${on}">
+      <label class="cx-pick-row"><input type="checkbox" data-action="cx-toggle" data-id="${esc(n.id)}" data-label="${esc(n.label)}" data-type="${esc(n.type)}" ${on ? 'checked' : ''}>
+        ${n.type === 'human' || n.type === 'agent' ? '<span class="yy-mini" aria-hidden="true"></span>' : n.type === 'reserved' ? hollow(n.label, 'xs') : `<span class="ent-dot e-${esc(k)}" aria-hidden="true"></span>`}
+        <span class="cx-pick-name">${esc(plain(n.label))}</span>
+        <span class="t-dim">${esc(n.type === 'human' ? 'Human + AI' : ENT_LABEL[k] || k)}</span>
+      </label></li>`;
+  }).join('');
+}
+async function searchPick(q, gen) {
+  if (gen == null) gen = ++pickGen;
+  if (q.length < 2) { if (gen === pickGen) renderPickList([]); return; }
+  try {
+    const r = await api('/api/connect/search?q=' + encodeURIComponent(q));
+    if (gen !== pickGen) return; // stale response — a newer query is in flight
+    // Prefer humans over their agents for identity-unity (dedupe agents when human present)
+    const seenH = new Set();
+    const out = [];
+    for (const n of r.results || []) {
+      if (n.type === 'agent' && n.human_id && seenH.has(n.human_id)) continue;
+      if (n.type === 'human') seenH.add(n.id);
+      if (n.type === 'agent' && n.human_id) {
+        out.push({ id: n.human_id, label: n.label.replace(/\s*[’']s agent$/, '') || n.label, type: 'human' });
+        seenH.add(n.human_id);
+        continue;
+      }
+      out.push(n);
+    }
+    renderPickList(out.slice(0, 12));
+  } catch { if (gen === pickGen) renderPickList([]); }
+}
+function toggleSelect(id, label, type) {
+  const i = CX_SEL.findIndex(t => t.id === id);
+  if (i >= 0) CX_SEL.splice(i, 1);
+  else if (CX_SEL.length < 8) CX_SEL.push({ id, label, type: type || 'unknown' });
+  syncPickSelected();
+  // live update graph while popup open
+  refreshAllPaths();
+  const panelSel = document.querySelector('.cx-sec #cxSelTitle');
+  const sec = document.querySelector('.cx-sec');
+  if (sec) {
+    const html = selectedChipsHtml();
+    const wrap = sec.querySelector('.cx-sel, .cx-sel-empty');
+    if (wrap) wrap.outerHTML = html;
+    else sec.insertAdjacentHTML('beforeend', html);
+  }
+  if (panelSel) panelSel.innerHTML = `Selected <span class="num">${CX_SEL.length}</span>`;
+  // refresh checkboxes in list
+  document.querySelectorAll('#cxPickList input[type=checkbox]').forEach(cb => { cb.checked = CX_SEL.some(t => t.id === cb.dataset.id); const li = cb.closest('[role=option]'); if (li) li.setAttribute('aria-selected', String(cb.checked)); });
+}
 
 // ---------- reserved profile + claim + requests ----------
 solo.reserved = async id => {
+  exitCxMode();
   let d; try { d = await api('/api/reserved/' + encodeURIComponent(id)); } catch (e) { return `<div class="page">${head('Unclaimed profile', 'Profile not available.', e.status === 404 ? 'It was removed, hidden pending review, or never existed.' : esc(e.message))}</div>`; }
   const p = d.profile;
   POST_RENDER = () => { if (window.PMGraph) { PMGraph.showPath(null); PMGraph.fly(p.id); } };
@@ -95,9 +383,10 @@ function claimResult(r) {
     ${ok ? `<div class="form-actions"><a class="btn small" href="${esc(r.human.href)}" data-link>Open your profile</a>${r.agent ? `<a class="btn small secondary" href="${esc(r.agent.href)}" data-link>${r.agent.created ? 'Your new AI agent' : 'Your AI agent'}</a>` : ''}<a class="btn small ghost" href="/import" data-link>Import from LinkedIn (optional)</a></div>` : ''}</div>`;
 }
 
-// ---------- LinkedIn import: official OIDC (stub) or the member's own data-export ZIP, reviewed before saving ----------
+// ---------- LinkedIn import ----------
 let IMPORT = null;
 solo.import = async () => {
+  exitCxMode();
   if (!ME || !ME.signed_in) { go('/signup'); return ''; }
   POST_RENDER = () => { if (window.PMGraph) PMGraph.showPath(null); };
   return `<div class="page imp">${head('Optional', 'Bring your LinkedIn history.', 'Only with your consent, only your own data. Nothing is saved until you review it. PointMint never scrapes LinkedIn.')}
@@ -165,10 +454,18 @@ function reviewHtml(D) {
 }
 
 // ---------- events ----------
-let cxTimer = 0;
+let cxTimer = 0, pickTimer = 0, pickGen = 0;
 document.addEventListener('input', ev => {
+  if (ev.target.id === 'cxPickQ') {
+    clearTimeout(pickTimer);
+    const q = ev.target.value.trim();
+    const gen = ++pickGen;
+    pickTimer = setTimeout(() => searchPick(q, gen), 140);
+    return;
+  }
   if (ev.target.id !== 'cxq') return;
   clearTimeout(cxTimer); const q = ev.target.value.trim(), list = document.getElementById('cxList');
+  if (!list) return;
   if (q.length < 2) { list.hidden = true; ev.target.setAttribute('aria-expanded', 'false'); return; }
   cxTimer = setTimeout(async () => {
     try { const r = await api('/api/connect/search?q=' + encodeURIComponent(q));
@@ -177,8 +474,10 @@ document.addEventListener('input', ev => {
   }, 160);
 });
 document.addEventListener('keydown', ev => {
+  if (ev.target.id === 'cxPickQ' && ev.key === 'Escape') { const d = document.getElementById('cxPick'); if (d && d.open) d.close(); return; }
   if (ev.target.id !== 'cxq') return;
-  const list = document.getElementById('cxList'), opts = [...list.querySelectorAll('[role=option]')]; let i = opts.findIndex(o => o.getAttribute('aria-selected') === 'true');
+  const list = document.getElementById('cxList'); if (!list) return;
+  const opts = [...list.querySelectorAll('[role=option]')]; let i = opts.findIndex(o => o.getAttribute('aria-selected') === 'true');
   if ((ev.key === 'ArrowDown' || ev.key === 'ArrowUp') && opts.length && !list.hidden) { ev.preventDefault(); i = (i + (ev.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length; opts.forEach((o, k) => o.setAttribute('aria-selected', String(k === i))); ev.target.setAttribute('aria-activedescendant', opts[i].id); }
   else if (ev.key === 'Enter' && i >= 0 && !list.hidden) { ev.preventDefault(); go('/connect?to=' + encodeURIComponent(opts[i].dataset.id)); }
   else if (ev.key === 'Escape') { list.hidden = true; }
@@ -187,13 +486,52 @@ document.addEventListener('click', async ev => {
   const o = ev.target.closest('#cxList [role=option]'); if (o) { go('/connect?to=' + encodeURIComponent(o.dataset.id)); return; }
   const b = ev.target.closest('[data-action]'); if (!b) return;
   const act = b.dataset.action;
+  if (act === 'cx-open-pick') {
+    if (location.pathname.replace(/\/$/, '') !== '/connect') { CX_OPEN_PICK = true; go('/connect'); return; }
+    openPickDialog(); return;
+  }
+  if (act === 'cx-toggle') {
+    ev.stopPropagation();
+    toggleSelect(b.dataset.id, b.dataset.label, b.dataset.type);
+    return;
+  }
+  if (act === 'cx-remove') {
+    CX_SEL = CX_SEL.filter(t => t.id !== b.dataset.id);
+    delete CX_RESULTS[b.dataset.id];
+    syncPickSelected();
+    const title = document.getElementById('cxSelTitle'); if (title) title.innerHTML = `Selected <span class="num">${CX_SEL.length}</span>`;
+    const sec = document.querySelector('.cx-panel .cx-sec');
+    if (sec) { const el = sec.querySelector('.cx-sel, .cx-sel-empty'); if (el) el.outerHTML = selectedChipsHtml(); }
+    refreshAllPaths();
+    return;
+  }
+  if (act === 'cx-quick') {
+    const q = b.dataset.q;
+    if (!CX_SEL.some(t => t.id === q || t.label === q)) CX_SEL.push({ id: q, label: q, type: 'unknown' });
+    const title = document.getElementById('cxSelTitle'); if (title) title.innerHTML = `Selected <span class="num">${CX_SEL.length}</span>`;
+    const sec = document.querySelectorAll('.cx-panel .cx-sec')[0];
+    if (sec) { const el = sec.querySelector('.cx-sel, .cx-sel-empty'); if (el) el.outerHTML = selectedChipsHtml(); }
+    refreshAllPaths();
+    return;
+  }
+  if (act === 'cx-focus') {
+    CX_FOCUS = b.dataset.id; CX = CX_RESULTS[CX_FOCUS] || null;
+    const box = document.getElementById('cxResults'); if (box) box.innerHTML = resultsPanelHtml();
+    paintPathsLive();
+    return;
+  }
   if (act === 'cx-path' && CX) {
     const i = Number(b.dataset.i);
-    document.querySelectorAll('.cx-tabs [role=tab]').forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; document.getElementById('cxp-' + k).hidden = k !== i; });
-    if (window.PMGraph) PMGraph.showPath(CX.paths[i].nodes);
+    document.querySelectorAll('.cx-tabs [role=tab]').forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; const p = document.getElementById('cxp-' + k); if (p) p.hidden = k !== i; });
+    paintPathsLive();
   } else if (act === 'claim-open') { const s = document.getElementById('claim'); s.hidden = false; s.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); const f = document.getElementById('cl-legal'); if (f) f.focus(); }
   else if (act === 'li-stub') { document.getElementById('liOut').innerHTML = `<p class="small section-gap-sm" role="status">${icon('info')}Prototype stub. In production this button starts LinkedIn’s official OpenID Connect flow (scopes <code>openid profile email</code>) and returns to PointMint with your consent. No request was made to LinkedIn.</p>`; }
   else if (act === 'imp-remove') { if (!await ask({ title: 'Remove imported LinkedIn data?', message: 'Positions, schools and skills you imported are removed from your graph.', ok: 'Remove', destructive: true })) return; await api('/api/me/import/linkedin', { method: 'DELETE' }); if (window.PMGraph) PMGraph.refresh(); await ask({ title: 'Removed', message: 'Your imported LinkedIn data is gone.', cancel: null }); }
+  else if (act === 'cx-pick-done') {
+    const d = document.getElementById('cxPick'); if (d && d.open) d.close();
+    if (location.pathname.replace(/\/$/, '') !== '/connect') go('/connect' + (CX_SEL.length ? '?to=' + CX_SEL.map(t => encodeURIComponent(t.id)).join(',') : ''));
+    else refreshAllPaths();
+  }
 });
 document.addEventListener('change', async ev => {
   if (ev.target.id !== 'liZip' || !ev.target.files[0]) return;
@@ -222,5 +560,19 @@ document.addEventListener('submit', async ev => {
   } catch (e) { let box = f.querySelector('.err'); if (!box) { box = document.createElement('div'); box.className = 'err'; box.setAttribute('role', 'alert'); f.appendChild(box); } box.textContent = e.message; }
   finally { if (btn) btn.disabled = false; }
 }, true);
+
+// Exit connect column mode when navigating elsewhere
+const _pmRender = typeof render === 'function' ? null : null;
+document.addEventListener('click', ev => {
+  const link = ev.target.closest('a[data-link]');
+  if (!link) return;
+  const href = link.getAttribute('href') || '';
+  if (link.dataset.cxPick === '1') CX_OPEN_PICK = true;
+  if (!href.startsWith('/connect') && document.getElementById('deck')?.dataset.cx === 'on') {
+    // defer exit to after navigation; render hook below also covers popstate
+    setTimeout(() => { if (!location.pathname.startsWith('/connect')) exitCxMode(); }, 0);
+  }
+});
+
 routes.push([/^\/connect\/?$/, 'connect'], [/^\/p\/(rp_[a-z0-9_]+)\/?$/, 'reserved'], [/^\/import\/?$/, 'import']);
 Object.assign(TITLES, { connect: 'How am I connected?', reserved: 'Unclaimed profile', import: 'Import from LinkedIn' });

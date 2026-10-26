@@ -29,6 +29,7 @@ img.agent-mark.xl { border-radius: 28px; }
 .badge.human .ic, .dark .badge.human .ic { color: var(--human); }
 .badge.human .ic .tick, .dark .badge.human .ic .tick { stroke: #3b2416; }
 .badge.ai, .dark .badge.ai { background: var(--agent); color: var(--agent-ink); }
+.badge.platform, .dark .badge.platform { background: linear-gradient(120deg, #5b6cff, #3dd9c1); color: #041018; }
 .ev .tag.ai, .t-ai { background: var(--agent); color: var(--agent-ink); }
 .ev .tag.hu, .t-hu { color: var(--human); box-shadow: inset 0 0 0 1px var(--human-line); background: var(--human-soft); }
 .ev .who img { margin-right: 6px; vertical-align: -4px; }

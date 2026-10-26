@@ -54,8 +54,8 @@ async function pathGraph(env, viewerId) {
   // reserved profiles (unclaimed or under review). Claimed ones live on as the verified human.
   const res = (await env.DB.prepare("SELECT * FROM reserved_profiles WHERE status IN ('unclaimed','claim_review') LIMIT 2000").all()).results;
   for (const r of res) node(r.id, { id: r.id, type: 'reserved', label: r.name, sub: r.title, href: `/p/${r.id}`, demo: !!r.is_demo, verified: false });
-  const ents = (await env.DB.prepare('SELECT id, type, name, source_url, is_demo FROM entities LIMIT 5000').all()).results;
-  for (const e of ents) node(e.id, { id: e.id, type: 'entity', kind: e.type, label: e.name, source_url: e.source_url, demo: !!e.is_demo });
+  const ents = (await env.DB.prepare('SELECT id, type, name, handle, source_url, is_demo FROM entities LIMIT 5000').all()).results;
+  for (const e of ents) node(e.id, { id: e.id, type: 'entity', kind: e.type, label: e.name, handle: e.handle || null, href: e.handle ? '/' + e.handle : undefined, source_url: e.source_url, demo: !!e.is_demo });
   const ge = (await env.DB.prepare('SELECT id, src, dst, rel, label, source_url, provenance, confidence FROM graph_edges LIMIT 20000').all()).results;
   for (const e of ge) {
     if (e.provenance === 'member_import' && !viewerId) continue; // members-only data
@@ -159,13 +159,13 @@ export async function augmentGraph(env, G, viewerId) {
   const hs = new Set(G.nodes.filter(n => n.type === 'human').map(n => n.id));
   const res = (await env.DB.prepare("SELECT * FROM reserved_profiles WHERE status IN ('unclaimed','claim_review') LIMIT 1000").all()).results;
   const rs = new Set(res.map(r => r.id));
-  const ents = new Map((await env.DB.prepare('SELECT id, type, name, source_url, is_demo FROM entities').all()).results.map(e => [e.id, e]));
+  const ents = new Map((await env.DB.prepare('SELECT id, type, name, handle, source_url, is_demo FROM entities').all()).results.map(e => [e.id, e]));
   const ge = (await env.DB.prepare('SELECT id, src, dst, rel, label, source_url, provenance, confidence FROM graph_edges').all()).results.filter(e => !(e.provenance === 'member_import' && !viewerId));
   const ok = id => hs.has(id) || rs.has(id) || ents.has(id);
   const deg = new Map(); for (const e of ge) if (ok(e.src) && ok(e.dst)) for (const x of [e.src, e.dst]) deg.set(x, (deg.get(x) || 0) + 1);
   const keepEnt = id => ents.has(id) && (deg.get(id) || 0) >= 2;
   for (const r of res) G.nodes.push({ id: r.id, type: 'reserved', label: r.name, sub: `${r.title} · Unclaimed profile`, initials: initials(r.name), status: r.status, demo: !!r.is_demo, href: `/p/${r.id}` });
-  for (const [id, e] of ents) if (keepEnt(id)) G.nodes.push({ id, type: 'entity', kind: e.type, label: e.name, demo: !!e.is_demo, source_url: e.source_url });
+  for (const [id, e] of ents) if (keepEnt(id)) G.nodes.push({ id, type: 'entity', kind: e.type, label: e.name, handle: e.handle || null, href: e.handle ? '/' + e.handle : undefined, demo: !!e.is_demo, source_url: e.source_url });
   for (const e of ge) {
     const a = hs.has(e.src) || rs.has(e.src) || keepEnt(e.src), b = hs.has(e.dst) || rs.has(e.dst) || keepEnt(e.dst);
     if (!a || !b) continue;

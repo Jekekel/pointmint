@@ -219,24 +219,29 @@
       if (e.type === 'tether' && k > 0.45) { ctx.setLineDash([]); yinyang(0.25 * sx + 0.5 * cx + 0.25 * tx, 0.25 * sy + 0.5 * cy + 0.25 * ty, Math.max(2.4, 3.2 * Math.min(1.6, k))); }
     }
     ctx.setLineDash([]); ctx.globalAlpha = 1;
-    // the connection path: segments light up one after another, then a spark keeps travelling along it
-    if (PT && PT.ids.length > 1) {
-      const segs = []; for (let i = 0; i + 1 < PT.ids.length; i++) { const a = G.byId.get(PT.ids[i]), b = G.byId.get(PT.ids[i + 1]); if (a && b) segs.push([a, b]); }
+    // connection path(s): segments light up; multi-select paints several paths
+    if (PT && (PT.paths || PT.ids)) {
+      const pathList = (PT.paths && PT.paths.length ? PT.paths : [PT.ids]).filter(p => p && p.length > 1);
       const el = RM.matches ? 1e9 : t - PT.t0, per = 420;
       ctx.lineCap = 'round';
-      segs.forEach(([a, b], i) => {
-        const u = Math.max(0, Math.min(1, (el - i * per) / per)); if (u <= 0) return;
-        const [ax, ay] = P.get(a), [bx, by] = P.get(b), [cx, cy] = ctrl(ax, ay, bx, by, 0.12);
-        const N = 18, m = Math.max(1, Math.round(N * u));
-        for (const [w, al] of [[9, 0.12], [4.5, 0.35], [2, 1]]) {
-          ctx.strokeStyle = rgba(C.path, al); ctx.lineWidth = w * Math.min(1.4, Math.max(0.8, k)); ctx.beginPath(); ctx.moveTo(ax, ay);
-          for (let j = 1; j <= m; j++) { const q = j / N; ctx.lineTo((1 - q) * (1 - q) * ax + 2 * (1 - q) * q * cx + q * q * bx, (1 - q) * (1 - q) * ay + 2 * (1 - q) * q * cy + q * q * by); }
-          ctx.stroke();
-        }
+      let allSegs = [];
+      pathList.forEach((ids, pi) => {
+        const segs = []; for (let i = 0; i + 1 < ids.length; i++) { const a = G.byId.get(ids[i]), b = G.byId.get(ids[i + 1]); if (a && b) segs.push([a, b]); }
+        allSegs = allSegs.concat(segs);
+        segs.forEach(([a, b], i) => {
+          const u = Math.max(0, Math.min(1, (el - (pi * 80 + i * per)) / per)); if (u <= 0) return;
+          const [ax, ay] = P.get(a), [bx, by] = P.get(b), [cx, cy] = ctrl(ax, ay, bx, by, 0.12);
+          const N = 18, m = Math.max(1, Math.round(N * u));
+          for (const [w, al] of [[9, 0.12], [4.5, 0.35], [2, 1]]) {
+            ctx.strokeStyle = rgba(C.path, al); ctx.lineWidth = w * Math.min(1.4, Math.max(0.8, k)); ctx.beginPath(); ctx.moveTo(ax, ay);
+            for (let j = 1; j <= m; j++) { const q = j / N; ctx.lineTo((1 - q) * (1 - q) * ax + 2 * (1 - q) * q * cx + q * q * bx, (1 - q) * (1 - q) * ay + 2 * (1 - q) * q * cy + q * q * by); }
+            ctx.stroke();
+          }
+        });
       });
-      if (!RM.matches && el > segs.length * per && segs.length && segs.every(([a, b]) => P.has(a) && P.has(b))) {
-        const total = segs.length, f = ((el - total * per) / (900 * total)) % 1, i = Math.min(total - 1, Math.floor(f * total)), q = f * total - i;
-        const [a, b] = segs[i], [ax, ay] = P.get(a), [bx, by] = P.get(b), [cx, cy] = ctrl(ax, ay, bx, by, 0.12);
+      if (!RM.matches && allSegs.length && el > allSegs.length * per && allSegs.every(([a, b]) => P.has(a) && P.has(b))) {
+        const total = allSegs.length, f = ((el - total * per) / (900 * total)) % 1, i = Math.min(total - 1, Math.floor(f * total)), q = f * total - i;
+        const [a, b] = allSegs[i], [ax, ay] = P.get(a), [bx, by] = P.get(b), [cx, cy] = ctrl(ax, ay, bx, by, 0.12);
         const x = (1 - q) * (1 - q) * ax + 2 * (1 - q) * q * cx + q * q * bx, y = (1 - q) * (1 - q) * ay + 2 * (1 - q) * q * cy + q * q * by, z = 34;
         ctx.drawImage(sprite(C.path), x - z / 2, y - z / 2, z, z); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
       }
@@ -493,10 +498,14 @@
       return G.nodes.filter(n => (n.type === 'human' || n.type === 'agent' || n.type === 'reserved' || n.type === 'entity' || n.type === 'intent') && String(n.label).toLowerCase().includes(q)).sort((a, b) => (a.type === 'intent') - (b.type === 'intent')).slice(0, 8);
     },
     showPath(ids) {
-      if (!G.ready || !W) { G.pendingPath = ids; return; }   // graph not loaded yet: apply after the first load
+      // ids: null | id[] (one path) | id[][] (several paths lit at once for multi-select)
+      if (!G.ready || !W) { G.pendingPath = ids; return; }
       if (!ids || !ids.length) { if (G.path) { G.path = null; kick(); } return; }
-      const keep = ids.filter(id => G.byId.has(id));
-      G.path = { ids: keep, set: new Set(keep), t0: performance.now() }; G.sel = null; G.follow = false; wake(keep.length * 420 + 2500);
+      const multi = Array.isArray(ids[0]);
+      const paths = (multi ? ids : [ids]).map(p => (p || []).filter(id => G.byId.has(id))).filter(p => p.length);
+      if (!paths.length) { if (G.path) { G.path = null; kick(); } return; }
+      const keep = [...new Set(paths.flat())];
+      G.path = { ids: paths[0], paths, set: new Set(keep), t0: performance.now() }; G.sel = null; G.follow = false; wake(keep.length * 420 + 2500);
       const list = keep.map(id => G.byId.get(id));
       if (list.length && W) {
         const b = bounds(list), off = typeof G.viewOffset === 'function' ? G.viewOffset() : { x: 0, y: 0 };

@@ -7,6 +7,12 @@ workers_dev = true
 # Host persona on the home page (the founder clip + name). One switch: set to "false" to show a neutral persona instead.
 [vars]
 SHOW_FOUNDER = "false"
+# §32 Cardinal Rule: comma-separated human ids allowed to set Trust Score vetoes (freeze/suspend/ban/clamp).
+# HARD PRODUCTION GATE (2026-10-25): must be set to Michael Lebor's human id (h_…) before any live deploy to agents.pointmint.io.
+# Empty = production-gate.mjs aborts `npm run deploy`. Also required for §32 Trust Score veto (/api/trust/override).
+PLATFORM_OWNER_HUMAN_IDS = "h_8f0dd87584fc9f72a9"
+# §39: stub|workers_ai|http — no paid key required for stub; put TRANSLATE_API_KEY via wrangler secret when enabling a live provider.
+TRANSLATE_PROVIDER = "stub"
 
 [assets]
 directory = "./public"

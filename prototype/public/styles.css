@@ -220,6 +220,8 @@ code, pre, kbd { font-family: var(--mono); }
 .badge .ic { width: 12px; height: 12px; }
 .badge.ai { background: var(--ink); color: var(--ink-text); }
 .badge.ai .prov { font-weight: 400; opacity: .72; }
+.badge.platform { background: linear-gradient(120deg, #5b6cff, #3dd9c1); color: #041018; }
+.badge.platform .prov { font-weight: 400; opacity: .72; }
 .badge.human { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--hairline); }
 .badge.human .ic { color: var(--accent); }
 .badge.human .ic .tick { stroke: var(--surface-2); }
@@ -474,6 +476,7 @@ td.when { white-space: nowrap; color: var(--text-2); font-variant-numeric: tabul
 .dark .eyebrow { color: #a1a1a6; }
 .dark .label-pair { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .dark .badge.ai { background: #f5f5f7; color: #000; }
+.dark .badge.platform { background: linear-gradient(120deg, #7a88ff, #5eecd4); color: #041018; }
 .dark .badge.human { background: #2c2c2e; color: #f5f5f7; box-shadow: none; }
 .dark .badge.human .ic { color: #3dd9c1; }
 .dark .badge.human .ic .tick { stroke: #2c2c2e; }
@@ -609,3 +612,57 @@ a.item.member { display: grid; }
 }
 .kv dt { white-space: nowrap; flex: none; }
 @media (max-width: 600px) { .kv > div { font-size: 15px; } .kv dd code { font-size: 12px; } }
+
+/* ---- Handles (@handle chips + field) — glass ---- */
+.handle-chip {
+  display: inline-flex; align-items: center; gap: 2px;
+  height: 22px; padding: 0 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+  color: var(--accent, #3dd9c1);
+  background: color-mix(in srgb, var(--accent, #3dd9c1) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #3dd9c1) 35%, transparent);
+  text-decoration: none; vertical-align: middle;
+}
+.handle-chip:hover { background: color-mix(in srgb, var(--accent, #3dd9c1) 22%, transparent); }
+.handle-chip.sm { height: 18px; font-size: 11px; padding: 0 6px; font-weight: 500; }
+.handle-url { margin: 4px 0 0; }
+
+/* ---- User number (early-adopter status chip) ---- */
+.user-number-chip {
+  display: inline-flex; align-items: center;
+  height: 22px; padding: 0 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2, #a1a1a6);
+  background: color-mix(in srgb, var(--text, #fff) 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong, rgba(255,255,255,.12));
+  vertical-align: middle; white-space: nowrap;
+}
+.user-number-chip.sm { height: 18px; font-size: 10px; padding: 0 6px; font-weight: 500; }
+
+.handle-url b { color: var(--text); font-weight: 600; }
+.handle-field {
+  display: flex; align-items: stretch; border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2, #1c1c1e) 80%, transparent);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong, rgba(255,255,255,.12));
+  overflow: hidden;
+}
+.handle-field .handle-prefix {
+  display: flex; align-items: center; padding: 0 4px 0 12px;
+  color: var(--text-2); font-weight: 600; font-size: 15px;
+}
+.handle-field input {
+  border: 0 !important; box-shadow: none !important; background: transparent !important;
+  border-radius: 0 !important; flex: 1;
+}
+.company-profile .ent-glyph {
+  width: 56px; height: 56px; border-radius: 16px; flex: none;
+  background: color-mix(in srgb, #93a9ff 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #93a9ff 40%, transparent);
+}
+.company-handle-row + .company-handle-row { margin-top: 16px; padding-top: 16px; box-shadow: inset 0 1px 0 var(--hairline); }
+
+/* §39 translation badges (human column bubbles) */
+.tr-badge { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(0,0,0,0.06); }
+.tr-badge.translating { color: #0a7a6a; }
+.tr-orig { margin-top: 6px; font-size: 12px; }

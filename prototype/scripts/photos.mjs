@@ -98,7 +98,7 @@ ok(!!dm && !dm.reasons.some(x => /no profile photo/.test(x)) && (!dn || dn.reaso
 
 // ---- identity model + owner-only hint ----
 r = await A.c('/api/page?path=' + encodeURIComponent('/h/' + A.id));
-ok(r.data.identity.human.id === A.id && r.data.identity.human.photo_url === url2 && r.data.identity.agent.avatar_url === `/avatars/${A.agentId}.svg`, 'profile page: left = this human (photo), right = their AI agent (avatar)');
+ok(r.data.identity.human.id === A.id && r.data.identity.human.photo_url === url2 && String(r.data.identity.agent.avatar_url || '').startsWith(`/avatars/twin/${A.agentId}.svg`), 'profile page: left = this human (photo), right = their AI agent (twin avatar)');
 await A.c('/api/me/photo', { method: 'DELETE' });
 ok((await anon(url2)).status === 404, 'removed photo is gone');
 r = await A.c('/api/page?path=' + encodeURIComponent('/h/' + A.id));
@@ -106,14 +106,38 @@ ok(/ranked lower/.test(r.data.identity.human.rank_hint || '') && /you rank lower
 r = await anon('/api/page?path=' + encodeURIComponent('/h/' + A.id));
 ok(!r.data.identity.human.rank_hint && !/rank lower/.test(r.data.md.page) && r.data.identity.human.photo_url === null, 'others never see the ranking hint; they see a neutral placeholder');
 r = await anon('/api/page?path=/');
-if (r.data.flags && r.data.flags.show_founder) ok(r.data.identity.basis === 'host' && r.data.identity.human.has_photo && /^\/avatars\/agent_\w+\.svg$/.test(r.data.identity.agent.avatar_url), 'home (SHOW_FOUNDER on): host human on the left, host AI agent on the right');
-else { ok(r.data.identity.basis === 'host' && r.data.identity.human.name === 'You' && r.data.identity.agent.avatar_url === '/avatars/agent_host.svg', 'home (SHOW_FOUNDER off): neutral host persona, no owner details');
+if (r.data.flags && r.data.flags.show_founder) ok(r.data.identity.basis === 'host' && r.data.identity.human.has_photo && /^\/avatars\/twin\/agent_\w+\.svg/.test(r.data.identity.agent.avatar_url), 'home (SHOW_FOUNDER on): host human on the left, host AI agent on the right');
+else { ok(r.data.identity.basis === 'host' && r.data.identity.human.name === 'You' && String(r.data.identity.agent.avatar_url || '').startsWith('/avatars/twin/agent_host.svg'), 'home (SHOW_FOUNDER off): neutral host persona, no owner details');
   const hm = await fetch(BASE + '/glass/michael.jpg'); ok(hm.status === 404, 'SHOW_FOUNDER off: host-only media is not served', hm.status); }
 r = await anon('/api/activity?limit=50&human_id=' + A.id);
 ok(true, 'activity endpoint reachable', String(r.status));
 r = await A.c('/api/activity?limit=50&human_id=' + A.id);
 ok((r.data.events || []).some(e => e.action === 'profile.photo_added'), 'photo upload appears in the owner’s activity feed');
 ok((r.data.events || []).filter(e => e.actor.type === 'agent').every(e => /^\/avatars\//.test(e.actor.avatar_url)), 'feed rows carry the agent avatar');
+
+
+// ---- digital twin avatars (human photo + sunglasses) ----
+r = await up(A, 'face-exif.jpg', 'image/jpeg', 'camera');
+ok(r.status === 201, 're-upload photo for twin compose', `${r.status}`);
+const twinPath = `/avatars/twin/${A.agentId}.svg`;
+r = await anon(twinPath);
+const twinSvg = r.buf.toString();
+ok(r.status === 200 && /image\/svg\+xml/.test(r.headers.get('content-type') || ''), 'twin avatar served as SVG', String(r.status));
+ok(/sunglasses|data-part="sunglasses"/i.test(twinSvg), 'twin avatar wears sunglasses');
+ok(/data:image\/(jpeg|webp);base64,/i.test(twinSvg), 'twin embeds the human photo as data-URI');
+ok(/Digital twin|human photo/i.test(twinSvg), 'twin labeled as digital twin / human photo');
+ok(/default-src 'none'/.test(r.headers.get('content-security-policy') || ''), 'twin SVG has locked-down CSP');
+r = await anon(`/api/twin-avatar/${A.id}`);
+ok(r.status === 200 && /sunglasses/i.test(r.buf.toString()), 'GET /api/twin-avatar/:humanId returns twin with sunglasses', String(r.status));
+await A.c('/api/me/photo', { method: 'DELETE' });
+r = await anon(twinPath);
+const phSvg = r.buf.toString();
+ok(r.status === 200 && /sunglasses/i.test(phSvg) && !/data:image\//i.test(phSvg), 'no human photo → twin placeholder still has sunglasses (not a blank circle)');
+r = await anon('/avatars/twin-placeholder.svg');
+ok(r.status === 200 && /sunglasses/i.test(r.buf.toString()), 'default twin-placeholder.svg has sunglasses');
+me = (await A.c('/api/me')).data;
+ok(me.agent && String(me.agent.avatar_url || '').startsWith(`/avatars/twin/${A.agentId}.svg`), '/api/me agent.avatar_url is twin path');
+
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

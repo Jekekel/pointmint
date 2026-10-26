@@ -375,3 +375,33 @@ body.resizing { cursor: col-resize; user-select: none; }
 .hud .me-btn:hover { background: rgba(30, 144, 255, 0.32); }
 .hud .me-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media (max-width: 1279px) { .hud .me-btn span { display: none; } .hud .me-btn { padding: 0 11px; } }
+
+
+/* Find-me / connect mode: middle column is the narrow filter rail; graph shows in the gap to its right. */
+.deck[data-cx="on"] #grip-r { opacity: 0.35; }
+.deck[data-cx="on"] .m-title { font-size: 13px; }
+
+
+/* Agent Trust Score v1 — glass chip + card (cool agent palette) */
+.trust-chip { display: inline-flex; align-items: baseline; gap: 2px; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; letter-spacing: -0.02em; color: #c7d2fe; background: rgba(147, 169, 255, 0.14); box-shadow: inset 0 0 0 1px rgba(147, 169, 255, 0.28); }
+.trust-chip .t-dim { font-weight: 500; opacity: 0.7; font-size: 10.5px; }
+.trust-st { margin-left: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.trust-st-frozen { color: #93a9ff; } .trust-st-suspended { color: #ffb47a; } .trust-st-banned { color: #ff8fab; }
+.trust.glass-card, section.trust { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; padding: 14px; margin: 10px 12px 12px; border-radius: 14px; background: rgba(147, 169, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(147, 169, 255, 0.22), 0 8px 28px rgba(0,0,0,0.18); backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2); }
+.trust-ring { display: block; }
+.trust-ring .tr-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 7; }
+.trust-ring .tr-val { fill: none; stroke-width: 7; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(147,169,255,0.4)); }
+.trust-ring .tr-num { fill: var(--text); font: 650 26px/1 -apple-system, BlinkMacSystemFont, Inter, sans-serif; letter-spacing: -0.03em; }
+.trust-ring .tr-of { fill: var(--text-3); font: 500 9px/1 -apple-system, BlinkMacSystemFont, Inter, sans-serif; text-transform: uppercase; letter-spacing: 0.06em; }
+.trust-k { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; }
+.trust-k .tbtn { margin-left: auto; }
+.trust-s { margin: 4px 0 8px; font-size: 12px; color: var(--text-2); line-height: 1.35; }
+.trust-buckets { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 4px; }
+.trust-b { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.trust-dims { margin: 4px 0 8px; font-size: 12px; }
+.trust-dims ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 3px; }
+.trust-d { display: flex; justify-content: space-between; gap: 8px; color: var(--text-2); }
+.trust-report { margin: 6px 0 0; color: var(--text-3); }
+.trust-report a { color: #c7d2fe; }
+.trust-banner { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(255,143,171,0.12); }
+@media (max-width: 760px) { section.trust { grid-template-columns: 1fr; justify-items: center; } }

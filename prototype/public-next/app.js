@@ -15,6 +15,24 @@ async function api(path, opts = {}) {
   if (!r.ok) { const e = new Error(data.error || `HTTP ${r.status}`); e.status = r.status; e.data = data; throw e; }
   return data;
 }
+
+async function loadCompanyHandles() {
+  const sec = document.getElementById('companyHandlesSection');
+  const body = document.getElementById('companyHandlesBody');
+  if (!sec || !body || !ME || !ME.signed_in) return;
+  try {
+    const r = await api('/api/me/companies');
+    if (!r.companies || !r.companies.length) { sec.hidden = true; return; }
+    sec.hidden = false;
+    body.innerHTML = r.companies.map(c => `<form class="company-handle-row companyHandleForm" data-id="${esc(c.id)}">
+      <div class="fields two"><div><label>Company</label><p class="sub"><b>${esc(c.name)}</b> <span class="small muted">(${esc(c.claim_rel)})</span></p></div>
+      <div><label for="ch-${esc(c.id)}">Handle</label>
+        <div class="handle-field"><span class="handle-prefix">@</span><input id="ch-${esc(c.id)}" name="handle" value="${esc(c.handle || '')}" minlength="3" maxlength="32" pattern="[a-z0-9][a-z0-9_-]{1,30}[a-z0-9]|[a-z0-9]{3}" placeholder="acme" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+        <p class="small muted">${c.handle ? 'agents.pointmint.io/<b>' + esc(c.handle) + '</b>' : 'No handle yet'}</p></div></div>
+      <div class="form-actions"><button class="btn small">Save company handle</button></div></form>`).join('');
+  } catch (e) { body.innerHTML = `<p class="err" role="alert">${esc(e.message)}</p>`; }
+}
+
 async function loadMe() { try { ME = await api('/api/me'); } catch { ME = { signed_in: false }; } renderAuthNav(); }
 function renderAuthNav() {
   const el = document.getElementById('authNav'); if (!el) return;
@@ -57,8 +75,15 @@ const AV_PX = { xs: 18, sm: 32, '': 44, lg: 88, xl: 112 };
 const avatar = (h, size = '') => { const o = typeof h === 'string' ? { name: h } : (h || {}); const px = AV_PX[size] || 44;
   return `<img class="avatar face ${size}${o.photo_url ? '' : ' ph'}" src="${esc(o.photo_url || PH)}" alt="" width="${px}" height="${px}" decoding="async">`; };
 const avSeed = a => (a && (a.agent_id || a.id)) || 'agent';
+// Digital twin mark: API avatar_url is /avatars/twin/<agentId>.svg (human photo + sunglasses).
+// Fallback: twin placeholder with sunglasses (never a blank circle). Legacy /avatars/<id>.svg still works.
+const twinSrc = (a) => {
+  if (a && a.avatar_url) return a.avatar_url;
+  const id = avSeed(a);
+  return id ? `/avatars/twin/${id}.svg` : '/avatars/twin-placeholder.svg';
+};
 const agentMark = (a, size = '') => { if (typeof a === 'string' || a == null) { size = a || ''; a = null; } const px = AV_PX[size] || 44;
-  return `<img class="agent-mark av ${size}" src="${esc(a && a.avatar_url || `/avatars/${avSeed(a)}.svg`)}" alt="" width="${px}" height="${px}" decoding="async">`; };
+  return `<img class="agent-mark av ${size}" src="${esc(twinSrc(a))}" alt="" width="${px}" height="${px}" decoding="async">`; };
 // Authorship mark: who performed it. Person (warm circle), AI agent (cool square in sunglasses), or yin-yang when both did it together.
 const AUTHOR = { human: 'By human', agent: 'By AI agent', both: 'Human + AI together' };
 function authorMark(k, cls = '') {
@@ -72,6 +97,12 @@ const demoBadge = () => '<span class="badge demo" title="Fictional demo member">
 const humanPill = (lg = '') => `<span class="badge human ${lg}" title="Phone-verified human">${icon('seal')}Verified human</span>`;
 const humanBadge = (h) => `${humanPill()}${h && h.is_demo ? ' ' + demoBadge() : ''}`;
 const aiPill = (provider, lg = '') => `<span class="badge ai ${lg}" title="This is an AI agent, not a person">${icon('sparkle')}AI agent${provider ? `<span class="prov">· ${esc(provider)}</span>` : ''}</span>`;
+const platformPill = (lg = '') => `<span class="badge platform ${lg}" title="PM — PointMint platform AI guide">${pmIcon(14)}PM</span>`;
+/** Platform guide avatar — mint point on grayscale tile; not a human twin / no sunglasses. */
+function pmIcon(size = 20) {
+  const s = Math.max(12, Math.min(48, Number(size) || 20));
+  return `<img class="pm-ico" src="/assets/pm.svg" width="${s}" height="${s}" alt="" role="presentation" decoding="async">`;
+}
 const aiBadge = (a) => aiPill(a && a.provider);
 const TYPE = { buy: 'Buying', sell: 'Selling', seek: 'Seeking', acquire: 'Acquiring' };
 const typeLabel = (t, ic = true) => `<span class="intent t-${esc(t)}">${ic ? icon(TYPE[t] ? t : 'seek') : ''}${esc(TYPE[t] || t)}</span>`;
@@ -82,10 +113,39 @@ const money = n => n == null ? '' : '$' + Number(n).toLocaleString('en-US');
 const range = (a, b) => a == null && b == null ? '' : a != null && b != null ? `${money(a)} – ${money(b)}` : a != null ? `From ${money(a)}` : `Up to ${money(b)}`;
 const when = s => s ? new Date(s).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
 const day = s => s ? new Date(s).toLocaleDateString([], { dateStyle: 'medium' }) : '';
-const humanLink = h => `<a href="/h/${esc(h.id)}" data-link>${esc(h.name)}</a>`;
+const humanHref = h => (h && h.handle) ? '/' + h.handle : (h && h.href) ? h.href : (h && h.id ? '/h/' + h.id : '#');
+const humanLink = h => `<a href="${esc(humanHref(h))}" data-link>${esc(h.name)}</a>`;
+const handleChip = h => h && h.handle ? `<a class="handle-chip" href="/${esc(h.handle)}" data-link title="agents.pointmint.io/${esc(h.handle)}">@${esc(h.handle)}</a>` : '';
+const formatUserNumber = n => {
+  if (n == null || n === '') return '';
+  const num = Number(n);
+  if (!Number.isFinite(num) || num < 1) return '';
+  const i = Math.trunc(num);
+  return 'User ' + (i < 1000 ? String(i).padStart(3, '0') : String(i));
+};
+const userNumberChip = (h, sm = false) => {
+  if (!h || h.user_number == null) return '';
+  const label = h.user_number_label || formatUserNumber(h.user_number);
+  if (!label) return '';
+  return `<span class="user-number-chip${sm ? ' sm' : ''}" title="Member number — early adopter status">${esc(label)}</span>`;
+};
+const RESERVED_HANDLES = new Set(['h','a','p','for-you','foryou','feed','api','admin','mcp','oauth','network','vault','matches','activity','intros','signup','dashboard','about','docs','connect','import','community','launch','graph','index','assets','avatars','media','glass','llms','login','logout','settings','me','null','undefined','home','robots','sitemap','favicon','static','public','private','ws','sse','health','status','term','feed','col','hud','theme','styles','split','float','top100','deck','identity','company','companies','human','humans','agent','agents','entity','entities','reserved','claim','claims','handle','handles','profile','profiles','user','users','org','orgs','www','app','cdn','well-known','og','opengraph']);
 const agentLink = a => `<a href="/a/${esc(a.id)}" data-link>${esc(a.name)}</a>`;
-const AGENT_STATUS = { active: 'Active', no_credential: 'No live credential', revoked: 'Revoked' };
+const AGENT_STATUS = { active: 'Active', no_credential: 'No live credential', revoked: 'Revoked', not_minted: 'Not minted' };
 const chev = () => icon('chevron');
+// Mask pm_agent_ credentials the same way as the dashboard: prefix + ellipsis. Never echo a full secret.
+function maskAgentCred(prefixOrToken) {
+  if (!prefixOrToken) return 'pm_agent_…';
+  const s = String(prefixOrToken);
+  if (!s.startsWith('pm_agent_')) return 'pm_agent_…';
+  // Server stores credential_prefix as token.slice(0, 13); SESSION_CRED may be full — keep only the prefix.
+  return s.slice(0, 13) + '…';
+}
+// Compact Grok mark (geometric; label carries the brand) for Mel / Grok Bot chrome.
+function grokBadge() {
+  return `<span class="grok-badge" title="Grok Bot"><svg class="grok-mark" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 16.5 12 7.5l5 9" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.2 13.2h5.6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg><span>Grok Bot</span></span>`;
+}
+
 function err(e) { return `<div class="err" role="alert">${esc(e.message || e)}</div>`; }
 const head = (eyebrow, title, lede) => `<header class="page-head">${eyebrow ? `<p class="eyebrow">${eyebrow}</p>` : ''}<h1 class="title">${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</header>`;
 const groupLabel = (title, aside = '') => `<div class="group-label"><h2>${title}</h2>${aside ? `<span class="aside">${aside}</span>` : ''}</div>`;
@@ -127,6 +187,32 @@ function introCard(i, { link = true } = {}) {
     ${i.counterpart_contact ? `<div class="contact">${icon('contact')}<span>Both humans approved. Contact: <b>${esc(i.counterpart_contact)}</b></span></div>` : ''}
     ${actions}${link ? `<a href="/intros/${esc(i.id)}" data-link class="link-more small">${i.status === 'accepted' ? 'Read the conversation' : 'View details'}${chev()}</a>` : ''}</article>`;
 }
+
+// §39 Multilingual: flag + translating chrome (Worker attaches translation_* fields)
+const LANG_FLAG = { en:'🇺🇸', es:'🇪🇸', fr:'🇫🇷', de:'🇩🇪', pt:'🇧🇷', it:'🇮🇹', ja:'🇯🇵', ko:'🇰🇷', zh:'🇨🇳', 'zh-Hans':'🇨🇳', 'zh-Hant':'🇹🇼', ar:'🇸🇦', hi:'🇮🇳', he:'🇮🇱', ru:'🇷🇺', nl:'🇳🇱', pl:'🇵🇱', tr:'🇹🇷', vi:'🇻🇳', th:'🇹🇭', id:'🇮🇩' };
+function langFlag(tag) { if (!tag) return '🌐'; const t = String(tag); return LANG_FLAG[t] || LANG_FLAG[t.split('-')[0]] || '🌐'; }
+function langName(tag) { const n = { en:'English', es:'Spanish', fr:'French', de:'German', pt:'Portuguese', it:'Italian', ja:'Japanese', ko:'Korean', zh:'Chinese', ar:'Arabic', hi:'Hindi', he:'Hebrew', ru:'Russian', nl:'Dutch', pl:'Polish', tr:'Turkish', vi:'Vietnamese', th:'Thai', id:'Indonesian' }; if (!tag) return ''; const t = String(tag); return n[t] || n[t.split('-')[0]] || t; }
+function translationChrome(m) {
+  const st = m.translation_status || (m.translation && m.translation.status) || 'not_needed';
+  const src = m.source_language || (m.translation && m.translation.source_lang);
+  const tgt = m.preferred_language || (m.translation && m.translation.target_lang) || (ME && ME.human && ME.human.preferred_language) || 'en';
+  if (st === 'not_needed' || !src) return '';
+  if (st === 'translating') return `<span class="tr-badge translating" role="status">${langFlag(src)} <span>Translating…</span></span>`;
+  if (st === 'ready' && (m.body_display || m.show_original)) {
+    return `<span class="tr-badge ready" title="Shown in ${langName(tgt)} · original ${langName(src)}">${langFlag(src)} <span>Shown in ${esc(langName(tgt))} · original ${esc(langName(src))}</span></span>`;
+  }
+  if (st === 'unavailable' || st === 'pending' || st === 'error') {
+    return `<span class="tr-badge pending" title="${esc((m.translation && m.translation.note) || 'Translation unavailable')}">${langFlag(src)} <span>Original ${esc(langName(src))} · translation pending</span></span>`;
+  }
+  if (src) return `<span class="tr-badge lang" title="Message language">${langFlag(src)} <span>${esc(langName(src))}</span></span>`;
+  return '';
+}
+function messageBodyHtml(m) {
+  const display = m.body_display || m.body;
+  const badge = translationChrome(m);
+  const orig = (m.show_original && m.body_original) ? `<details class="tr-orig"><summary>Show original</summary><p class="tr-orig-body">${esc(m.body_original)}</p></details>` : '';
+  return `${badge}<div class="bubble-text">${esc(display)}</div>${orig}`;
+}
 function bubble(m, i) {
   const fromIds = i ? [i.from.human.id, i.from.agent && i.from.agent.id] : [];
   const isFrom = m.sender_type === 'agent' ? fromIds.includes(m.sender.agent_id) : fromIds.includes(m.sender.human_id);
@@ -136,7 +222,7 @@ function bubble(m, i) {
     : `${humanPill()} <b>${esc(m.sender.name)}</b>${levelChip(m.sender_verification)}`;
   const mine = ME && ME.signed_in && m.sender_type === 'human' && m.sender.human_id === ME.human.id;
   const pic = authorMark(m.author || m.sender_type) + (m.sender_type === 'agent' ? agentMark(m.sender, 'sm') : avatar(m.sender, 'sm'));
-  return `<div class="msg ${m.sender_type === 'agent' ? 'agent' : 'human'}${right ? ' right' : ''}${mine ? ' mine' : ''}"><div class="meta">${pic}${who}<span>· ${esc(when(m.created_at))}</span></div><div class="bubble">${esc(m.body)}</div></div>`;
+  return `<div class="msg ${m.sender_type === 'agent' ? 'agent' : 'human'}${right ? ' right' : ''}${mine ? ' mine' : ''}"><div class="meta">${pic}${who}<span>· ${esc(when(m.created_at))}</span></div><div class="bubble">${messageBodyHtml(m)}</div></div>`;
 }
 
 // ---- messages (every direction) ----
@@ -152,7 +238,7 @@ function dmRow(m) {
   const agent = m.sender_type === 'agent';
   const who = agent ? `${aiPill(m.sender.provider)} <b>${esc(m.sender.name)}</b> <span>for ${esc(actsFor(m.sender))}</span>` : `${humanPill()} <b>${esc(m.sender.name)}</b>`;
   const pic = authorMark(m.author || m.sender_type) + (agent ? agentMark(m.sender, 'sm') : avatar(m.sender, 'sm'));
-  return `<div class="msg dm ${agent ? 'agent' : 'human'}"><div class="meta">${pic}${who}${levelChip(m.sender_verification)}${toLabel(m.to)}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="bubble">${esc(m.body)}</div></div>`;
+  return `<div class="msg dm ${agent ? 'agent' : 'human'}"><div class="meta">${pic}${who}${levelChip(m.sender_verification)}${toLabel(m.to)}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="bubble">${messageBodyHtml(m)}</div></div>`;
 }
 const dmList = (msgs, empty) => `<div class="panel">${msgs.length ? `<div class="thread">${msgs.map(dmRow).join('')}</div>` : `<p class="empty">${empty}</p>`}</div>`;
 function targetOptions(M, dflt) {
@@ -198,7 +284,7 @@ const pages = {
   },
   network(M) {
     const rows = M.data.members.map(m => `<div class="item member">${avatar(m.human)}
-      <div class="who"><span class="name">${humanLink(m.human)}</span><span class="row">${humanBadge(m.human)}</span><span class="sub">${esc(m.human.headline)}</span></div>
+      <div class="who"><span class="name">${humanLink(m.human)}</span><span class="row">${humanBadge(m.human)}${userNumberChip(m.human, true)}</span><span class="sub">${esc(m.human.headline)}</span></div>
       ${m.agent ? `<div class="rep">${agentMark(m.agent, 'sm')}<div class="meta">${agentLink(m.agent)}<span>${aiBadge(m.agent)}</span></div></div>` : '<div class="rep small muted">No AI agent yet</div>'}
       <span class="count num">${m.public_items} public ${m.public_items === 1 ? 'card' : 'cards'}</span></div>`);
     return `<div class="wrap page">${head('Network', 'Everyone here is a verified human.', 'Each member may have at most one AI agent, and it always says who it works for.')}
@@ -216,21 +302,32 @@ const pages = {
     const s = M.subject, own = ME && ME.signed_in && ME.human.id === s.human.id;
     const pick = own ? '' : `<form class="toolbar" id="matchPick"><label class="sr-only" for="mp">Demo member</label><select id="mp" name="human">${M.data.demo_members.map(h => `<option value="${esc(h.id)}"${h.id === s.human.id ? ' selected' : ''}>${esc(plain(h.name))}</option>`).join('')}</select><span class="small muted">Matches are public for fictional demo members${ME && ME.signed_in ? '' : '. Sign in to see your own'}.</span></form>`;
     return `<div class="wrap mid page">${head('Matches', own ? 'People who fit what you want.' : `Who fits ${esc(plain(s.human.name))}.`, 'Agents score complementary intent cards — buy with sell, seek with sell, acquire with sell — by shared tags, keywords and budget fit.')}
-      ${pick}<div class="profile slim section-gap-sm">${avatar(s.human)}<div class="meta"><b>${humanLink(s.human)}</b><span class="row">${humanBadge(s.human)}${s.agent ? ` <span class="muted small">agent</span> ${agentLink(s.agent)} ${aiBadge(s.agent)}` : ''}</span></div></div>
+      ${pick}<div class="profile slim section-gap-sm">${avatar(s.human)}<div class="meta"><b>${humanLink(s.human)}</b><span class="row">${humanBadge(s.human)}${userNumberChip(s.human, true)}${s.agent ? ` <span class="muted small">agent</span> ${agentLink(s.agent)} ${aiBadge(s.agent)}` : ''}</span></div></div>
       <section class="section-gap">${groupLabel('Ranked matches', `<span class="num">${M.data.matches.length}</span> found`)}${panelRows(M.data.matches.map(m => matchCard(m, { canRequest: own })), 'No matches yet.')}</section></div>`;
   },
   human(M) {
     const h = M.subject.human, a = M.subject.agent, D = M.data;
     return `<div class="wrap mid page">
-      <header class="profile">${avatar(h, 'lg')}<div class="meta"><h1>${esc(h.name)}</h1><div class="row">${humanBadge(h)}<span class="lvl" title="Phone verified">${esc(h.level)}</span></div><p class="sub">${esc(h.headline)}${h.company && !String(h.headline || '').includes(h.company) ? ' · ' + esc(h.company) : ''}</p></div></header>
+      <header class="profile">${avatar(h, 'lg')}<div class="meta"><h1>${esc(h.name)}</h1><div class="row">${humanBadge(h)}<span class="lvl" title="Phone verified">${esc(h.level)}</span>${userNumberChip(h)}${handleChip(h)}</div><p class="sub">${esc(h.headline)}${h.company && !String(h.headline || '').includes(h.company) ? ' · ' + esc(h.company) : ''}</p>${h.handle ? `<p class="handle-url small muted">agents.pointmint.io/<b>${esc(h.handle)}</b></p>` : ''}</div></header>
       ${h.bio ? `<p class="prose section-gap-sm">${esc(h.bio)}</p>` : ''}
       <section class="section-gap">${groupLabel('AI agent', 'Exactly one per human')}
         ${a ? `<div class="panel rows"><a class="item link member" href="/a/${esc(a.id)}" data-link>${agentMark(a)}<div class="who"><span class="name">${esc(a.name)}</span><span class="row">${aiBadge(a)}</span></div><span class="sub hide-sm">Acts for ${esc(plain(h.name))}</span><span class="count">${chev().replace('class="ic"', 'class="ic chev"')}</span></a></div>` : '<div class="panel"><p class="empty">No AI agent yet.</p></div>'}</section>
       <section class="section-gap">${groupLabel('Vault', `${D.vault.length} visible ${D.vault.length === 1 ? 'card' : 'cards'}`)}${panelRows(D.vault.map(v => itemCard(v, { owner: false })), 'No visible intent cards.')}</section>
       ${D.matches ? `<section class="section-gap">${groupLabel('Suggested matches', `<a class="link-more small" href="/matches?human=${esc(h.id)}" data-link>All matches${chev()}</a>`)}${panelRows(D.matches.map(m => matchCard(m)), 'No matches yet.')}</section>` : ''}
+      ${typeof top100Section === 'function' ? top100Section(M) : ''}
       <section class="section-gap">${groupLabel('Messages', 'Visible to you')}${dmList(D.messages, h.is_demo ? 'No messages yet.' : 'Your conversation with this member appears here.')}</section>
       ${humanComposer(M)}
       <p class="foot-note section-gap">${icon('lock')}Contact details are never shown publicly — only after both humans approve an intro.</p></div>`;
+  },
+  company(M) {
+    const c = M.data.company, people = M.data.people || [];
+    return `<div class="wrap mid page">
+      <header class="profile company-profile"><div class="ent-glyph e-company" aria-hidden="true"></div><div class="meta"><p class="eyebrow">Company</p><h1>${esc(c.name)}</h1>
+        <div class="row"><span class="badge sys">Company</span>${c.handle ? `<a class="handle-chip" href="/${esc(c.handle)}" data-link>@${esc(c.handle)}</a>` : ''}${c.is_demo ? demoBadge() : ''}</div>
+        ${c.handle ? `<p class="handle-url small muted">agents.pointmint.io/<b>${esc(c.handle)}</b></p>` : '<p class="small muted">No handle yet.</p>'}
+        ${c.source_url ? `<p class="sub"><a href="${esc(c.source_url)}" target="_blank" rel="noopener noreferrer nofollow">Source</a></p>` : ''}</div></header>
+      <section class="section-gap">${groupLabel('People', `${people.length}`)}${panelRows(people.map(p => `<div class="item member"><div class="who"><span class="name"><a href="${esc(p.href)}" data-link>${esc(p.name)}</a>${p.handle ? ` <span class="handle-chip sm">@${esc(p.handle)}</span>` : ''}</span><span class="sub">${esc(p.label || p.rel)}${p.headline ? ' · ' + esc(p.headline) : ''}</span></div></div>`), 'No linked members yet.')}</section>
+      <p class="foot-note section-gap">${icon('shield')}Company handles are set only by a verified human with proven claim (founded / co-founded / led). Agents cannot claim handles (§28).</p></div>`;
   },
   agent(M) {
     const a = M.subject.agent, h = M.subject.human;
@@ -315,10 +412,11 @@ const solo = {
     const pending = intros.intros.filter(i => (i.viewer_role === 'sender' && i.status === 'pending_human_approval') || (i.viewer_role === 'recipient' && i.status === 'pending_recipient'));
     const actor = e => e.actor_type === 'agent' ? aiPill() : e.actor_type === 'human' ? humanPill() : '<span class="badge sys">System</span>';
     return `<div class="wrap mid page">
-      <header class="profile">${avatar(h, 'lg')}<div class="meta"><p class="eyebrow">Dashboard</p><h1>Hi, ${esc(plain(h.name))}.</h1><div class="row">${humanBadge(h)} <span class="small muted num">${esc(h.phone_masked)}</span> <a class="link-more small" href="/h/${esc(h.id)}" data-link>Public profile${chev()}</a></div></div><button class="btn secondary small" data-action="logout">Sign out</button></header>
+      <header class="profile">${avatar(h, 'lg')}<div class="meta"><p class="eyebrow">Dashboard</p><h1>Hi, ${esc(plain(h.name))}.</h1><div class="row">${humanBadge(h)} ${userNumberChip(h)} ${handleChip(h)} <span class="small muted num">${esc(h.phone_masked)}</span> <a class="link-more small" href="${esc(humanHref(h))}" data-link>Public profile${chev()}</a></div></div><button class="btn secondary small" data-action="logout">Sign out</button></header>
       ${h.photo_required ? `<div class="nag section-gap-sm" role="note">${avatar(h, 'sm')}<p><b>Add a photo of yourself.</b> Without one you’re still listed, but you rank lower in search and matches.</p><a class="btn small" href="#photo">Add photo</a></div>` : ''}
       ${pending.length ? `<section class="section-gap">${groupLabel('Needs your approval', `<span class="num">${pending.length}</span> waiting`)}${panelRows(pending.map(i => introCard(i)), '')}</section>` : ''}
       <section class="section-gap">${groupLabel('Profile photo', h.photo_url ? 'Visible to members' : '<span class="warn-txt">Missing · ranked lower</span>')}${photoPanel(h)}</section>
+      ${typeof top100DashPanel === 'function' ? await top100DashPanel() : ''}
       <section class="section-gap">${groupLabel('Your AI agent', 'Exactly one per human')}<div id="agentArea">${agentPanel(a, h)}</div></section>
       <section class="section-gap">${groupLabel('Your vault', `${vault.items.length} ${vault.items.length === 1 ? 'card' : 'cards'}`)}
         ${vault.items.length ? panelRows(vault.items.map(v => itemCard(v, { owner: false, actions: `<div class="actions"><button class="btn small danger" data-action="del-item" data-id="${esc(v.id)}">Delete</button></div>` })), '') : ''}
@@ -332,12 +430,30 @@ const solo = {
         <div class="form-actions"><button class="btn">Add intent card</button></div></form></div></section>
       <section class="section-gap">${groupLabel('Suggested matches')}${panelRows(matches.matches.map(m => matchCard(m, { canRequest: true })), 'No matches yet — try tags like coffee, saas, accounting, marketing, design or fundraising.')}</section>
       <section class="section-gap">${groupLabel('Your intros')}${panelRows(intros.intros.map(i => introCard(i)), 'None yet.')}</section>
+      <section class="section-gap">${groupLabel('Handle', 'Public URL · unique across humans & companies')}<div class="panel pad glass-panel-ish">
+        <form id="handleForm"><div class="fields"><div><label for="hf-handle">Your handle</label>
+          <div class="handle-field"><span class="handle-prefix">@</span><input id="hf-handle" name="handle" value="${esc(h.handle || '')}" minlength="3" maxlength="32" pattern="[a-z0-9][a-z0-9_-]{1,30}[a-z0-9]|[a-z0-9]{3}" placeholder="your-name" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
+          <p class="small muted">agents.pointmint.io/<span id="hf-preview">${esc(h.handle || 'your-name')}</span> · 3–32 chars · lowercase letters, numbers, hyphens, underscores · reserved words blocked</p></div></div>
+        <div class="form-actions"><button class="btn">Save handle</button>${h.handle ? '<button type="button" class="btn secondary" data-action="clear-handle">Clear</button>' : ''}</div>
+        <p class="small muted section-gap-sm" id="handleStatus" role="status"></p></form></div></section>
+      <section class="section-gap" id="companyHandlesSection" hidden>${groupLabel('Company handles', 'Only if you founded / co-founded / lead the company (§28)')}<div class="panel pad" id="companyHandlesBody"><p class="small muted">Loading…</p></div></section>
+      <section class="section-gap">${groupLabel('Language', 'How you read messages · §39')}<div class="panel pad glass-panel-ish">
+        <form id="langForm"><div class="fields"><div><label for="lf-lang">Preferred language</label>
+          <select id="lf-lang" name="preferred_language">${(ME.language_options || [{tag:'en',label:'English'},{tag:'ja',label:'日本語'},{tag:'es',label:'Español'},{tag:'de',label:'Deutsch'},{tag:'pt',label:'Português'},{tag:'zh',label:'中文'},{tag:'ko',label:'한국어'},{tag:'fr',label:'Français'},{tag:'ar',label:'العربية'},{tag:'hi',label:'हिन्दी'},{tag:'ru',label:'Русский'}]).map(o => `<option value="${esc(o.tag)}"${(h.preferred_language || 'en') === o.tag ? ' selected' : ''}>${esc(o.label)} (${esc(o.tag)})</option>`).join('')}</select>
+          <p class="small muted">You type and send in your language. Incoming messages in another language show a flag and a <b>Translating…</b> indicator. Worker-side translation (shared with MCP). Phase 1 may show “translation pending” until a provider key is configured.</p></div></div>
+        <div class="form-actions"><button class="btn">Save language</button></div>
+        <p class="small muted section-gap-sm" id="langStatus" role="status"></p></form></div></section>
       <section class="section-gap">${groupLabel('Profile')}<div class="panel pad"><form id="profileForm"><div class="fields two"><div><label for="pf-name">Name</label><input id="pf-name" name="name" value="${esc(h.name)}" maxlength="80"></div><div><label for="pf-co">Company</label><input id="pf-co" name="company" value="${esc(h.company)}" maxlength="80"></div></div>
         <div class="fields section-gap-sm"><div><label for="pf-head">Headline</label><input id="pf-head" name="headline" value="${esc(h.headline)}" maxlength="120"></div><div><label for="pf-bio">Bio</label><textarea id="pf-bio" name="bio" maxlength="1000">${esc(h.bio)}</textarea></div>
         <div><label for="pf-contact">Contact to share after mutual approval</label><input id="pf-contact" name="contact" value="${esc(h.contact)}" maxlength="200" placeholder="Email or LinkedIn — defaults to your phone number"></div></div>
         <div class="form-actions"><button class="btn">Save profile</button></div></form></div></section>
       <section class="section-gap">${groupLabel('Audit log', 'Every human and agent action')}<div class="panel table-wrap"><table><thead><tr><th scope="col">When</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Detail</th></tr></thead><tbody>
       ${auditR.entries.map(e => `<tr><td class="when">${esc(when(e.created_at))}</td><td>${actor(e)}</td><td><code>${esc(e.action)}</code></td><td class="detail">${esc(JSON.stringify(e.detail)).slice(0, 300)}</td></tr>`).join('')}</tbody></table></div></section></div>`;
+  },
+  async foryou() {
+    const filter = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('pm-fy-filter')) || 'both';
+    if (typeof fyRenderPage === 'function') return fyRenderPage(filter);
+    return `<div class="wrap mid page"><p class="muted">For You UI failed to load.</p></div>`;
   },
 };
 function agentPanel(a, h) {
@@ -673,9 +789,9 @@ function mdRender(src) {
 const hhmm = s => new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 function feedLine(e) {
   const a = e.actor, ai = a.type === 'agent';
-  const what = e.kind === 'mcp' ? (e.tool === 'initialize' ? '<span class="t-dim">mcp</span> initialize' : `<span class="t-dim">tools/call</span> <b>${esc(e.tool)}</b>`) : `<b>${esc(e.action)}</b>`;
-  const res = e.kind === 'mcp' ? (e.ok ? '<span class="t-ok">ok</span>' : '<span class="t-err">error</span>') : '';
-  return `<div class="ev" data-id="${esc(e.id)}"><time class="t-dim num" datetime="${esc(e.at)}">${esc(hhmm(e.at))}</time>${authorMark(e.author || (ai ? 'agent' : 'human'), 'xs')}<span class="tag ${ai ? 'ai' : 'hu'}">${ai ? 'AI agent' : 'HUMAN'}</span><span class="t-lvl">${esc(a.level)}</span><span class="who">${ai ? agentMark(a, 'xs') : avatar(a, 'xs')}${esc(plain(a.name))}</span><span class="what">${what} ${res}${e.simulated ? ' <span class="t-dim">· demo</span>' : ''}</span></div>`;
+  const summary = e.summary_human || e.summary || (e.kind === 'mcp' ? (e.tool || e.action) : e.action);
+  const demo = e.simulated || e.demo;
+  return `<div class="ha-ev${demo ? ' demo' : ''}" data-id="${esc(e.id)}"><time class="t-dim num" datetime="${esc(e.at)}">${esc(hhmm(e.at))}</time><span class="ha-mark">${authorMark(e.author || (ai ? 'agent' : 'human'), 'xs')}</span><span class="tag ${ai ? 'ai' : 'hu'}">${ai ? 'AI agent' : 'HUMAN'}</span><span class="ha-sum">${esc(summary)}</span></div>`;
 }
 function connectorsHtml(c) {
   const rows = c.list.map(x => `<div class="cn"><div class="cn-head"><span class="cn-name">${esc(x.name)}</span><span class="t-dim">${esc(x.method)}</span></div>
@@ -710,7 +826,69 @@ function agentChatBubble(m) {
     ? `${aiPill(m.sender.provider)} <b>${esc(m.sender.name)}</b> <span class="t-dim">for ${esc(actsFor(m.sender))}</span>`
     : `${humanPill()} <b>${esc(m.sender.name)}</b>${mine ? '<span class="id-you">You</span>' : ''}`;
   const pic = agent ? agentMark(m.sender, 'sm') : avatar(m.sender, 'sm');
-  return `<div class="ac-msg ${agent ? 'agent' : 'human'}${mine ? ' mine' : ''}" data-id="${esc(m.id)}"><div class="ac-meta">${pic}${who}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="ac-bubble">${esc(m.body)}</div></div>`;
+  return `<div class="ac-msg ${agent ? 'agent' : 'human'}${mine ? ' mine' : ''}" data-id="${esc(m.id)}"><div class="ac-meta">${pic}${who}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="ac-bubble">${messageBodyHtml(m)}</div></div>`;
+}
+// Own agent display name for Private bot window (core MVP). Mel is only one agent's name.
+function ownAgentName(M) {
+  const H = M && M.agent_home;
+  if (H && H.agent_name) return H.agent_name;
+  const a = M && M.identity && M.identity.agent;
+  if (a && a.name) return a.name;
+  if (ME && ME.agent && ME.agent.name) return ME.agent.name;
+  return null;
+}
+function privBotLabel(name) {
+  const n = (name && String(name).trim()) || null;
+  return n ? `Private · only you & ${n}` : 'Private · only you & your bot';
+}
+function privBotTitle(name) {
+  const n = (name && String(name).trim()) || null;
+  return n ? `Private with ${n}` : 'Private bot window';
+}
+// Mel micro-dashboard: top chrome of the signed-in owner's own AI agent column (Grok Bot home).
+// Guests / other members: agent_home is null — generic agentIdHead stays; no Mel branding.
+function melDash(M) {
+  const H = M.agent_home; if (!H) return '';
+  const a = M.identity && M.identity.agent;
+  const h = M.identity && M.identity.human;
+  const minted = !!H.minted;
+  const st = H.status || (minted ? (a && a.status) : 'not_minted');
+  const stLabel = st === 'active' ? 'Active' : (AGENT_STATUS[st] || (minted ? 'Connected' : 'Not minted'));
+  const stClass = st === 'active' ? 'on' : (st === 'revoked' ? 'off' : 'idle');
+  // Prefer owner-only prefix from agent_home / ME; fall back to session banner token (still masked). Never full secret in the DOM beyond the once-dialog.
+  const prefix = H.credential_prefix
+    || (ME && ME.agent && ME.agent.credential_prefix)
+    || (SESSION_CRED ? SESSION_CRED.slice(0, 13) : null);
+  const cred = minted && prefix ? maskAgentCred(prefix) : (minted ? 'pm_agent_…' : '—');
+  const acts = h ? plain(h.name) : 'you';
+  const provider = H.provider || (a && a.provider) || 'Grok';
+  return `<section class="mel-dash" id="melDash" aria-labelledby="melDashTitle">
+    <div class="mel-pic"><img class="mel-avatar" src="${esc((a && a.avatar_url) || (h && h.id ? ('/api/twin-avatar/' + encodeURIComponent(h.id)) : '/avatars/twin-placeholder.svg'))}" alt="" width="72" height="72" decoding="async"><span class="mel-led ${stClass}" aria-hidden="true"></span></div>
+    <div class="mel-meta">
+      <p class="mel-kicker"><span class="id-dot a" aria-hidden="true"></span>Ask the Grok bot${grokBadge()}</p>
+      <h2 class="mel-name" id="melDashTitle">Mel</h2>
+      <p class="mel-sub"><span class="mel-model">Model · <b>Grok</b> <span class="t-dim">(Grok Bot)</span></span>${provider && provider !== 'Grok' ? `<span class="t-dim">· minted as ${esc(provider)}</span>` : ''}</p>
+      <dl class="mel-kv">
+        <div><dt>Status</dt><dd><span class="mel-st ${stClass}"><span class="dot" aria-hidden="true"></span>${esc(stLabel)}${st === 'active' ? ' · connected' : ''}</span></dd></div>
+        <div><dt>Credential</dt><dd><code class="mel-cred" title="Masked credential prefix">${esc(cred)}</code></dd></div>
+        <div><dt>Acts for</dt><dd>${esc(acts)} <span class="t-dim">· signed-in human</span></dd></div>
+      </dl>
+      ${(() => {
+        const bot = ownAgentName(M) || 'your bot';
+        const priv = minted ? `<button type="button" class="btn small mel-priv-btn" id="openPrivateWs" aria-controls="privateWs" aria-expanded="false" title="Private bot window — only you and ${esc(bot)}">
+          <span class="mel-priv-lock" aria-hidden="true">🔒</span> ${esc(privBotTitle(bot))}
+        </button>
+        <span class="mel-priv-hint t-dim">Just you &amp; ${esc(bot)} · not on the feed</span>` : '';
+        return `<div class="mel-actions">
+        ${priv}
+        <button type="button" class="btn small mel-guide-btn" id="openGuideThread" aria-controls="guideThread" aria-expanded="false" title="Talk with PM — you, ${esc(bot)}, and the platform guide">
+          <span class="mel-guide-ico" aria-hidden="true">${pmIcon(16)}</span> Talk with PM
+        </button>
+        <span class="mel-guide-hint t-dim">You · ${minted ? esc(bot) + ' · ' : ''}PM · confidential</span>
+      </div>`;
+      })()}
+    </div>
+  </section>`;
 }
 function agentMintCTA(M) {
   const h = M.identity.human;
@@ -746,41 +924,274 @@ function agentChatHome(M) {
     ${form}
   </section>`;
 }
+
+// ---- Private bot window: confidential human↔own-agent dialogue (not public agent-home chat) ----
+let privateWsOpen = false;
+let privateWsTimer = null;
+function stopPrivateWs() { if (privateWsTimer) clearInterval(privateWsTimer); privateWsTimer = null; }
+function privWsBubble(m) {
+  const agent = m.sender_type === 'agent';
+  const mine = !agent && ME && ME.signed_in && m.sender && m.sender.human_id === ME.human.id;
+  const who = agent
+    ? `${aiPill(m.sender && m.sender.provider)} <b>${esc((m.sender && m.sender.name) || 'your bot')}</b>`
+    : `${humanPill()} <b>${esc((m.sender && m.sender.name) || 'You')}</b>${mine ? '<span class="id-you">You</span>' : ''}`;
+  return `<div class="pw-msg ${agent ? 'agent' : 'human'}${mine ? ' mine' : ''}" data-id="${esc(m.id)}"><div class="pw-meta">${who}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="pw-bubble">${esc(m.body)}</div></div>`;
+}
+function privateWorkspaceEmpty(es, agentName) {
+  const e = es || {};
+  const bot = (agentName && String(agentName).trim()) || 'your bot';
+  const hints = (e.hints || [
+    `Talk with ${bot} about goals and next steps`,
+    'Keep notes that stay between you two',
+    'Same thread as your external bot client via MCP',
+  ]).map(h => `<li>${esc(h)}</li>`).join('');
+  return `<div class="pw-empty" id="pwEmpty">
+    <p class="pw-kicker"><span class="id-dot a" aria-hidden="true"></span>${esc(e.kicker || 'Private bot window')}</p>
+    <h3 class="pw-empty-title">${esc(e.title || ('Just you & ' + bot))}</h3>
+    <p class="pw-lead">${esc(e.lead || ('Confidential dialogue between you and ' + bot + '. Not on the network feed. Not readable by other agents or humans.'))}</p>
+    <ul class="pw-hints">${hints}</ul>
+  </div>`;
+}
+function privateWorkspacePanel(M) {
+  if (!M.agent_home || !M.agent_home.minted) return '';
+  // Panel mounts hidden; opened from agent-home dash. Owner-only (agent_home is null for guests/others).
+  const bot = ownAgentName(M) || 'your bot';
+  const provider = (M.agent_home && M.agent_home.provider) || 'Grok';
+  return `<section class="private-ws glass-panel" id="privateWs" hidden aria-labelledby="privateWsTitle" aria-hidden="true">
+    <header class="pw-head">
+      <div class="pw-head-text">
+        <p class="pw-kicker"><span class="pw-lock" aria-hidden="true">🔒</span> ${esc(privBotLabel(bot))}</p>
+        <h2 class="pw-title" id="privateWsTitle">Private bot window</h2>
+        <p class="pw-sub">Just you and ${esc(bot)} — confidential dialogue inside PointMint. Same thread your external bot reaches via MCP. Separate from the public agent chat and network feed.</p>
+      </div>
+      <button type="button" class="tbtn pw-close" id="closePrivateWs" aria-label="Close private bot window">Close</button>
+    </header>
+    <div class="pw-thread" id="privateWsThread" role="log" aria-live="polite" aria-relevant="additions">${privateWorkspaceEmpty(null, bot)}</div>
+    <form class="pw-compose" id="composePrivateWs">
+      <label class="sr-only" for="pw-body">Message ${esc(bot)} privately</label>
+      <textarea id="pw-body" name="body" rows="3" maxlength="4000" required placeholder="Message ${esc(bot)} privately…"></textarea>
+      <div class="pw-foot">
+        <span class="t-dim">${humanPill()} you · ${aiPill(provider)} ${esc(bot)} · confidential</span>
+        <button type="submit" class="btn small">Send privately</button>
+      </div>
+    </form>
+  </section>`;
+}
+async function refreshPrivateWs() {
+  const box = document.getElementById('privateWsThread');
+  if (!box || !privateWsOpen) return;
+  try {
+    const r = await api('/api/private-workspace');
+    const msgs = r.messages || [];
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
+    if (!msgs.length) box.innerHTML = privateWorkspaceEmpty(r.empty_state, (r.workspace && r.workspace.agent_name) || ownAgentName(MODEL));
+    else box.innerHTML = msgs.map(privWsBubble).join('');
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  } catch (e) {
+    box.innerHTML = `<p class="pw-err" role="alert">${esc(e.message || 'Could not load private bot window')}</p>`;
+  }
+}
+function setPrivateWsOpen(on) {
+  privateWsOpen = !!on;
+  if (privateWsOpen && typeof setGuideThreadOpen === 'function' && guideThreadOpen) setGuideThreadOpen(false);
+  const panel = document.getElementById('privateWs');
+  const btn = document.getElementById('openPrivateWs');
+  const col = document.getElementById('agentCol');
+  if (panel) {
+    panel.hidden = !privateWsOpen;
+    panel.setAttribute('aria-hidden', privateWsOpen ? 'false' : 'true');
+  }
+  if (btn) btn.setAttribute('aria-expanded', privateWsOpen ? 'true' : 'false');
+  if (col) col.classList.toggle('priv-open', privateWsOpen);
+  if (privateWsOpen) {
+    refreshPrivateWs();
+    stopPrivateWs();
+    privateWsTimer = setInterval(() => { if (!document.hidden && privateWsOpen) refreshPrivateWs(); }, 4000);
+    const ta = document.getElementById('pw-body'); if (ta) try { ta.focus(); } catch {}
+  } else {
+    stopPrivateWs();
+  }
+}
+function bindPrivateWs() {
+  const open = document.getElementById('openPrivateWs');
+  const close = document.getElementById('closePrivateWs');
+  if (open) open.addEventListener('click', () => setPrivateWsOpen(true));
+  if (close) close.addEventListener('click', () => setPrivateWsOpen(false));
+}
+
+// ---- PM guide thread: confidential human + own bot + platform AI (not §35 private window) ----
+let guideThreadOpen = false;
+let guideThreadTimer = null;
+function stopGuideThread() { if (guideThreadTimer) clearInterval(guideThreadTimer); guideThreadTimer = null; }
+function guideBubble(m) {
+  const sp = m.speaker || (m.sender && m.sender.type === 'platform' ? 'platform' : (m.sender && m.sender.type === 'agent' ? 'own_agent' : 'human'));
+  const mine = sp === 'human' && ME && ME.signed_in && m.sender && m.sender.human_id === ME.human.id;
+  let who;
+  if (sp === 'platform') {
+    who = `<span class="gt-pm-ava" aria-hidden="true">${pmIcon(20)}</span>${platformPill()} <b>${esc((m.sender && m.sender.name) || (m.sender && m.sender.short) || 'PM')}</b>`;
+  } else if (sp === 'own_agent') {
+    who = `${aiPill(m.sender && m.sender.provider)} <b>${esc((m.sender && m.sender.name) || 'your bot')}</b>`;
+  } else {
+    who = `${humanPill()} <b>${esc((m.sender && m.sender.name) || 'You')}</b>${mine ? '<span class="id-you">You</span>' : ''}`;
+  }
+  return `<div class="gt-msg ${esc(sp)}${mine ? ' mine' : ''}" data-id="${esc(m.id)}" data-speaker="${esc(sp)}"><div class="gt-meta">${who}<span class="num">· ${esc(when(m.created_at))}</span></div><div class="gt-bubble">${esc(m.body)}</div></div>`;
+}
+function guideThreadEmpty(es, agentName, muted) {
+  const e = es || {};
+  const bot = (agentName && String(agentName).trim()) || 'your bot';
+  const hints = (e.hints || [
+    'Fill buy and sell cards — the vault is the main course',
+    'PM nudges gaps and objectives here',
+    muted ? 'Mute is on — only you and PM' : (`Unmute lets ${bot} join`),
+  ]).map(h => `<li>${esc(h)}</li>`).join('');
+  return `<div class="gt-empty" id="gtEmpty">
+    <p class="gt-kicker"><span class="gt-pm-ava" aria-hidden="true">${pmIcon(16)}</span>${esc(e.kicker || 'PM')}</p>
+    <h3 class="gt-empty-title">${esc(e.title || 'Get more impact from your vault')}</h3>
+    <p class="gt-lead">${esc(e.lead || ('Private three-way guide for you' + (muted ? '' : ', ' + bot) + ', and PM. Not on the network feed.'))}</p>
+    <ul class="gt-hints">${hints}</ul>
+  </div>`;
+}
+function guideThreadPanel(M) {
+  if (!M.agent_home) return '';
+  const bot = ownAgentName(M) || 'your bot';
+  const provider = (M.agent_home && M.agent_home.provider) || 'Grok';
+  const muted = !!(M.agent_home.guide_thread && M.agent_home.guide_thread.own_agent_muted);
+  return `<section class="guide-thread glass-panel" id="guideThread" hidden aria-labelledby="guideThreadTitle" aria-hidden="true">
+    <header class="gt-head">
+      <div class="gt-head-text">
+        <p class="gt-kicker"><span class="gt-lock" aria-hidden="true">🔒</span> Confidential · <span class="gt-pm-ava" aria-hidden="true">${pmIcon(14)}</span> PM</p>
+        <h2 class="gt-title" id="guideThreadTitle">Talk with PM</h2>
+        <p class="gt-sub">You${M.agent_home.minted ? `, ${esc(bot)},` : ''} and PM — vault gaps, buy/sell fill-in, objectives. Not on the feed. Separate from the private bot window.</p>
+      </div>
+      <button type="button" class="tbtn gt-close" id="closeGuideThread" aria-label="Close PM">Close</button>
+    </header>
+    <label class="gt-mute"${M.agent_home.minted ? '' : ' hidden'}>
+      <input type="checkbox" id="guideMuteOwn" ${muted ? 'checked' : ''}${M.agent_home.minted ? '' : ' disabled'}>
+      <span>Mute ${esc(bot)} in this thread <span class="t-dim">(human + PM only)</span></span>
+    </label>
+    <div class="gt-thread" id="guideThreadLog" role="log" aria-live="polite" aria-relevant="additions">${guideThreadEmpty(null, bot, muted)}</div>
+    <form class="gt-compose" id="composeGuideThread">
+      <label class="sr-only" for="gt-body">Message PM</label>
+      <textarea id="gt-body" name="body" rows="3" maxlength="4000" required placeholder="Ask PM about vault gaps or objectives…"></textarea>
+      <div class="gt-foot">
+        <span class="t-dim">${humanPill()} you · ${M.agent_home.minted && !muted ? aiPill(provider) + ' ' + esc(bot) + ' · ' : ''}${platformPill()} · confidential</span>
+        <button type="submit" class="btn small">Send</button>
+      </div>
+    </form>
+  </section>`;
+}
+async function refreshGuideThread() {
+  const box = document.getElementById('guideThreadLog');
+  if (!box || !guideThreadOpen) return;
+  try {
+    const r = await api('/api/guide-thread');
+    const msgs = r.messages || [];
+    const muted = !!(r.thread && r.thread.own_agent_muted);
+    const muteEl = document.getElementById('guideMuteOwn');
+    if (muteEl) muteEl.checked = muted;
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 48;
+    const bot = (r.thread && r.thread.agent_name) || ownAgentName(MODEL);
+    if (!msgs.length) box.innerHTML = guideThreadEmpty(r.empty_state, bot, muted);
+    else box.innerHTML = msgs.map(guideBubble).join('');
+    if (atBottom) box.scrollTop = box.scrollHeight;
+    const foot = document.querySelector('#composeGuideThread .gt-foot .t-dim');
+    if (foot && r.thread) {
+      const provider = (MODEL && MODEL.agent_home && MODEL.agent_home.provider) || 'Grok';
+      foot.innerHTML = `${humanPill()} you · ${r.thread.agent_name && !muted ? aiPill(provider) + ' ' + esc(r.thread.agent_name) + ' · ' : ''}${platformPill()} · confidential`;
+    }
+  } catch (e) {
+    box.innerHTML = `<p class="gt-err" role="alert">${esc(e.message || 'Could not load PM')}</p>`;
+  }
+}
+function setGuideThreadOpen(on) {
+  guideThreadOpen = !!on;
+  if (guideThreadOpen && privateWsOpen) setPrivateWsOpen(false);
+  const panel = document.getElementById('guideThread');
+  const btn = document.getElementById('openGuideThread');
+  const col = document.getElementById('agentCol');
+  if (panel) {
+    panel.hidden = !guideThreadOpen;
+    panel.setAttribute('aria-hidden', guideThreadOpen ? 'false' : 'true');
+  }
+  if (btn) btn.setAttribute('aria-expanded', guideThreadOpen ? 'true' : 'false');
+  if (col) col.classList.toggle('guide-open', guideThreadOpen);
+  if (guideThreadOpen) {
+    refreshGuideThread();
+    stopGuideThread();
+    guideThreadTimer = setInterval(() => { if (!document.hidden && guideThreadOpen) refreshGuideThread(); }, 4000);
+    const ta = document.getElementById('gt-body'); if (ta) try { ta.focus(); } catch {}
+  } else {
+    stopGuideThread();
+  }
+}
+function bindGuideThread() {
+  const open = document.getElementById('openGuideThread');
+  const close = document.getElementById('closeGuideThread');
+  const mute = document.getElementById('guideMuteOwn');
+  if (open) open.addEventListener('click', () => setGuideThreadOpen(true));
+  if (close) close.addEventListener('click', () => setGuideThreadOpen(false));
+  if (mute) mute.addEventListener('change', async () => {
+    try {
+      await api('/api/guide-thread', { method: 'PATCH', body: { own_agent_muted: !!mute.checked } });
+      await refreshGuideThread();
+    } catch (e) {
+      mute.checked = !mute.checked;
+      alert(e.message || 'Could not update mute');
+    }
+  });
+}
+
+
 function agentColumn(M) {
   const host = location.host;
   const mdPath = new URL(M.markdown_url).pathname + new URL(M.markdown_url).search;
   const scope = M.activity.scope.kind === 'human' ? `?human_id=${M.activity.scope.id}` : '';
   const home = M.agent_home;
   const top = home ? (home.minted ? agentChatHome(M) : agentMintCTA(M)) : '';
+  // Own agent home: Mel micro-dashboard is the top chrome (Grok Bot). Others keep the generic agentIdHead.
+  const head = home ? melDash(M) : agentIdHead(M);
+  const priv = home && home.minted ? privateWorkspacePanel(M) : '';
+  const guide = home ? guideThreadPanel(M) : '';
+  const trust = trustCard(M);
   return `<aside class="col-agent" id="agentCol" aria-labelledby="agentTitle">
-    ${agentIdHead(M)}
+    ${head}
+    ${trust}
+    ${priv}
+    ${guide}
     ${top}
-    <header class="term-bar"><div class="term-title"><span class="term-led" aria-hidden="true"></span><h2 id="agentTitle">AI agent view</h2><span class="t-dim hide-narrow">${home && home.minted ? 'activity · posts · page as Markdown' : 'this page, as AI agents read it'}</span></div>
-      <div class="term-actions"><button type="button" class="tbtn" data-action="copy-md">copy .md</button><a class="tbtn" href="${esc(location.origin + mdPath)}" aria-label="Open this page as raw Markdown">raw</a></div></header>
-    <div class="term-body" id="termBody" tabindex="0" aria-label="Agent view: this page as Markdown, connectors and activity">
-      <p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">curl -H "Accept: text/markdown" ${esc(host + M.path)}</span></p>
-      <div class="md" id="mdPage">${mdRender(M.md.page)}</div>
-      <p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">cat connectors.yaml</span></p>
-      <div class="md">${connectorsHtml(M.connect)}</div>
-      ${home && home.minted ? '' : `<p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">send_message</span></p>${agentComposer(M)}`}
-    </div>
-    <section class="term-tail" aria-labelledby="feedTitle">
-      <p class="tail-head" id="feedTitle"><span class="cmd"><span class="ps1" aria-hidden="true">~ $</span> tail -f /api/activity/stream${esc(scope)}</span> <span class="live${M.activity.visible ? '' : ' off'}"><span class="dot" aria-hidden="true"></span>${M.activity.visible ? 'live' : 'private'}</span><span class="t-dim tail-scope">${esc(M.activity.scope.kind === 'human' ? (M.subject ? plain(M.subject.human.name) : 'member') : 'demo network' + (ME && ME.signed_in ? ' + you' : ''))}</span></p>
-      ${M.activity.visible ? '' : ' off'}"><span class="dot" aria-hidden="true"></span>${M.activity.visible ? 'live' : 'private'}</span><span class="t-dim tail-scope">${esc(M.activity.scope.kind === 'human' ? (M.subject ? plain(M.subject.human.name) : 'member') : 'demo network' + (ME && ME.signed_in ? ' + you' : ''))}</span></p>
-      ${M.activity.visible ? `<div class="feed" id="feed" role="log" aria-live="off" aria-label="Live agent activity" tabindex="0">${M.activity.events.map(feedLine).join('')}<div class="ev cur"><span class="ps1" aria-hidden="true">›</span><span class="cursor" aria-hidden="true"></span><span class="sr-only">Waiting for new activity</span></div></div>` : `<p class="feed-off t-dim">${esc(M.activity.note)}</p>`}
-    </section></aside>`;
+    <section class="ha-panel" aria-labelledby="haTitle">
+      <header class="ha-head">
+        <div class="ha-title-row"><span class="ha-led" aria-hidden="true"></span><h2 id="haTitle" class="ha-title">Human activity</h2>
+          <span class="live${M.activity.visible ? '' : ' off'}"><span class="dot" aria-hidden="true"></span>${M.activity.visible ? 'live' : 'private'}</span></div>
+        <p class="ha-scope t-dim">${esc(M.activity.scope.kind === 'human' ? (ME && ME.signed_in && M.activity.scope.id === ME.human.id ? 'Your agent' : (M.subject ? plain(M.subject.human.name) : 'member')) : 'Demo network' + (ME && ME.signed_in ? ' + you' : ''))} · plain-language · AI labeled</p>
+      </header>
+      ${M.activity.visible
+        ? `<div class="ha-feed" id="feed" role="log" aria-live="polite" aria-label="Human-readable agent activity" tabindex="0">${M.activity.events.map(feedLine).join('')}<div class="ha-ev cur" aria-hidden="true"><span class="ha-waiting">Waiting for new activity…</span></div></div>`
+        : `<p class="ha-off t-dim">${esc(M.activity.note)}</p>`}
+    </section>
+    <details class="dev-view" id="devView">
+      <summary class="dev-sum"><span class="term-led" aria-hidden="true"></span><span>Developer view</span><span class="t-dim hide-narrow">Markdown · connectors · copy .md</span>
+        <span class="dev-actions" onclick="event.preventDefault()"><button type="button" class="tbtn" data-action="copy-md">copy .md</button><a class="tbtn" href="${esc(location.origin + mdPath)}" aria-label="Open this page as raw Markdown">raw</a></span></summary>
+      <div class="term-body" id="termBody" tabindex="0" aria-label="Developer view: page as Markdown and connectors">
+        <p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">curl -H "Accept: text/markdown" ${esc(host + M.path)}</span></p>
+        <div class="md" id="mdPage">${mdRender(M.md.page)}</div>
+        <p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">cat connectors.yaml</span></p>
+        <div class="md">${connectorsHtml(M.connect)}</div>
+        ${home && home.minted ? '' : `<p class="prompt"><span class="ps1" aria-hidden="true">~ $</span> <span class="cmd">send_message</span></p>${agentComposer(M)}`}
+      </div>
+    </details></aside>`;
 }
 
 // ---- identity headers: left column = the HUMAN, right column = their AI AGENT. Same words, colors and shapes everywhere. ----
 function humanIdHead(M) {
   const I = M.identity, h = I.human;
-  const link = h.id ? `<a href="/h/${esc(h.id)}" data-link>${esc(plain(h.name))}</a>` : esc(h.name);
+  const link = h.id ? `<a href="${esc(humanHref(h))}" data-link>${esc(plain(h.name))}</a>` : esc(h.name);
   const hint = h.rank_hint ? `<p class="id-hint" role="note">${icon('info')}<span>${esc(h.rank_hint)}</span> <a href="/dashboard#photo" data-link>Add photo</a></p>` : '';
   return `<header class="id-head id-human" aria-label="Human: ${esc(plain(h.name))}">
     <span class="id-pic">${avatar(h, 'xl')}</span>
     <div class="id-meta"><p class="id-kind"><span class="id-dot" aria-hidden="true"></span>Human${h.is_you ? '<span class="id-you">You</span>' : ''}</p>
       <p class="id-name">${link}</p>
-      <p class="id-sub">${h.headline ? `<span>${esc(h.headline)}</span>` : ''}${humanPill()}<span class="lvl" title="Phone-verified human">${esc(h.level)}</span>${h.is_demo ? demoBadge() : ''}</p></div>
+      <p class="id-sub">${h.headline ? `<span>${esc(h.headline)}</span>` : ''}${humanPill()}<span class="lvl" title="Phone-verified human">${esc(h.level)}</span>${userNumberChip(h, true)}${h.is_demo ? demoBadge() : ''}</p></div>
     ${hint}</header>`;
 }
 function agentIdHead(M) {
@@ -848,6 +1259,49 @@ function composer(M) {
     <button class="btn small">Post</button></form>`;
 }
 
+
+// ---- Agent Trust Score (§30): community peer feedback chip + glass card on AI column / profile ----
+function trustRing(total, size = 96) {
+  const r = 42, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, Number(total) || 0));
+  const col = v >= 70 ? '#6ee7b7' : v >= 40 ? '#93a9ff' : '#ff8fab';
+  return `<svg class="trust-ring" viewBox="0 0 100 100" width="${size}" height="${size}" role="img" aria-label="Agent Trust Score ${v} out of 100">
+    <circle class="tr-track" cx="50" cy="50" r="${r}"/><circle class="tr-val" cx="50" cy="50" r="${r}" stroke="${col}" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/>
+    <text x="50" y="52" class="tr-num" text-anchor="middle">${v}</text><text x="50" y="66" class="tr-of" text-anchor="middle">trust</text></svg>`;
+}
+function trustChip(M) {
+  const ts = M && M.trust; if (!ts || ts.total == null) return '';
+  const st = ts.status && ts.status !== 'active' ? `<span class="trust-st trust-st-${esc(ts.status)}">${esc(ts.status)}</span>` : '';
+  return `<span class="trust-chip" title="Agent Trust Score — community peer feedback (agents rating agents)">${esc(String(ts.total))}<span class="t-dim">/100</span>${st}</span>`;
+}
+function trustCard(M) {
+  const ts = M && M.trust, a = M && M.identity && M.identity.agent;
+  if (!ts || !a || !a.id) return '';
+  const fb = M.trust_feedback || {};
+  const buckets = ts.buckets ? Object.entries(ts.buckets).map(([k, b]) => {
+    const label = k === 'peer' ? 'Peer ratings' : k === 'behavior' ? 'Observed behavior' : 'Verification';
+    const w = b.weight != null ? Math.round(b.weight * 100) : '';
+    return `<li class="trust-b"><span class="tb-l">${esc(label)}${w ? ` <span class="t-dim">${w}%</span>` : ''}</span><span class="tb-p num">${esc(b.score != null ? b.score : '—')}</span></li>`;
+  }).join('') : '';
+  const dims = ts.dimensions ? Object.entries(ts.dimensions).map(([k, d]) => {
+    const label = (d && d.label) || k; const sc = d && d.score_0_100 != null ? d.score_0_100 : (d && d.mean_1_5 != null ? Math.round(((d.mean_1_5 - 1) / 4) * 100) : null);
+    return sc == null ? '' : `<li class="trust-d"><span>${esc(label)}</span><span class="num">${esc(sc)}</span></li>`;
+  }).filter(Boolean).join('') : '';
+  const mail = fb.mailto || 'mailto:report@pointmint.io?subject=%5BPointMint%20Trust%20Score%5D';
+  const gh = fb.github_new || fb.github_issues || 'https://github.com/Jekekel/pointmint/issues';
+  return `<section class="trust glass-card" aria-labelledby="trustTitle">
+    ${trustRing(ts.total)}
+    <div class="trust-main">
+      <p class="trust-k"><span class="id-dot a" aria-hidden="true"></span><span id="trustTitle">Agent Trust Score</span>
+        <a class="tbtn" href="/api/trust/${esc(a.id)}" aria-label="Agent Trust Score as JSON">json</a></p>
+      <p class="trust-s">Community peer feedback — agents rating agents. Open launch (no prior-interaction gate). Peer 50% · behavior 35% · verification 15%.</p>
+      ${ts.status && ts.status !== 'active' ? `<p class="trust-banner trust-st-${esc(ts.status)}">Status: ${esc(ts.status)}</p>` : ''}
+      ${buckets ? `<ul class="trust-buckets">${buckets}</ul>` : ''}
+      ${dims ? `<details class="trust-dims"><summary>Dimensions (${esc(String(ts.rating_count || 0))} ratings)</summary><ul>${dims}</ul></details>` : `<p class="small muted">${esc(String(ts.rating_count || 0))} peer ratings · Bayesian-smoothed until 20</p>`}
+      <p class="trust-report small">Report / feedback: <a href="${esc(mail)}">report@pointmint.io</a> · <a href="${esc(gh)}" target="_blank" rel="noopener">GitHub Issues</a> · MCP <code>report_agent</code></p>
+    </div>
+  </section>`;
+}
+
 // ---- Digital Twin Score: a ring where the human (warm) and agent (cool) halves meet ----
 function twinRing(total, size = 112) {
   const r = 50, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, Number(total) || 0));
@@ -868,16 +1322,16 @@ function twinCard(M) {
 }
 
 // ---- the three columns: HUMAN (left) · FEED (middle) · AI AGENT (right), floating over the live graph ----
-const NAV = [['/', 'Graph', 'seek'], ['/connect', 'Connections', 'link'], ['/network', 'Network', 'contact'], ['/vault', 'Vault', 'vault'], ['/matches', 'Matches', 'swap'], ['/intros', 'Intros', 'approve'], ['/activity', 'Activity', 'message'], ['/community', 'Community', 'community'], ['/docs', 'Developers', 'plug'], ['/about', 'How it works', 'info']];
+const NAV = [['/', 'Graph', 'seek'], ['/connect', 'Connections', 'link'], ['/network', 'Network', 'contact'], ['/vault', 'Vault', 'vault'], ['/matches', 'Matches', 'swap'], ['/intros', 'Intros', 'approve'], ['/for-you', 'For You', 'sparkle'], ['/activity', 'Activity', 'message'], ['/community', 'Community', 'community'], ['/docs', 'Developers', 'plug'], ['/about', 'How it works', 'info']];
 function humanColumn(M) {
   const I = M && M.identity, h = I ? I.human : { name: 'You', level: 'L1', headline: 'Sign in to see yourself here', host: true };
   const path = location.pathname;
-  const link = h.id ? `<a href="/h/${esc(h.id)}" data-link>${esc(plain(h.name))}</a>` : esc(h.name);
+  const link = h.id ? `<a href="${esc(humanHref(h))}" data-link>${esc(plain(h.name))}</a>` : esc(h.name);
   const ap = h.approvals && h.approvals.total ? `<a class="approvals" href="/dashboard" data-link>${icon('approve')}<span><b class="num">${esc(h.approvals.total)}</b> waiting for your approval</span>${chev()}</a>` : '';
   const vault = h.vault ? `<section class="lc-sec" aria-labelledby="lcVault"><p class="lc-h" id="lcVault">Vault <span class="t-dim num">${esc(h.vault.length)}</span></p>${h.vault.length ? `<ul class="lc-vault">${h.vault.map(v => `<li>${typeLabel(v.type)}<span class="t">${esc(v.title)}</span>${v.author === 'agent' ? authorMark('agent', 'xs') : ''}</li>`).join('')}</ul>` : '<p class="small muted">No visible intent cards.</p>'}</section>` : '';
   return `<div class="col-bar"><p class="col-kind"><span class="id-dot h" aria-hidden="true"></span>Human${h.is_you ? '<span class="id-you">You</span>' : ''}</p><button type="button" class="rail-btn" data-rail="l" aria-controls="colL" aria-expanded="true" aria-label="Collapse the human column">${icon('chevron', 'ic flip')}</button></div>
     <div class="col-scroll">
-      <header class="lc-id" aria-label="Human: ${esc(plain(h.name))}">${avatar(h, 'lg')}<p class="lc-name">${link}</p>${h.headline ? `<p class="lc-sub">${esc(h.headline)}</p>` : ''}<p class="lc-badges">${humanPill()}<span class="lvl" title="${h.level === 'L3' ? 'Identity-verified human (L3, simulated ID + selfie)' : 'Phone-verified human'}">${esc(h.level || 'L1')}</span>${h.is_demo ? demoBadge() : ''}${h.host ? '<span class="badge sys">Host</span>' : ''}</p>
+      <header class="lc-id" aria-label="Human: ${esc(plain(h.name))}">${avatar(h, 'lg')}<p class="lc-name">${link}</p>${h.headline ? `<p class="lc-sub">${esc(h.headline)}</p>` : ''}<p class="lc-badges">${humanPill()}<span class="lvl" title="${h.level === 'L3' ? 'Identity-verified human (L3, simulated ID + selfie)' : 'Phone-verified human'}">${esc(h.level || 'L1')}</span>${userNumberChip(h, true)}${h.is_demo ? demoBadge() : ''}${h.host ? '<span class="badge sys">Host</span>' : ''}</p>
         ${h.rank_hint ? `<p class="id-hint" role="note">${icon('info')}<span>${esc(h.rank_hint)}</span> <a href="/dashboard#photo" data-link>Add photo</a></p>` : ''}</header>
       ${ap}${vault}
       <nav class="lc-nav" aria-label="Primary">${NAV.map(([href, label, ic]) => { const on = href === path || (href !== '/' && path.startsWith(href + '/')); return `<a href="${href}" data-link${on ? ' aria-current="page" class="on"' : ''}>${icon(ic)}<span>${label}</span></a>`; }).join('')}
@@ -901,7 +1355,7 @@ function rightColumn(M) {
     <button type="button" class="rail" data-rail="r" aria-controls="colR" aria-label="Expand the AI agent column${a ? ': ' + esc(a.name) : ''}">${agentMark(a || { id: 'agent_host' }, 'sm')}<span class="id-dot a" aria-hidden="true"></span></button>`;
 }
 function middleHead(M, name) {
-  const I = M && M.identity, t = { home: 'Network feed', network: 'Network', vault: 'Vault', matches: 'Matches', intros: 'Intros', intro: 'Intro', activity: 'Activity', docs: 'Developers', about: 'How it works', human: I ? plain(I.human.name) : 'Member', agent: I && I.agent ? I.agent.name : 'AI agent', signup: 'Sign in', dashboard: 'Dashboard', connect: 'How am I connected?', reserved: 'Unclaimed profile', import: 'Import from LinkedIn', community: 'Community', cposts: 'Community', cthread: 'Community' }[name] || '';
+  const I = M && M.identity, t = { home: 'Network feed', network: 'Network', vault: 'Vault', matches: 'Matches', intros: 'Intros', intro: 'Intro', foryou: 'For You', activity: 'Activity', docs: 'Developers', about: 'How it works', human: I ? plain(I.human.name) : 'Member', agent: I && I.agent ? I.agent.name : 'AI agent', company: (M && M.data && M.data.company) ? M.data.company.name : 'Company', handle: 'Profile', signup: 'Sign in', dashboard: 'Dashboard', connect: 'How am I connected?', reserved: 'Unclaimed profile', import: 'Import from LinkedIn', community: 'Community', cposts: 'Community', cthread: 'Community' }[name] || '';
   const tabs = ['home', 'community', 'cposts', 'cthread'].includes(name) ? `<nav class="m-tabs" aria-label="Panel view"><a href="/" data-link${name === 'home' ? ' aria-current="page"' : ''}>Feed</a><a href="/community" data-link${name !== 'home' ? ' aria-current="page"' : ''}>Community</a></nav>` : '';
   return `<header class="m-head">${typeof fpGrip === 'function' ? fpGrip() : ''}<p class="m-title${tabs ? ' sr-only' : ''}">${esc(t)}</p>${tabs}${M && FEED_PAGES.has(name) && M.data.posts ? feedFilter() : ''}${typeof fpMin === 'function' ? fpMin() : ''}</header>`;
 }
@@ -1001,7 +1455,7 @@ function edgeCard(e, x, y) {
 async function initGraph() {
   const cv = document.getElementById('graph'); if (!cv || !window.PMGraph || graphReady) return; graphReady = true;
   await PMGraph.init(cv, {
-    onSelect: n => { const href = n.type === 'entity' ? '/connect?to=' + encodeURIComponent(n.id) : n.href || (n.human_id ? '/h/' + n.human_id : null); if (href) { if (mobileMQ.matches) setSheet('peek'); go(href); } },
+    onSelect: n => { const href = (window.PMConnect && PMConnect.identityHref) ? PMConnect.identityHref(n) : (n.type === 'entity' ? '/connect?to=' + encodeURIComponent(n.id) : (n.type === 'agent' && n.human_id ? '/h/' + n.human_id : n.href || (n.human_id ? '/h/' + n.human_id : null))); if (href) { if (mobileMQ.matches) setSheet('peek'); go(href); } },
     onEdge: (e, x, y) => edgeCard(e, x, y),
     onFocusText: n => { document.getElementById('gLive').textContent = `${n.type === 'agent' ? 'AI agent' : n.type === 'reserved' ? 'Unclaimed public-figure profile' : n.type === 'entity' ? (n.kind || 'Entity') : 'Human'}: ${plain(n.label)}${n.sub ? '. ' + n.sub : ''}. Press Enter to open.`; },
     viewOffset: graphOffset,
@@ -1014,8 +1468,14 @@ async function initGraph() {
 }
 function syncGraph(fly) {
   if (!window.PMGraph || !MODEL || !MODEL.identity) return;
-  const I = MODEL.identity, id = MODEL.page === 'agent' && I.agent ? I.agent.id : I.human.id;
-  if (id && PMGraph.node(id)) { if (fly) PMGraph.fly(id, Math.max(1.5, PMGraph.G.cam.k)); else PMGraph.select(id); } else PMGraph.select(null);
+  const I = MODEL.identity, hid = I.human && I.human.id, aid = I.agent && I.agent.id;
+  // One identity path: human + their agent (yin-yang). Agent pages resolve to the same human.
+  if (hid && PMGraph.node(hid)) {
+    if (fly) {
+      if (aid && PMGraph.node(aid)) PMGraph.showPath([hid, aid]);
+      else PMGraph.fly(hid, Math.max(1.5, PMGraph.G.cam.k));
+    } else PMGraph.select(hid);
+  } else PMGraph.select(null);
 }
 // Live activity → pulses along the matching edge. SSE stream; quiet periods replay the latest real events softly.
 let es = null, recent = [], lastLive = 0;
@@ -1043,23 +1503,51 @@ function startPulses() {
   setInterval(() => { if (document.hidden || !recent.length || Date.now() - lastLive < 5000) return; firePulse(recent[Math.floor(Math.random() * recent.length)], true); }, 1600);
 }
 function initHud() {
-  const q = document.getElementById('gq'), list = document.getElementById('gqList');
+  // Search + chips live in the second-column find-me panel (recreated on navigate). Bind via delegation once.
+  if (initHud.bound) return; initHud.bound = true;
+  const gqEls = () => { const q = document.getElementById('gq'), list = document.getElementById('gqList'); return q && list ? { q, list } : null; };
   const show = () => {
-    const res = window.PMGraph ? PMGraph.search(q.value) : [];
-    list.innerHTML = res.map((n, i) => `<li role="option" id="gqo-${i}" data-node="${esc(n.id)}" aria-selected="false">${n.type === 'human' ? avatar({ photo_url: n.photo_url }, 'xs') : n.type === 'agent' ? agentMark({ avatar_url: n.avatar_url }, 'xs') : n.type === 'reserved' ? hollow(n.label, 'xs') : n.type === 'entity' ? `<span class="ent-dot e-${esc(n.kind)}" aria-hidden="true"></span>` : typeLabel(n.intent, true)}<span>${esc(plain(n.label))}</span><span class="t-dim">${n.type === 'agent' ? 'AI agent' : n.type === 'human' ? 'Human' : n.type === 'reserved' ? 'Unclaimed' : n.type === 'entity' ? esc(n.kind) : 'Intent'}</span></li>`).join('');
+    const el = gqEls(); if (!el || !window.PMGraph) return; const { q, list } = el;
+    const res = PMGraph.search(q.value);
+    list.innerHTML = res.map((n, i) => {
+      const kind = n.type === 'agent' ? 'AI agent' : n.type === 'human' ? 'Human + AI' : n.type === 'reserved' ? 'Unclaimed' : n.type === 'entity' ? esc(n.kind) : 'Intent';
+      const mark = n.type === 'human' ? avatar({ photo_url: n.photo_url }, 'xs') : n.type === 'agent' ? agentMark({ avatar_url: n.avatar_url }, 'xs') : n.type === 'reserved' ? (typeof hollow === 'function' ? hollow(n.label, 'xs') : '') : n.type === 'entity' ? `<span class="ent-dot e-${esc(n.kind)}" aria-hidden="true"></span>` : typeLabel(n.intent, true);
+      return `<li role="option" id="gqo-${i}" data-node="${esc(n.id)}" aria-selected="false">${mark}<span>${esc(plain(n.label))}</span><span class="t-dim">${kind}</span></li>`;
+    }).join('');
     list.hidden = !res.length; q.setAttribute('aria-expanded', String(!!res.length)); q.removeAttribute('aria-activedescendant');
   };
-  const pick = li => { const n = PMGraph.node(li.dataset.node); list.hidden = true; q.setAttribute('aria-expanded', 'false'); PMGraph.fly(n.id); const href = n.type === 'entity' ? '/connect?to=' + encodeURIComponent(n.id) : n.href || '/h/' + n.human_id; go(href); };
-  q.addEventListener('input', show);
-  q.addEventListener('keydown', e => {
+  const pick = li => {
+    const el = gqEls(); if (!el || !window.PMGraph) return; const { q, list } = el;
+    const n = PMGraph.node(li.dataset.node); list.hidden = true; q.setAttribute('aria-expanded', 'false');
+    const href = (window.PMConnect && PMConnect.identityHref) ? PMConnect.identityHref(n) : (n.type === 'entity' ? '/connect?to=' + encodeURIComponent(n.id) : (n.type === 'agent' && n.human_id ? '/h/' + n.human_id : n.href || '/h/' + n.human_id));
+    if (n.type === 'human' || n.type === 'agent') {
+      const hid = n.type === 'human' ? n.id : n.human_id, aid = n.type === 'agent' ? n.id : (PMGraph.G.nodes.find(x => x.type === 'agent' && x.human_id === hid) || {}).id;
+      if (hid && aid) PMGraph.showPath([hid, aid]); else PMGraph.fly(n.id);
+    } else PMGraph.fly(n.id);
+    if (href) go(href);
+  };
+  document.addEventListener('input', e => { if (e.target.id === 'gq') show(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && !/input|textarea|select/i.test((document.activeElement && document.activeElement.tagName) || '')) {
+      e.preventDefault();
+      const el = gqEls();
+      if (el) el.q.focus();
+      else { if (window.PMConnect) {/* open connect panel */} go('/connect'); }
+      return;
+    }
+    if (e.target.id !== 'gq') return;
+    const el = gqEls(); if (!el) return; const { q, list } = el;
     const opts = [...list.querySelectorAll('[role=option]')]; let i = opts.findIndex(o => o.getAttribute('aria-selected') === 'true');
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!opts.length) return; i = (i + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length; opts.forEach((o, k) => o.setAttribute('aria-selected', String(k === i))); q.setAttribute('aria-activedescendant', opts[i].id); }
     else if (e.key === 'Enter') { e.preventDefault(); const o = opts[Math.max(0, i)]; if (o) pick(o); }
     else if (e.key === 'Escape') { list.hidden = true; q.value = ''; }
   });
-  list.addEventListener('click', e => { const li = e.target.closest('[role=option]'); if (li) pick(li); });
-  document.querySelectorAll('[data-chip]').forEach(b => b.addEventListener('click', () => { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); PMGraph.filter(b.dataset.chip, on); }));
-  document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); } });
+  document.addEventListener('click', e => {
+    const li = e.target.closest('#gqList [role=option]'); if (li) { pick(li); return; }
+    const chip = e.target.closest('[data-chip]'); if (chip && window.PMGraph) {
+      const on = chip.getAttribute('aria-pressed') !== 'true'; chip.setAttribute('aria-pressed', String(on)); PMGraph.filter(chip.dataset.chip, on); return;
+    }
+  });
 }
 
 // ---- live feed (polls the sanitized audit log; SSE is offered to agents at /api/activity/stream) ----
@@ -1101,9 +1589,9 @@ function startFeed(M) {
       feedCursor = r.cursor;
       const b = document.getElementById('feed'); if (!b || !r.events.length) return;
       const nearBottom = b.scrollHeight - b.scrollTop - b.clientHeight < 40;
-      const cur = b.querySelector('.ev.cur');
-      for (const e of r.events) { if (b.querySelector(`.ev[data-id="${CSS.escape(String(e.id))}"]`)) continue; cur.insertAdjacentHTML('beforebegin', feedLine(e).replace('class="ev"', 'class="ev fresh"')); }
-      const all = b.querySelectorAll('.ev:not(.cur)'); for (let k = 0; k < all.length - 80; k++) all[k].remove();
+      const cur = b.querySelector('.ha-ev.cur, .ev.cur');
+      for (const e of r.events) { if (b.querySelector(`.ev[data-id="${CSS.escape(String(e.id))}"]`)) continue; cur.insertAdjacentHTML('beforebegin', feedLine(e).replace('class="ha-ev"', 'class="ha-ev fresh"')); }
+      const all = b.querySelectorAll('.ha-ev:not(.cur), .ev:not(.cur)'); for (let k = 0; k < all.length - 80; k++) all[k].remove();
       if (nearBottom) b.scrollTop = b.scrollHeight;
     } catch {}
   };
@@ -1111,30 +1599,52 @@ function startFeed(M) {
 }
 
 // ---- router ----
-const routes = [[/^\/$/, 'home'], [/^\/network\/?$/, 'network'], [/^\/vault\/?$/, 'vault'], [/^\/matches\/?$/, 'matches'], [/^\/activity\/?$/, 'activity'], [/^\/h\/([\w-]+)$/, 'human'], [/^\/a\/([\w-]+)$/, 'agent'], [/^\/intros\/?$/, 'intros'], [/^\/intros\/([\w-]+)$/, 'intro'], [/^\/signup\/?$/, 'signup'], [/^\/dashboard\/?$/, 'dashboard'], [/^\/about\/?$/, 'about'], [/^\/docs\/?$/, 'docs']];
-const TITLES = { home: 'PointMint Agent Network — Get to the point', network: 'Network', vault: 'Vault', matches: 'Matches', activity: 'Activity', human: 'Member', agent: 'AI agent', intros: 'Intros', intro: 'Intro', signup: 'Sign in', dashboard: 'Dashboard', about: 'How it works', docs: 'Developers' };
+const routes = [[/^\/$/, 'home'], [/^\/network\/?$/, 'network'], [/^\/vault\/?$/, 'vault'], [/^\/matches\/?$/, 'matches'], [/^\/for-you\/?$/, 'foryou'], [/^\/activity\/?$/, 'activity'], [/^\/h\/([\w-]+)$/, 'human'], [/^\/a\/([\w-]+)$/, 'agent'], [/^\/intros\/?$/, 'intros'], [/^\/intros\/([\w-]+)$/, 'intro'], [/^\/signup\/?$/, 'signup'], [/^\/dashboard\/?$/, 'dashboard'], [/^\/about\/?$/, 'about'], [/^\/docs\/?$/, 'docs']];
+const TITLES = { home: 'PointMint Agent Network — Get to the point', network: 'Network', vault: 'Vault', matches: 'Matches', foryou: 'For You', activity: 'Activity', human: 'Member', agent: 'AI agent', company: 'Company', handle: 'Profile', intros: 'Intros', intro: 'Intro', signup: 'Sign in', dashboard: 'Dashboard', about: 'How it works', docs: 'Developers' };
 let MODEL = null;
 let lastSubject = null;
 let POST_RENDER = null; // set by a page that needs the graph after it renders (e.g. a connection path)
 async function render(opts = {}) {
   const path = location.pathname;
-  unmountGlass(); stopFeed();
+  unmountGlass(); stopFeed(); stopAgentChat(); stopPrivateWs();
   document.documentElement.dataset.page = path === '/' ? 'home' : 'inner';
-  const canon = document.querySelector('link[rel=canonical]'); if (canon) canon.href = 'https://agents.pointmint.io' + path;
   const tip = document.getElementById('gTip'); if (tip) tip.hidden = true;
+  // Match explicit routes first; then global /{handle} (humans + companies), skipping reserved SPA segments.
+  let matched = null;
   for (const [re, name] of routes) {
     const m = path.match(re);
     if (!m) continue;
+    matched = { name, m };
+    break;
+  }
+  if (!matched) {
+    const hm = path.match(/^\/([a-z0-9][a-z0-9_-]{2,31})\/?$/);
+    if (hm && !RESERVED_HANDLES.has(hm[1].toLowerCase())) matched = { name: 'handle', m: hm };
+  }
+  if (matched) {
+    const name0 = matched.name, m = matched.m;
     const el = $app(), L = document.getElementById('colL'), R = document.getElementById('colR');
     try {
       let mid;
-      if (SPLIT.has(name)) {
+      let name = name0;
+      if (SPLIT.has(name) || name === 'handle' || name === 'company') {
         MODEL = await api('/api/page?path=' + encodeURIComponent(path + location.search));
+        if (name === 'handle') name = MODEL.page; // 'human' | 'company'
+        // Canonical: prefer /{handle} when the subject has one
+        const canon = document.querySelector('link[rel=canonical]');
+        if (canon) {
+          let cpath = path;
+          if (MODEL.page === 'human' && MODEL.subject && MODEL.subject.human && MODEL.subject.human.handle) cpath = '/' + MODEL.subject.human.handle;
+          if (MODEL.page === 'company' && MODEL.data && MODEL.data.company && MODEL.data.company.handle) cpath = '/' + MODEL.data.company.handle;
+          canon.href = 'https://agents.pointmint.io' + cpath;
+        }
+        if (!pages[name]) throw new Error('Page not found');
         let body = pages[name](MODEL, ...m.slice(1));
         const stream = FEED_PAGES.has(name) ? postStream(MODEL) : '';
         body = body.includes('@@STREAM@@') ? body.replace('@@STREAM@@', stream) : stream + body;
-        mid = middleHead(MODEL, name) + `<div class="m-scroll" id="mScroll" tabindex="0">${twinCard(MODEL)}${body}</div>` + (FEED_PAGES.has(name) ? composer(MODEL) : '');
+        mid = middleHead(MODEL, name) + `<div class="m-scroll" id="mScroll" tabindex="0">${name === 'company' ? '' : twinCard(MODEL)}${name === 'agent' || name === 'human' || name === 'home' ? trustCard(MODEL) : ''}${body}</div>` + (FEED_PAGES.has(name) ? composer(MODEL) : '');
       } else {
+        const canon = document.querySelector('link[rel=canonical]'); if (canon) canon.href = 'https://agents.pointmint.io' + path;
         const html = await solo[name](...m.slice(1)); if (!html) return;
         // Private pages keep both side columns: they show the signed-in member (or the host) and their agent.
         MODEL = await api('/api/page?path=' + encodeURIComponent(ME && ME.signed_in ? '/activity' : '/'));
@@ -1149,17 +1659,25 @@ async function render(opts = {}) {
       applyRails(); applySheet(); if (typeof fpAfterRender === 'function') fpAfterRender();
       if (!document.getElementById('credTok')) SESSION_CRED = null;
       if (!opts.keep) { pop(el, 'm'); if (changed) { pop(L, 'l'); pop(R, 'r'); } }
-      if (MODEL) { startFeed(MODEL); startAgentChat(MODEL); if (keepScroll) { const tb = document.getElementById('termBody'); if (tb) tb.scrollTop = keepScroll; } }
+      if (MODEL) { startFeed(MODEL); startAgentChat(MODEL); bindPrivateWs(); bindGuideThread(); if (privateWsOpen && MODEL.agent_home && MODEL.agent_home.minted) setPrivateWsOpen(true); if (guideThreadOpen && MODEL.agent_home) setGuideThreadOpen(true); if (keepScroll) { const tb = document.getElementById('termBody'); if (tb) tb.scrollTop = keepScroll; } }
+      if (name === 'dashboard') {
+        loadCompanyHandles();
+        const hf = document.getElementById('hf-handle'), prev = document.getElementById('hf-preview');
+        if (hf && prev) hf.addEventListener('input', () => { prev.textContent = (hf.value || 'your-name').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'your-name'; });
+      }
       if (keepMid) document.getElementById('mScroll').scrollTop = keepMid;
-      const t = MODEL && (name === 'human' || name === 'agent') && SPLIT.has(name) ? MODEL.title : TITLES[name];
+      const t = MODEL && (name === 'human' || name === 'agent' || name === 'company') ? MODEL.title : TITLES[name];
       document.title = name === 'home' ? TITLES.home : `${t} · PointMint Agent Network`;
+      if (name === 'connect') { if (window.PMConnect) PMConnect.enter(); }
+      else if (window.PMConnect && document.getElementById('deck') && document.getElementById('deck').dataset.cx === 'on') PMConnect.exit();
       syncGraph(!opts.keep && (name === 'human' || name === 'agent'));
       if (name === 'home' && !opts.keep && window.PMGraph && PMGraph.findMe && PMGraph.G.ready) PMGraph.findMe();
-      if (POST_RENDER) { const f = POST_RENDER; POST_RENDER = null; try { f(); } catch {} } else if (window.PMGraph && PMGraph.showPath && !opts.keep) PMGraph.showPath(null);
+      if (POST_RENDER) { const f = POST_RENDER; POST_RENDER = null; try { f(); } catch {} } else if (window.PMGraph && PMGraph.showPath && !opts.keep && name !== 'connect') PMGraph.showPath(null);
     } catch (e) { el.innerHTML = middleHead(null, '') + `<div class="m-scroll"><div class="page-error">${err(e)}</div></div>`; }
     if (!opts.keep) { const tgt = location.hash && document.getElementById(location.hash.slice(1)); const sc = document.getElementById('mScroll'); if (tgt) tgt.scrollIntoView({ block: 'center' }); else if (sc) sc.scrollTop = 0; }
     return;
   }
+  const canon404 = document.querySelector('link[rel=canonical]'); if (canon404) canon404.href = 'https://agents.pointmint.io' + path;
   $app().innerHTML = middleHead(null, '') + `<div class="m-scroll"><div class="page">${head('', 'Page not found.', 'The page you’re looking for isn’t here.')}<a class="link-more" href="/" data-link>Go home${chev()}</a></div></div>`;
 }
 function go(path) { history.pushState({}, '', path); render(); }
@@ -1197,6 +1715,11 @@ document.addEventListener('click', async (ev) => {
     else if (act === 'photo-camera') { await photoFromCamera(); }
     else if (act === 'photo-remove') { if (!await ask({ title: 'Remove your photo?', message: 'You’ll still be listed, but you’ll rank lower in search and matches.', ok: 'Remove', destructive: true })) return; await api('/api/me/photo', { method: 'DELETE' }); await loadMe(); render({ keep: true }); }
     else if (act === 'logout') { await api('/api/auth/logout', { method: 'POST' }); await loadMe(); go('/'); }
+    else if (act === 'clear-handle') {
+      if (!await ask({ title: 'Clear your handle?', message: 'Your public URL will fall back to /h/{id}. You can set a new handle any time.', ok: 'Clear' })) return;
+      await api('/api/me/handle', { method: 'PATCH', body: { handle: '' } });
+      await loadMe(); render(); return;
+    }
     else if (act === 'rotate') { if (!await ask({ title: 'Rotate credential?', message: 'The current credential stops working immediately. You’ll get a new one, shown once.', ok: 'Rotate' })) return; const r = await api('/api/agent/rotate', { method: 'POST' }); await loadMe(); document.getElementById('agentArea').innerHTML = agentPanel(ME.agent, ME.human); showCredential(r.credential); }
     else if (act === 'revoke') { if (!await ask({ title: 'Revoke credential?', message: 'Your agent loses access until you rotate to issue a new credential.', ok: 'Revoke', destructive: true })) return; await api('/api/agent/revoke', { method: 'POST' }); await loadMe(); render(); }
     else if (act === 'mint-again') { try { await api('/api/agent', { method: 'POST', body: { name: 'Second agent', provider: 'Other' } }); } catch (e) { document.getElementById('credArea').innerHTML = `<div class="err" role="status">Rejected (${esc(e.status)}): ${esc(e.message)}</div>`; } }
@@ -1240,11 +1763,29 @@ document.addEventListener('submit', async (ev) => {
     }
     else if (f.id === 'mintForm' || f.id === 'mintFormCol') { const r = await api('/api/agent', { method: 'POST', body: data }); await loadMe(); const area = document.getElementById('agentArea'); if (area) area.innerHTML = agentPanel(ME.agent, ME.human); await render(); showCredential(r.credential); }
     else if (f.id === 'vaultForm') { await api('/api/vault', { method: 'POST', body: data }); render(); }
-    else if (f.id === 'profileForm') { await api('/api/me', { method: 'PATCH', body: data }); await loadMe(); render(); }
+    else if (f.id === 'langForm') { await api('/api/me', { method: 'PATCH', body: { preferred_language: data.preferred_language } }); await loadMe(); const st = document.getElementById('langStatus'); if (st) st.textContent = 'Saved · ' + (ME.human.preferred_language || data.preferred_language); }
+      else if (f.id === 'profileForm') { await api('/api/me', { method: 'PATCH', body: data }); await loadMe(); render(); }
+    else if (f.id === 'handleForm') {
+      const handle = String(data.handle || '').trim().toLowerCase();
+      await api('/api/me/handle', { method: 'PATCH', body: { handle } });
+      await loadMe(); render(); return;
+    }
+    else if (f.classList && f.classList.contains('companyHandleForm')) {
+      await api('/api/companies/' + encodeURIComponent(f.dataset.id) + '/handle', { method: 'PATCH', body: { handle: String(data.handle || '').trim().toLowerCase() } });
+      await loadCompanyHandles(); return;
+    }
     else if (f.id === 'msgForm') { await api(`/api/intros/${f.dataset.id}/messages`, { method: 'POST', body: data }); render(); }
     else if (f.id === 'postForm') {
       const media = data.mkind === 'prompt' ? { kind: 'prompt', title: data.mtitle, text: data.mtext } : data.mkind === 'skill' ? { kind: 'skill', name: String(data.mtitle || '').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-'), summary: data.mtext } : undefined;
       await api('/api/posts', { method: 'POST', body: { body: data.body, author: data.author, media } }); await render({ keep: true }); if (window.PMGraph) PMGraph.refresh(); return;
+    }
+    else if (f.id === 'composePrivateWs') {
+      await api('/api/private-workspace/messages', { method: 'POST', body: { body: data.body } });
+      f.reset(); await refreshPrivateWs(); return;
+    }
+    else if (f.id === 'composeGuideThread') {
+      await api('/api/guide-thread/messages', { method: 'POST', body: { body: data.body } });
+      f.reset(); await refreshGuideThread(); return;
     }
     else if (f.id === 'composeAgentHome') {
       const to_id = f.dataset.agent; if (!to_id) throw new Error('No agent');

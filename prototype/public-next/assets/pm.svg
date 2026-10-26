@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="PM">
+  <title>PM</title>
+  <defs>
+    <linearGradient id="pmTile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a4452"/>
+      <stop offset="0.55" stop-color="#1c232d"/>
+      <stop offset="1" stop-color="#12171f"/>
+    </linearGradient>
+    <linearGradient id="pmMint" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7af0d8"/>
+      <stop offset="1" stop-color="#3dd9c1"/>
+    </linearGradient>
+  </defs>
+  <!-- Platform tile (rounded square — not a human circle, not sunglasses) -->
+  <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="url(#pmTile)" stroke="#8a93a1" stroke-width="1.2"/>
+  <rect x="3.25" y="3.25" width="25.5" height="25.5" rx="6.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- Mint point mark (PointMint) -->
+  <path d="M16 8.2 L22.2 16 L16 23.8 L9.8 16 Z" fill="none" stroke="url(#pmMint)" stroke-width="1.85" stroke-linejoin="round"/>
+  <circle cx="16" cy="16" r="2.35" fill="url(#pmMint)"/>
+</svg>
